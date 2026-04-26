@@ -1,0 +1,622 @@
+Good—this is the **core of the product**. If this panel is wrong, the entire platform feels weak. If it’s right, everything else inherits strength.
+
+This spec is written at **Fortune-5 / Bloomberg-grade level**: structured, dense, decision-oriented, and fully aligned with your data + entitlement system.
+
+---
+
+# 🧠 **Souvera Country Intelligence Panel Spec v1.0**
+
+**Owner:** Afronovation, Inc.
+**Component Type:** Core Terminal View (Primary Decision Surface)
+**Used in:**
+
+* `/terminal/country/[iso3]`
+* `/terminal/map` (drawer mode)
+* enterprise exports (data source)
+
+---
+
+# 1. 🎯 PURPOSE
+
+The Country Intelligence Panel is:
+
+👉 **The single source of truth for country-level decision-making**
+
+It must allow a user to answer in < 60 seconds:
+
+* Is this market attractive?
+* What is driving growth?
+* What are the risks?
+* Where are the opportunities?
+* Should I act?
+
+---
+
+# 2. 🧱 PANEL ARCHITECTURE
+
+## Layout Modes
+
+| Mode      | Use Case                   |
+| --------- | -------------------------- |
+| Full Page | `/terminal/country/[iso3]` |
+| Drawer    | `/terminal/map` click      |
+| Embedded  | future widgets             |
+
+---
+
+## Layout Grid (Desktop)
+
+```text
+[Header Bar]
+[Executive Snapshot Grid]
+[Signal + Momentum Row]
+[Tabs Section]
+    - Overview
+    - Economy
+    - Sectors
+    - Opportunity
+    - Risk
+    - Trade
+    - Reports
+```
+
+---
+
+# 3. 🔷 HEADER BAR
+
+## Content
+
+* Country Flag
+* Country Name
+* Region / Subregion
+* Capital
+* Currency
+* Signal Badge (HIGH VISIBILITY)
+
+---
+
+## Signal Badge
+
+| Value         | Color  |
+| ------------- | ------ |
+| High Growth   | Green  |
+| Emerging      | Blue   |
+| Stable        | Gray   |
+| Watchlist     | Yellow |
+| Risk Elevated | Red    |
+
+---
+
+## Data Sources
+
+* `souvera_countries`
+* `souvera_country_signal_scores`
+
+---
+
+# 4. 📊 EXECUTIVE SNAPSHOT GRID
+
+## Purpose
+
+Immediate quantitative orientation.
+
+---
+
+## Layout (4–6 cards)
+
+| Metric                  | Source       |
+| ----------------------- | ------------ |
+| GDP (current USD)       | observations |
+| GDP Growth              | observations |
+| Population              | observations |
+| FDI (if entitled)       | observations |
+| Inflation (if entitled) | observations |
+| FX rate (if entitled)   | observations |
+
+---
+
+## Component
+
+`MetricCard`
+
+### States
+
+* visible
+* loading
+* locked (blurred)
+* stale (badge)
+
+---
+
+## API
+
+* `/api/v1/country`
+
+---
+
+# 5. 🧠 SIGNAL + MOMENTUM ROW
+
+## Components
+
+### 1. Signal Card
+
+* signal level
+* investment score
+* confidence score
+
+### 2. Momentum Card
+
+* economic momentum
+* investor readiness
+
+### 3. News Pulse Card
+
+* sentiment score
+* risk intensity
+* opportunity intensity
+
+---
+
+## Data Sources
+
+* `souvera_country_signal_scores`
+* `souvera_country_news_signals`
+* `souvera_country_profiles`
+
+---
+
+# 6. 📑 TAB SYSTEM (CORE INTERACTION MODEL)
+
+---
+
+## Tabs (fixed order)
+
+1. Overview
+2. Economy
+3. Sectors
+4. Opportunity
+5. Risk
+6. Trade
+7. Reports
+
+---
+
+# 7. 🧩 TAB DETAILS
+
+---
+
+## 7.1 OVERVIEW TAB
+
+### Purpose
+
+Narrative + positioning.
+
+---
+
+### Sections
+
+#### 1. Summary
+
+* `summary_md`
+
+#### 2. Why Now
+
+* `why_now_md`
+
+#### 3. Key Highlights
+
+* 3–5 bullet insights (derived)
+
+---
+
+### Access
+
+* Explorer+: summary (partial)
+* Professional+: full
+
+---
+
+---
+
+## 7.2 ECONOMY TAB
+
+### Purpose
+
+Macro + time series.
+
+---
+
+### Sections
+
+#### 1. Key Indicators
+
+* GDP
+* inflation
+* debt
+* FDI
+
+#### 2. Charts
+
+* GDP growth over time
+* inflation trend
+* FDI trend
+
+---
+
+### API
+
+* `/api/v1/country/series`
+
+---
+
+### Access
+
+* Professional+
+
+---
+
+---
+
+## 7.3 SECTORS TAB
+
+### Purpose
+
+Where to invest.
+
+---
+
+### Sections
+
+#### 1. Sector List
+
+Each item:
+
+* sector name
+* strength score
+* growth score
+* attractiveness score
+
+#### 2. Sector Rationale
+
+* `rationale_md`
+
+---
+
+### Component
+
+`SectorCard`
+
+---
+
+### Access
+
+| Tier         | Access         |
+| ------------ | -------------- |
+| Public       | labels only    |
+| Explorer     | teaser         |
+| Professional | scores         |
+| Business     | full rationale |
+| Investor     | sector thesis  |
+
+---
+
+---
+
+## 7.4 OPPORTUNITY TAB
+
+### Purpose
+
+Decision driver.
+
+---
+
+### Content
+
+* `opportunity_thesis_md`
+
+---
+
+### Structure
+
+* growth drivers
+* key sectors
+* investment entry points
+* regional advantages
+
+---
+
+### Access
+
+* Business+
+* Investor+: expanded
+
+---
+
+---
+
+## 7.5 RISK TAB
+
+### Purpose
+
+Risk awareness.
+
+---
+
+### Content
+
+* `risk_narrative_md`
+
+---
+
+### Structure
+
+* macro risks
+* political risks
+* sector risks
+* mitigation context
+
+---
+
+### Access
+
+* Business+
+* Investor+: expanded
+
+---
+
+---
+
+## 7.6 TRADE TAB
+
+### Purpose
+
+Economic flows.
+
+---
+
+### Data
+
+* top exports
+* top imports
+* top partners
+
+---
+
+### Source
+
+* `souvera_country_trade_snapshots`
+
+---
+
+### Access
+
+* Business+
+
+---
+
+---
+
+## 7.7 REPORTS TAB
+
+### Purpose
+
+Downloadable intelligence.
+
+---
+
+### Content
+
+* report cards
+
+---
+
+### Component
+
+`ReportCard`
+
+Fields:
+
+* title
+* type
+* description
+* CTA (download)
+
+---
+
+### Access
+
+| Tier          | Access        |
+| ------------- | ------------- |
+| Business      | country brief |
+| Investor      | investor memo |
+| Institutional | full          |
+
+---
+
+---
+
+# 8. 🔒 LOCKED CONTENT BEHAVIOR
+
+---
+
+## Component
+
+`LockedContentCard`
+
+---
+
+## States
+
+| State       | Behavior      |
+| ----------- | ------------- |
+| visible     | full content  |
+| locked      | blurred + CTA |
+| partial     | truncated     |
+| unavailable | hidden        |
+
+---
+
+## CTA
+
+“Unlock full intelligence in Souvera Terminal”
+
+---
+
+# 9. 🧠 ENTITLEMENT LOGIC (CRITICAL)
+
+---
+
+## Rule
+
+👉 UI never decides access
+👉 API returns filtered payload
+
+---
+
+## Flow
+
+```text
+User → API → Entitlement Resolver → Filtered Response → UI Render
+```
+
+---
+
+## Example
+
+```ts
+if (!entitlements.includes("trade_snapshots")) {
+  hideTradeTab()
+}
+```
+
+---
+
+# 10. ⚡ PERFORMANCE RULES
+
+---
+
+* first paint < 1.5s
+* panel load < 300ms (API)
+* charts lazy loaded
+* tabs lazy loaded
+
+---
+
+# 11. 📊 SOURCE TRANSPARENCY
+
+---
+
+## Component
+
+`SourceFreshnessPill`
+
+---
+
+## Display
+
+* Macro updated: date
+* Forecast updated: date
+* FX updated: date
+* News updated: date
+
+---
+
+# 12. 📱 RESPONSIVE BEHAVIOR
+
+---
+
+## Mobile
+
+* stacked layout
+* tabs → accordion
+* map drawer → full screen
+
+---
+
+## Tablet
+
+* hybrid layout
+
+---
+
+# 13. 🎯 UX PRINCIPLES
+
+---
+
+## Must feel like:
+
+* Bloomberg Terminal
+* not a blog
+* not a dashboard
+* not a static report
+
+---
+
+## Characteristics
+
+* dense but readable
+* structured hierarchy
+* fast navigation
+* decision-oriented
+* consistent layout
+
+---
+
+# 14. 🔁 PANEL STATES
+
+---
+
+| State    | Trigger        |
+| -------- | -------------- |
+| loading  | API call       |
+| empty    | no data        |
+| locked   | entitlement    |
+| degraded | source failure |
+| stale    | outdated data  |
+
+---
+
+# 15. 🧪 QA CHECKLIST
+
+---
+
+Before launch:
+
+* all tabs load correctly
+* entitlements enforced
+* locked states working
+* fallback states working
+* no undefined values
+* all metrics have source
+
+---
+
+# 🏁 FINAL SUMMARY
+
+This panel is:
+
+👉 the **heart of Souvera**
+👉 the **primary decision interface**
+👉 the **conversion engine from teaser → enterprise**
+
+---
+
+# 🚀 NEXT DOCUMENT
+
+Now we complete the UX system that governs all screens:
+
+👉 **Souvera Terminal UX & Design System Spec v1.0**
+
+This will lock:
+
+* typography
+* spacing
+* component behavior
+* interaction patterns
+* visual hierarchy
+
+---
+
+Say:
+
+**“Proceed UX & Design Spec”**

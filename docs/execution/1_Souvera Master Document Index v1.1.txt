@@ -1,0 +1,174 @@
+
+
+---
+
+
+
+## 📄 DOCUMENT 1 — Souvera Master Document Index v1.1
+
+---
+
+# 🧠 **Souvera Master Document Index v1.1**
+
+**Owner:** Afronovation, Inc.
+**Purpose:** Single source of truth for all Souvera documentation
+**Audience:** Antigravity, engineering, product, leadership
+
+---
+
+## 🎯 Objective
+
+Provide:
+
+* a structured map of all documents
+* dependency relationships
+* execution reference order
+
+---
+
+# 🏗️ DOCUMENT HIERARCHY
+
+---
+
+## 🔷 1. PRODUCT LAYER
+
+| Document                         | Purpose                           |
+| -------------------------------- | --------------------------------- |
+| Souvera PRD v2.0                 | Product vision, modules, personas |
+| Souvera Pricing & Packaging v1.0 | Commercial model                  |
+
+---
+
+## 🔷 2. DATA & INTELLIGENCE LAYER
+
+| Document                                       | Purpose            |
+| ---------------------------------------------- | ------------------ |
+| Souvera Data Source & Ingestion Strategy v1.0  | Data foundation    |
+| Souvera Source Registry v1.0                   | Source control     |
+| Souvera Field-by-Field Entitlement Matrix v1.1 | Data access rules  |
+| Souvera Data Governance Spec v1.0              | Compliance + trust |
+
+---
+
+## 🔷 3. TECHNICAL ARCHITECTURE
+
+| Document                     | Purpose             |
+| ---------------------------- | ------------------- |
+| Souvera TRD v2.0             | System architecture |
+| Souvera SQL Pack v1.1        | Database            |
+| Souvera API Binding Map v1.1 | API structure       |
+
+---
+
+## 🔷 4. PRODUCT EXPERIENCE
+
+| Document                                     | Purpose           |
+| -------------------------------------------- | ----------------- |
+| Souvera Route-by-Route Build Spec v1.1       | Pages and flows   |
+| Souvera Country Intelligence Panel Spec v1.0 | Core UI component |
+| Souvera Terminal UX & Design Spec v1.0       | UX system         |
+
+---
+
+## 🔷 5. EXECUTION
+
+| Document                                | Purpose                           |
+| --------------------------------------- | --------------------------------- |
+| Souvera Engineering Execution Plan v1.0 | Build roadmap                     |
+| FlowMode Charter v1.0 (next)            | Governance + execution discipline |
+
+---
+
+## 🔷 6. INTEGRATIONS
+
+| Document                            | Purpose                     |
+| ----------------------------------- | --------------------------- |
+| Souvera API Binding Map v1.1        | Integration contracts       |
+| Souvera AfDEC Integration Spec v1.0 | External system integration |
+
+---
+
+# 🔁 DOCUMENT DEPENDENCIES
+
+```text
+PRD
+ ↓
+Data Strategy → Source Registry → Entitlement Matrix
+ ↓
+TRD → SQL Pack → API Binding Map
+ ↓
+Route Spec → Country Panel → UX System
+ ↓
+Execution Plan
+ ↓
+FlowMode Charter
+```
+
+---
+
+# 📦 PROJECT FOLDER STRUCTURE
+
+```text
+/docs
+  /product
+  /data
+  /technical
+  /ux
+  /execution
+  /integration
+```
+
+---
+
+# 🧭 USAGE RULE
+
+* Product reads PRD
+* Engineering reads TRD + SQL + API
+* Design reads Route + UX + Panel Spec
+* Admin reads Governance + Source Registry
+
+---
+
+# 🚨 CRITICAL RULE
+
+👉 No implementation starts without referencing:
+
+* SQL Pack
+* API Binding Map
+* Entitlement Matrix
+* Route Spec
+
+---
+
+# 🏁 Status
+
+| Layer      | Status        |
+| ---------- | ------------- |
+| Product    | ✅             |
+| Data       | ⚠️ completing |
+| Technical  | ✅             |
+| UX         | ❗ next        |
+| Execution  | ✅             |
+| Governance | ❗ next        |
+
+---
+
+# 🚀 NEXT
+
+If you confirm:
+
+👉 I proceed with:
+
+# **Souvera Country Intelligence Panel Spec v1.0**
+
+This is:
+
+* the **heart of Souvera**
+* the **Bloomberg Terminal equivalent screen**
+* the **most important UI in your platform**
+
+---
+
+Say:
+
+**“Proceed Country Panel Spec”**

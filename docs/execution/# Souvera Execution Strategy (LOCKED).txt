@@ -1,0 +1,398 @@
+
+
+👉 **You are choosing the highest-leverage, lowest-risk path.**
+
+Build **Souvera clean**, then connect AfDEC later.
+This avoids contamination, rework, and architectural compromise.
+
+---
+
+# 🧠 EXECUTION STRATEGY (LOCKED)
+
+## Phase Separation
+
+### 🔷 Phase 1 — Build Souvera (Isolated)
+
+* New repo
+* New Supabase
+* New Vercel
+* No AfDEC dependencies
+
+---
+
+### 🔷 Phase 2 — Stabilize Core APIs
+
+* `/countries-lite`
+* `/country-lite`
+* `/compare-lite`
+* `/insight-teaser`
+
+---
+
+### 🔷 Phase 3 — Integrate AfDEC
+
+* Replace map data source
+* Add CTA
+* Maintain teaser experience
+
+---
+
+👉 This is exactly how **Bloomberg Terminal ↔ Bloomberg.com** works.
+
+---
+
+# 🚀 DELIVERABLE 1
+
+# 🔥 **Antigravity Kickoff Brief v1.0 — Souvera**
+
+---
+
+## 🎯 Objective
+
+Build **Souvera Intelligence Terminal (SIT)** as a standalone, enterprise-grade SaaS platform.
+
+---
+
+## 🧭 Core Principle
+
+> Souvera is the **single source of truth for all intelligence**.
+> No other system (including AfDEC) may replicate or own this logic.
+
+---
+
+## 🏗️ Scope (Phase 1)
+
+### MUST BUILD
+
+1. Data ingestion layer
+2. Core database schema (SQL Pack v1.1)
+3. Country-lite API
+4. Countries-lite API
+5. Basic signal computation
+6. API gateway
+7. Initial terminal shell (minimal UI)
+
+---
+
+### MUST NOT BUILD
+
+* No AfDEC integration yet
+* No CMS
+* No marketing site
+* No advanced UI polish
+* No enterprise API (yet)
+
+---
+
+## 🧱 Architecture (MANDATORY)
+
+```text
+External Sources → Ingestion → Supabase → API Gateway → Terminal UI
+```
+
+---
+
+## 🧬 Required Documents (Already Provided)
+
+Team MUST follow:
+
+* PRD v2.0
+* TRD v2.0
+* SQL Pack v1.1
+* API Binding Map v1.1
+* Route Spec v1.1
+* Design.md
+* FlowMode Charter v1.0
+
+---
+
+## 🔐 Non-Negotiable Rules
+
+1. No frontend data logic
+2. No direct DB access outside API
+3. No unregistered data sources
+4. No schema changes without migration
+5. No partial features
+
+---
+
+## 🎯 Phase 1 Deliverables
+
+* working ingestion (World Bank + REST Countries)
+* populated `souvera_countries`
+* populated `souvera_country_observations`
+* `/api/v1/countries-lite`
+* `/api/v1/country-lite`
+* testable via Postman
+
+---
+
+## ⏱ Timeline
+
+* Week 1 → Data + ingestion
+* Week 2 → API + validation
+
+---
+
+## 🧪 Definition of Done
+
+* data populated for ≥ 10 countries
+* API returns valid JSON
+* entitlement filtering works
+* ingestion logs working
+* no mock data in production
+
+---
+
+# 🚀 DELIVERABLE 2
+
+# 🧱 GitHub Repo Structure + Initial Commits
+
+---
+
+## 🔷 Repo Name
+
+`souvera-intelligence-terminal`
+
+---
+
+## 🔷 Initial Structure
+
+```bash
+mkdir souvera
+cd souvera
+
+mkdir apps packages services infra docs
+```
+
+---
+
+## 📁 Full Structure
+
+```text
+/apps
+  /terminal-web
+  /api-gateway
+  /admin-console
+
+/packages
+  /ui
+  /types
+  /config
+  /entitlements
+  /api-client
+
+/services
+  /ingestion
+  /signal-engine
+  /normalization
+
+/infra
+  /supabase
+  /vercel
+
+/docs
+  /product
+  /technical
+  /data
+  /ux
+  /execution
+```
+
+---
+
+## 🔷 First Commit
+
+```bash
+git init
+git add .
+git commit -m "chore: initialize Souvera monorepo structure"
+```
+
+---
+
+## 🔷 Second Commit
+
+```bash
+git commit -m "docs: add PRD, TRD, SQL Pack, API Map, Route Spec, Design, FlowMode"
+```
+
+---
+
+## 🔷 Third Commit
+
+```bash
+git commit -m "infra: setup supabase schema and environment configs"
+```
+
+---
+
+# 🚀 DELIVERABLE 3
+
+# 📋 Jira Sprint Plan (Week 1–2)
+
+---
+
+## 🎯 Sprint Goal
+
+Deliver working:
+
+* ingestion
+* database
+* lite APIs
+
+---
+
+## 🧩 EPIC 1 — Data Foundation
+
+---
+
+### Ticket 1 — Setup Supabase Project
+
+**Description:**
+Create new Supabase instance for Souvera.
+
+**Acceptance Criteria:**
+
+* project created
+* env keys configured
+* connection verified
+
+---
+
+### Ticket 2 — Deploy SQL Pack v1.1
+
+**Description:**
+Run full schema.
+
+**Acceptance Criteria:**
+
+* all tables created
+* RLS enabled
+* functions working
+
+---
+
+---
+
+## 🧩 EPIC 2 — Ingestion Layer
+
+---
+
+### Ticket 3 — REST Countries Adapter
+
+**Acceptance Criteria:**
+
+* data fetched
+* stored in `souvera_countries`
+
+---
+
+### Ticket 4 — World Bank Adapter
+
+**Acceptance Criteria:**
+
+* GDP, population, growth ingested
+* stored in observations
+
+---
+
+---
+
+## 🧩 EPIC 3 — API Layer
+
+---
+
+### Ticket 5 — Countries Lite API
+
+`GET /api/v1/countries-lite`
+
+**Acceptance Criteria:**
+
+* returns list of countries
+* includes GDP + population + growth
+
+---
+
+---
+
+### Ticket 6 — Country Lite API
+
+`GET /api/v1/country-lite?iso3=XXX`
+
+**Acceptance Criteria:**
+
+* returns single country
+* includes teaser fields
+
+---
+
+---
+
+## 🧩 EPIC 4 — Signal Engine (Basic)
+
+---
+
+### Ticket 7 — Basic Signal Computation
+
+**Acceptance Criteria:**
+
+* signal score generated
+* stored in signal table
+
+---
+
+---
+
+## 🧩 EPIC 5 — Validation
+
+---
+
+### Ticket 8 — Ingestion Logging
+
+**Acceptance Criteria:**
+
+* jobs logged
+* payload archived
+* source health updated
+
+---
+
+---
+
+# 🧠 FINAL STATE AFTER SPRINT
+
+You will have:
+
+* real data (no mock)
+* working APIs
+* structured ingestion
+* clean architecture
+
+---
+
+# 🔥 FINAL ADVICE (CRITICAL)
+
+Do NOT:
+
+* touch AfDEC yet
+* rush UI
+* mix systems
+
+---
+
+👉 Build Souvera as if AfDEC does not exist.
+
+---
+
+# 🚀 NEXT STEP
+
+When you're ready, I can:
+
+* generate **Supabase setup script (step-by-step)**
+* generate **first ingestion adapters (code-level)**
+* generate **API endpoints (Next.js ready)**
+
+Just say:
+
+👉 “Start Phase 1 Build”

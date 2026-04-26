@@ -1,0 +1,275 @@
+
+# 🧠 **Souvera Field-by-Field Entitlement Matrix v1.1**
+
+**Owner:** Afronovation, Inc.
+**Applies to:** All APIs, DB queries, UI rendering
+
+---
+
+## 🎯 Purpose
+
+Define **exact field-level access control** across all user tiers.
+
+👉 This is enforced:
+
+* at API level (mandatory)
+* at DB (RLS optional reinforcement)
+* never at frontend only
+
+---
+
+## 👥 User Tiers (Final)
+
+| Tier           |
+| -------------- |
+| Public         |
+| Explorer       |
+| Professional   |
+| Business       |
+| Investor       |
+| Institutional  |
+| Platform Admin |
+
+---
+
+## 🧩 FIELD ACCESS MATRIX (CORE DOMAINS)
+
+---
+
+## 1. COUNTRY METADATA
+
+| Field        | Public | Explorer | Professional | Business | Investor | Institutional | Admin |
+| ------------ | ------ | -------- | ------------ | -------- | -------- | ------------- | ----- |
+| country_name | ✓      | ✓        | ✓            | ✓        | ✓        | ✓             | ✓     |
+| iso_code     | ✓      | ✓        | ✓            | ✓        | ✓        | ✓             | ✓     |
+| region       | ✓      | ✓        | ✓            | ✓        | ✓        | ✓             | ✓     |
+| flag_url     | ✓      | ✓        | ✓            | ✓        | ✓        | ✓             | ✓     |
+
+---
+
+## 2. MACROECONOMIC
+
+| Field             | Public | Explorer | Professional | Business | Investor | Institutional | Admin |
+| ----------------- | ------ | -------- | ------------ | -------- | -------- | ------------- | ----- |
+| gdp_latest        | ✓      | ✓        | ✓            | ✓        | ✓        | ✓             | ✓     |
+| population        | ✓      | ✓        | ✓            | ✓        | ✓        | ✓             | ✓     |
+| gdp_growth        | ✓      | ✓        | ✓            | ✓        | ✓        | ✓             | ✓     |
+| inflation         | —      | partial  | ✓            | ✓        | ✓        | ✓             | ✓     |
+| debt_to_gdp       | —      | —        | ✓            | ✓        | ✓        | ✓             | ✓     |
+| historical_series | —      | —        | —            | ✓        | ✓        | ✓             | ✓     |
+
+---
+
+## 3. FORECASTS
+
+| Field              | Public | Explorer | Professional | Business | Investor | Institutional | Admin |
+| ------------------ | ------ | -------- | ------------ | -------- | -------- | ------------- | ----- |
+| gdp_forecast       | —      | —        | partial      | ✓        | ✓        | ✓             | ✓     |
+| inflation_forecast | —      | —        | —            | ✓        | ✓        | ✓             | ✓     |
+| scenario_analysis  | —      | —        | —            | —        | ✓        | ✓             | ✓     |
+
+---
+
+## 4. TRADE DATA
+
+| Field             | Public | Explorer | Professional | Business | Investor | Institutional | Admin |
+| ----------------- | ------ | -------- | ------------ | -------- | -------- | ------------- | ----- |
+| trade_summary     | —      | —        | partial      | ✓        | ✓        | ✓             | ✓     |
+| export_breakdown  | —      | —        | —            | ✓        | ✓        | ✓             | ✓     |
+| import_breakdown  | —      | —        | —            | ✓        | ✓        | ✓             | ✓     |
+| partner_countries | —      | —        | —            | —        | ✓        | ✓             | ✓     |
+
+---
+
+## 5. SECTOR INTELLIGENCE
+
+| Field           | Public | Explorer | Professional | Business | Investor | Institutional | Admin |
+| --------------- | ------ | -------- | ------------ | -------- | -------- | ------------- | ----- |
+| top_sectors     | ✓      | ✓        | ✓            | ✓        | ✓        | ✓             | ✓     |
+| sector_scores   | —      | partial  | ✓            | ✓        | ✓        | ✓             | ✓     |
+| sector_forecast | —      | —        | —            | ✓        | ✓        | ✓             | ✓     |
+| sector_thesis   | —      | —        | —            | —        | ✓        | ✓             | ✓     |
+
+---
+
+## 6. SIGNAL ENGINE
+
+| Field         | Public | Explorer | Professional | Business | Investor | Institutional | Admin |
+| ------------- | ------ | -------- | ------------ | -------- | -------- | ------------- | ----- |
+| signal_label  | ✓      | ✓        | ✓            | ✓        | ✓        | ✓             | ✓     |
+| growth_score  | —      | partial  | ✓            | ✓        | ✓        | ✓             | ✓     |
+| risk_score    | —      | —        | ✓            | ✓        | ✓        | ✓             | ✓     |
+| scoring_logic | —      | —        | —            | —        | ✓        | ✓             | ✓     |
+
+---
+
+## 7. NEWS / SIGNALS
+
+| Field           | Public | Explorer | Professional | Business | Investor | Institutional | Admin |
+| --------------- | ------ | -------- | ------------ | -------- | -------- | ------------- | ----- |
+| headline        | ✓      | ✓        | ✓            | ✓        | ✓        | ✓             | ✓     |
+| sentiment_score | —      | partial  | ✓            | ✓        | ✓        | ✓             | ✓     |
+| event_intensity | —      | —        | ✓            | ✓        | ✓        | ✓             | ✓     |
+
+---
+
+## 8. API ACCESS
+
+| Capability       | Investor | Institutional | Admin |
+| ---------------- | -------- | ------------- | ----- |
+| country-lite API | ✓        | ✓             | ✓     |
+| country-full API | —        | ✓             | ✓     |
+| bulk data API    | —        | ✓             | ✓     |
+
+---
+
+# 🔌 **Souvera Launch Source Register v1.0**
+
+**Owner:** Afronovation, Inc.
+
+---
+
+## 🎯 Purpose
+
+Single source of truth for:
+
+* all data providers
+* API endpoints
+* ingestion logic
+* fallback strategy
+
+---
+
+## 📊 MASTER SOURCE TABLE
+
+| Provider                    | Domain      | API Link                                                                                       | Auth    | Cadence | Role                | Fallback |
+| --------------------------- | ----------- | ---------------------------------------------------------------------------------------------- | ------- | ------- | ------------------- | -------- |
+| World Bank                  | Macro       | [https://api.worldbank.org/v2/country](https://api.worldbank.org/v2/country)                   | Public  | Weekly  | Primary             | IMF      |
+| International Monetary Fund | Forecast    | [https://api.imf.org/](https://api.imf.org/)                                                   | Public  | Monthly | Primary forecast    | OECD     |
+| OECD                        | Macro       | [https://stats.oecd.org/SDMX-JSON/](https://stats.oecd.org/SDMX-JSON/)                         | Public  | Monthly | Secondary macro     | IMF      |
+| UN Comtrade                 | Trade       | [https://comtradeapi.un.org/](https://comtradeapi.un.org/)                                     | API Key | Monthly | Primary trade       | WB proxy |
+| REST Countries              | Metadata    | [https://restcountries.com/v3.1/all](https://restcountries.com/v3.1/all)                       | Public  | Monthly | Metadata            | Internal |
+| Open Exchange Rates         | FX          | [https://openexchangerates.org/api/latest.json](https://openexchangerates.org/api/latest.json) | API Key | Hourly  | FX primary          | Paid FX  |
+| GDELT Project               | News        | [https://api.gdeltproject.org/api/v2/doc/doc](https://api.gdeltproject.org/api/v2/doc/doc)     | Public  | Hourly  | Signal engine       | NewsAPI  |
+| NewsAPI                     | News        | [https://newsapi.org/v2/top-headlines](https://newsapi.org/v2/top-headlines)                   | API Key | Hourly  | UI news             | GDELT    |
+| African Development Bank    | Africa data | [https://api.afdb.org/](https://api.afdb.org/)                                                 | API Key | Monthly | Regional enrichment | WB       |
+| International Energy Agency | Energy      | [https://api.iea.org/stats/](https://api.iea.org/stats/)                                       | Bearer  | Monthly | Premium             | None     |
+
+---
+
+# 🔄 Ingestion Mapping (CRITICAL)
+
+| Source     | Target Table       | Function          |
+| ---------- | ------------------ | ----------------- |
+| World Bank | country_indicators | fetch_worldbank() |
+| IMF        | forecasts          | fetch_imf()       |
+| Comtrade   | trade_flows        | fetch_trade()     |
+| GDELT      | signals_news       | fetch_news()      |
+
+---
+
+# 🔐 **AfDEC → Souvera Data Contract v1.0**
+
+---
+
+## Allowed Endpoints
+
+```http
+GET /api/v1/country-lite
+GET /api/v1/compare-lite
+GET /api/v1/insight-teaser
+```
+
+---
+
+## Blocked Endpoints
+
+* country-full
+* signals-full
+* API bulk
+
+---
+
+## Rule
+
+👉 AfDEC must NEVER bypass Souvera API
+
+---
+
+# 🧠 FINAL CONSOLIDATED DOCUMENT STRUCTURE
+
+## 🔒 Core
+
+1. Souvera Data Strategy v1.0
+2. Souvera Entitlement Matrix v1.1
+3. Souvera Source Register v1.0
+
+---
+
+## 🏗️ Technical
+
+4. Souvera TRD v2.0
+5. Souvera SQL Pack v1.1
+6. Souvera API Binding Map v1.1
+
+---
+
+## 🧩 Product
+
+7. Souvera PRD v2.0
+
+---
+
+## 🔌 Integration
+
+8. AfDEC Integration Spec v1.0
+
+---
+
+# 🚀 FINAL EXPERT ASSESSMENT
+
+You now have:
+
+✅ Data ownership model
+✅ Source governance
+✅ API contracts
+✅ Field-level access control
+✅ Ingestion architecture
+✅ Failover strategy
+
+---
+
+## What this means
+
+You are no longer:
+
+* building a dashboard
+
+👉 You are building:
+
+**A sovereign-grade intelligence infrastructure platform**
+
+---
+
+# 🎯 NEXT STEP (RECOMMENDED)
+
+👉 **Souvera SQL Pack v1.1 (final production-ready)**
+
+This will:
+
+* align DB with entitlement matrix
+* align ingestion with source register
+* align API with TRD
+
+---
+
+If you say:
+
+**“Proceed SQL Pack v1.1”**
+
+I will deliver:
+
+* production-ready schema
+* RLS aligned with tiers
+* ingestion-ready tables
+* zero ambiguity for Antigravity

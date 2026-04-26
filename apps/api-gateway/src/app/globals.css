@@ -1,0 +1,201 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  /* ================================================================
+   * SOUVERA DESIGN SYSTEM v2.0
+   * Source: Souvera Terminal UX & Design System Spec v1.0
+   * Standard: Fortune-5 / Bloomberg / Palantir
+   * ================================================================ */
+
+  /* Background depth stack (3 levels — critical for non-flat look) */
+  --color-bg-canvas:    #0B0F14;
+  --color-bg-surface:   #121821;
+  --color-bg-card:      #161D26;
+  --color-bg-elevated:  #1C2534;
+
+  /* Borders */
+  --color-border:       #1F2A37;
+  --color-border-subtle: rgba(255,255,255,0.06);
+  --color-border-active: rgba(59,130,246,0.3);
+
+  /* Legacy aliases (keep for existing components) */
+  --color-zinc-925:  #0B0F14;
+  --color-zinc-975:  #070B0F;
+
+  /* Souvera Brand */
+  --color-souvera-blue:    #2563EB;
+  --color-souvera-blue-dim: #1d4ed8;
+  --color-souvera-navy:    #1d3557;
+
+  /* Signal Semantic Colors — per Design Spec */
+  --color-high-growth:     #22C55E;
+  --color-emerging:        #3B82F6;
+  --color-watchlist:       #F59E0B;
+  --color-stable:          #6B7280;
+  --color-risk:            #EF4444;
+
+  /* Text hierarchy */
+  --color-text-primary:   #E5E7EB;
+  --color-text-secondary: #9CA3AF;
+  --color-text-muted:     #6B7280;
+
+  /* Typography */
+  --font-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  --font-mono:    'Space Mono', 'Roboto Mono', monospace;
+  --font-body:    'Inter', system-ui, sans-serif;
+
+  /* Tracking */
+  --tracking-tighter: -0.05em;
+  --tracking-caps: 0.12em;
+  --ease-weight-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Semantic aliases */
+  --color-background: var(--color-bg-canvas);
+  --color-foreground: var(--color-text-primary);
+}
+
+/* ================================================================
+ * BASE RESET
+ * ================================================================ */
+html {
+  scroll-behavior: smooth;
+  background-color: #0B0F14;
+}
+
+body {
+  background-color: #0B0F14;
+  color: #E5E7EB;
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Headings use Space Grotesk */
+h1, h2, h3, h4 {
+  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+}
+
+/* Monospace data values */
+.font-mono, code, kbd, pre {
+  font-family: 'Space Mono', 'Roboto Mono', monospace;
+}
+
+::selection {
+  background-color: rgba(37, 99, 235, 0.35);
+  color: white;
+}
+
+/* ================================================================
+ * GLOW UTILITIES
+ * ================================================================ */
+@utility text-glow-blue {
+  text-shadow: 0 0 24px rgba(37, 99, 235, 0.6);
+}
+
+@utility text-glow-amber {
+  text-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+}
+
+@utility text-glow-emerald {
+  text-shadow: 0 0 20px rgba(34, 197, 94, 0.45);
+}
+
+@utility border-glow {
+  box-shadow: inset 0 0 1px 1px rgba(255,255,255,0.05),
+              0 0 0 1px rgba(37,99,235,0.08);
+}
+
+@utility glass {
+  background: rgba(11, 15, 20, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* ================================================================
+ * CORE INSTITUTIONAL COMPONENTS
+ * ================================================================ */
+
+/* Terminal Card — standard container */
+.terminal-card {
+  background-color: #161D26;
+  border: 1px solid #1F2A37;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.terminal-card:hover {
+  border-color: rgba(37,99,235,0.25);
+  box-shadow: 0 0 0 1px rgba(37,99,235,0.1);
+}
+
+/* Section header label */
+.section-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #6B7280;
+}
+
+/* Data value — monospaced numbers */
+.data-value {
+  font-family: 'Space Mono', 'Roboto Mono', monospace;
+  color: #E5E7EB;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Signal chip */
+.signal-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 2px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-family: 'Space Mono', monospace;
+}
+
+/* Rank badge */
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #1F2A37;
+  border: 1px solid #2A3A4A;
+  font-size: 9px;
+  font-weight: 900;
+  font-family: 'Space Mono', monospace;
+  color: #9CA3AF;
+  flex-shrink: 0;
+}
+
+/* Locked content overlay */
+.locked-overlay {
+  position: relative;
+  overflow: hidden;
+}
+.locked-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  backdrop-filter: blur(8px);
+  background: rgba(11,15,20,0.7);
+}
+
+/* ================================================================
+ * SCROLLBAR
+ * ================================================================ */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: #0B0F14; }
+::-webkit-scrollbar-thumb { background: #1F2A37; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #2A3A4A; }
+

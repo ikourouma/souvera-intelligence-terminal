@@ -1,0 +1,556 @@
+This is where Souvera becomes **visually authoritative and unmistakably premium**.
+
+What you’re asking for is not just a UI guide—this is a **design doctrine**, similar to what top-tier companies embed in their `design.md`:
+clear principles, constraints, and reusable patterns that prevent drift.
+
+---
+
+# 🧠 **Souvera Terminal UX & Design System Spec v1.0 (design.md)**
+
+**Owner:** Afronovation, Inc.
+**Applies to:** All Souvera interfaces (Terminal, Admin, API surfaces, AfDEC-lite outputs)
+**Standard:** Fortune-5 (Bloomberg / Palantir / McKinsey Digital level)
+
+---
+
+# 0. 🎯 DESIGN PHILOSOPHY
+
+## Souvera is not a dashboard.
+
+It is a:
+
+* **decision terminal**
+* **intelligence surface**
+* **high-density interface for experts**
+
+---
+
+## Core Design Principle
+
+> Every screen must reduce decision uncertainty.
+
+---
+
+## Design DNA
+
+| Attribute   | Meaning                              |
+| ----------- | ------------------------------------ |
+| Dense       | High information per pixel           |
+| Structured  | Clear hierarchy, never chaotic       |
+| Fast        | No friction, minimal clicks          |
+| Trustworthy | Source-aware, data-backed            |
+| Controlled  | No visual noise                      |
+| Scalable    | Works for 54+ countries, all modules |
+
+---
+
+# 1. 🧱 LAYOUT SYSTEM
+
+---
+
+## 1.1 Global Layout
+
+```text
+[Top Nav / Context Bar]
+[Primary Content]
+[Right Context Panel (optional)]
+[Footer / Attribution]
+```
+
+---
+
+## 1.2 Grid System
+
+* 12-column grid
+* Max width: 1440px
+* Padding: 24px desktop / 16px mobile
+
+---
+
+## 1.3 Spacing Scale
+
+| Token | Value |
+| ----- | ----- |
+| xs    | 4px   |
+| sm    | 8px   |
+| md    | 16px  |
+| lg    | 24px  |
+| xl    | 32px  |
+| 2xl   | 48px  |
+
+---
+
+## Rule
+
+👉 Never use arbitrary spacing
+👉 Always use scale tokens
+
+---
+
+# 2. 🎨 COLOR SYSTEM
+
+---
+
+## 2.1 Base Theme
+
+Dark-first (default terminal mode)
+
+---
+
+## 2.2 Core Colors
+
+| Role       | Color   |
+| ---------- | ------- |
+| Background | #0B0F14 |
+| Surface    | #121821 |
+| Card       | #161D26 |
+| Border     | #1F2A37 |
+
+---
+
+## 2.3 Text Colors
+
+| Role      | Color   |
+| --------- | ------- |
+| Primary   | #E5E7EB |
+| Secondary | #9CA3AF |
+| Muted     | #6B7280 |
+
+---
+
+## 2.4 Signal Colors
+
+| Signal        | Color   |
+| ------------- | ------- |
+| High Growth   | #22C55E |
+| Emerging      | #3B82F6 |
+| Stable        | #6B7280 |
+| Watchlist     | #F59E0B |
+| Risk Elevated | #EF4444 |
+
+---
+
+## Rule
+
+👉 Colors must encode meaning
+👉 Never use decorative colors
+
+---
+
+# 3. 🔤 TYPOGRAPHY SYSTEM
+
+---
+
+## Font
+
+* Primary: Inter
+* Fallback: system-ui
+
+---
+
+## Scale
+
+| Element       | Size    |
+| ------------- | ------- |
+| Page Title    | 24–28px |
+| Section Title | 18–20px |
+| Card Title    | 14–16px |
+| Body          | 13–14px |
+| Caption       | 11–12px |
+
+---
+
+## Rule
+
+👉 Prioritize readability over style
+👉 No oversized marketing typography in terminal
+
+---
+
+# 4. 🧩 COMPONENT SYSTEM
+
+---
+
+## 4.1 Core Components
+
+### 1. MetricCard
+
+Used for:
+
+* GDP
+* population
+* inflation
+* FDI
+
+States:
+
+* normal
+* loading
+* locked
+* stale
+
+---
+
+### 2. SignalCard
+
+Displays:
+
+* signal level
+* investment score
+* confidence
+
+---
+
+### 3. LockedContentCard
+
+States:
+
+* blurred
+* CTA overlay
+* partial reveal
+
+---
+
+### 4. CountryPanel (Core)
+
+Defined in:
+👉 Country Intelligence Panel Spec v1.0
+
+---
+
+### 5. CompareGrid
+
+* tabular comparison
+* dynamic rows
+* tier-based visibility
+
+---
+
+### 6. SourceFreshnessPill
+
+Displays:
+
+* macro updated
+* forecast updated
+* FX updated
+* news updated
+
+---
+
+## Rule
+
+👉 Every component must support:
+
+* loading
+* empty
+* locked
+* degraded
+
+---
+
+# 5. 🔐 LOCKED CONTENT UX
+
+---
+
+## Purpose
+
+Drive conversion without frustration.
+
+---
+
+## Behavior
+
+| State      | UX                |
+| ---------- | ----------------- |
+| Locked     | blur + CTA        |
+| Partial    | truncated content |
+| Restricted | hidden section    |
+
+---
+
+## CTA
+
+“Unlock full intelligence in Souvera Terminal”
+
+---
+
+## Rule
+
+👉 Never show broken UI
+👉 Locked ≠ broken
+
+---
+
+# 6. 🧠 INTERACTION MODEL
+
+---
+
+## Navigation
+
+* shallow hierarchy
+* max 2 clicks to key data
+* persistent context (country always visible)
+
+---
+
+## Tabs
+
+* primary navigation inside panels
+* lazy load content
+
+---
+
+## Hover
+
+* tooltips for metrics
+* preview states
+
+---
+
+## Search
+
+* global search always accessible
+
+---
+
+## Rule
+
+👉 Every interaction must reduce friction
+
+---
+
+# 7. ⚡ PERFORMANCE UX
+
+---
+
+## Requirements
+
+* first paint < 1.5s
+* API < 300ms
+* lazy load heavy modules
+
+---
+
+## UX Handling
+
+| Condition | Behavior               |
+| --------- | ---------------------- |
+| Loading   | skeleton UI            |
+| Slow      | spinner + message      |
+| Failed    | fallback + explanation |
+| Stale     | badge                  |
+
+---
+
+# 8. 📊 DATA VISUALIZATION
+
+---
+
+## Charts
+
+* minimal grid lines
+* muted colors
+* clear axis labels
+
+---
+
+## Rules
+
+* no 3D charts
+* no decorative visuals
+* no unnecessary animation
+
+---
+
+## Preferred Types
+
+* line charts (trends)
+* bar charts (comparison)
+* tables (precision)
+
+---
+
+# 9. 📱 RESPONSIVE DESIGN
+
+---
+
+## Desktop
+
+* full density
+* multi-column
+
+---
+
+## Tablet
+
+* hybrid grid
+
+---
+
+## Mobile
+
+* stacked
+* tabs → accordion
+
+---
+
+## Rule
+
+👉 Mobile is simplified, not degraded
+
+---
+
+# 10. 🔍 SEARCH & DISCOVERY
+
+---
+
+## Global Search
+
+* countries
+* sectors
+* reports
+
+---
+
+## Behavior
+
+* instant results
+* keyboard navigation (future)
+
+---
+
+# 11. 🧭 TERMINAL EXPERIENCE PRINCIPLES
+
+---
+
+## Must feel like:
+
+* Bloomberg Terminal
+* Palantir interface
+
+---
+
+## Must NOT feel like:
+
+* blog
+* marketing site
+* static report
+
+---
+
+## Characteristics
+
+* structured
+* dense
+* authoritative
+* fast
+
+---
+
+# 12. 📊 ANALYTICS UX
+
+---
+
+Track:
+
+* panel opens
+* locked clicks
+* compare usage
+* report downloads
+
+---
+
+## Purpose
+
+* optimize conversion
+* refine UX
+
+---
+
+# 13. 🧪 DESIGN QA CHECKLIST
+
+---
+
+Before shipping:
+
+* spacing consistent
+* typography consistent
+* all states handled
+* no overflow issues
+* no raw JSON exposed
+* no undefined data
+* locked states working
+
+---
+
+# 14. ❌ ANTI-PATTERNS (STRICTLY FORBIDDEN)
+
+---
+
+* oversized hero sections in terminal
+* decorative gradients
+* inconsistent spacing
+* random colors
+* UI that hides key data
+* frontend-only access control
+* duplicated components
+
+---
+
+# 15. 🎯 DESIGN GOVERNANCE RULE
+
+---
+
+## Every new component must answer:
+
+1. What decision does this support?
+2. What data powers it?
+3. What happens if data is missing?
+4. What happens if user lacks access?
+
+If unclear → do not build
+
+---
+
+# 🏁 FINAL SUMMARY
+
+This document ensures:
+
+* visual consistency
+* product clarity
+* developer alignment
+* zero UI drift
+
+---
+
+## What you now have
+
+You have:
+
+* data system ✅
+* API system ✅
+* route system ✅
+* execution system ✅
+* design system ✅
+
+---
+
+# 🚀 NEXT DOCUMENT
+
+Now we complete governance and trust layer:
+
+👉 **Souvera Data Governance & Compliance Spec v1.0**
+
+This will define:
+
+* licensing rules
+* redistribution constraints
+* source attribution
+* audit posture
+* legal safety (critical for enterprise)
+
+---
+
+Say:
+
+**“Proceed Data Governance Spec”**

@@ -1,0 +1,554 @@
+This is the layer that turns Souvera from a strong product into a **trusted, enterprise-grade, legally defensible platform**.
+
+Without this, you risk:
+
+* violating data licenses
+* losing enterprise deals
+* weakening credibility with governments
+
+With this, you position Souvera alongside institutional-grade platforms.
+
+---
+
+# 🧠 **Souvera Data Governance & Compliance Spec v1.0**
+
+**Owner:** Afronovation, Inc.
+**Applies to:** All data, APIs, UI, exports, ingestion, and integrations
+**Standard:** Sovereign-grade / Enterprise compliance
+
+---
+
+# 1. 🎯 PURPOSE
+
+Define how Souvera:
+
+* acquires data
+* processes data
+* stores data
+* displays data
+* distributes data
+
+👉 while remaining:
+
+* legally compliant
+* auditable
+* trustworthy
+* scalable
+
+---
+
+# 2. 🧭 GOVERNANCE PRINCIPLES
+
+---
+
+## 2.1 Source-of-Truth Principle
+
+👉 All intelligence must originate from:
+
+* approved data sources
+* or Souvera-derived computation
+
+---
+
+## 2.2 Attribution Principle
+
+👉 Every surfaced metric must include:
+
+* source
+* timestamp
+* transformation status (raw / derived)
+
+---
+
+## 2.3 Non-Replication Principle
+
+👉 Souvera must not:
+
+* replicate proprietary datasets unlawfully
+* expose raw provider data beyond license scope
+
+---
+
+## 2.4 Transparency Principle
+
+👉 Users must know:
+
+* what data is shown
+* how recent it is
+* where it comes from
+
+---
+
+## 2.5 Entitlement Enforcement Principle
+
+👉 Data access must be:
+
+* enforced server-side
+* tied to subscription tiers
+* logged for audit
+
+---
+
+# 3. 📊 DATA CLASSIFICATION
+
+---
+
+## 3.1 Data Categories
+
+| Category               | Description                         |
+| ---------------------- | ----------------------------------- |
+| Public Open Data       | Freely accessible data              |
+| Licensed Data          | Requires subscription or permission |
+| Derived Data           | Souvera computed                    |
+| Editorial Intelligence | Analyst-generated                   |
+| Internal System Data   | Logs, analytics, user data          |
+
+---
+
+## 3.2 Classification Rules
+
+| Data Type   | Storage    | Display    | Export     |
+| ----------- | ---------- | ---------- | ---------- |
+| Public Open | Allowed    | Allowed    | Allowed    |
+| Licensed    | Allowed    | Restricted | Controlled |
+| Derived     | Allowed    | Allowed    | Allowed    |
+| Editorial   | Allowed    | Allowed    | Restricted |
+| Internal    | Restricted | No         | No         |
+
+---
+
+# 4. 📡 DATA SOURCE GOVERNANCE
+
+---
+
+## 4.1 Approved Source Requirement
+
+👉 Only sources listed in:
+
+* `souvera_data_sources`
+
+can be used in production.
+
+---
+
+## 4.2 Mandatory Source Metadata
+
+Each source must define:
+
+* provider name
+* API base URL
+* documentation URL
+* authentication method
+* licensing status
+* redistribution policy
+* refresh cadence
+* fallback sources
+
+---
+
+## 4.3 Source Lifecycle
+
+| Status   | Meaning               |
+| -------- | --------------------- |
+| Testing  | Not production-ready  |
+| Approved | Allowed in production |
+| Paused   | Temporarily disabled  |
+| Retired  | No longer used        |
+
+---
+
+# 5. ⚖️ LICENSING & LEGAL COMPLIANCE
+
+---
+
+## 5.1 Core Rule
+
+👉 Souvera must respect all provider terms of use.
+
+---
+
+## 5.2 Licensing Categories
+
+| Type                 | Examples            |
+| -------------------- | ------------------- |
+| Public Domain        | Government datasets |
+| Attribution Required | Most APIs           |
+| Non-Commercial       | Restricted usage    |
+| Paid / Licensed      | Premium APIs        |
+
+---
+
+## 5.3 Display Rules
+
+| Condition     | Requirement                       |
+| ------------- | --------------------------------- |
+| Public data   | show source                       |
+| Licensed data | show attribution + respect limits |
+| Derived data  | label as “Souvera Intelligence”   |
+
+---
+
+## 5.4 Export Rules
+
+| Data Type | Export Allowed |
+| --------- | -------------- |
+| Public    | Yes            |
+| Licensed  | Conditional    |
+| Derived   | Yes            |
+| Editorial | Controlled     |
+
+---
+
+## 5.5 Legal Risk Control
+
+Before adding any new source:
+
+* review licensing
+* document redistribution rules
+* assign legal status:
+
+  * approved
+  * restricted
+  * review_required
+
+---
+
+# 6. 🔄 DATA INGESTION GOVERNANCE
+
+---
+
+## 6.1 Ingestion Requirements
+
+Every ingestion job must:
+
+1. log execution
+2. store raw payload (archive)
+3. normalize data
+4. assign source
+5. assign timestamp
+
+---
+
+## 6.2 Logging Tables
+
+* `souvera_ingestion_jobs`
+* `souvera_source_payload_archive`
+* `souvera_source_health`
+
+---
+
+## 6.3 Failure Handling
+
+| Scenario          | Action          |
+| ----------------- | --------------- |
+| API failure       | retry           |
+| repeated failure  | mark degraded   |
+| prolonged failure | switch fallback |
+
+---
+
+# 7. 🔁 DATA QUALITY & VALIDATION
+
+---
+
+## 7.1 Quality Metrics
+
+Each record must include:
+
+* completeness
+* freshness
+* consistency
+* source reliability
+
+---
+
+## 7.2 Quality Score
+
+Stored in:
+
+* `quality_score`
+
+---
+
+## 7.3 Validation Rules
+
+* no null critical metrics
+* no conflicting sources without resolution
+* no outdated data beyond thresholds
+
+---
+
+# 8. ⏱️ DATA FRESHNESS POLICY
+
+---
+
+## 8.1 Freshness Indicators
+
+Each dataset must track:
+
+* last updated
+* expected update frequency
+
+---
+
+## 8.2 Thresholds
+
+| Data Type | Warning | Stale |
+| --------- | ------- | ----- |
+| FX        | 24h     | 72h   |
+| News      | 12h     | 48h   |
+| Macro     | 45d     | 120d  |
+| Forecast  | 90d     | 180d  |
+
+---
+
+## 8.3 UI Requirement
+
+👉 Always display freshness:
+
+* `SourceFreshnessPill`
+
+---
+
+# 9. 🔐 ACCESS CONTROL & ENTITLEMENTS
+
+---
+
+## 9.1 Enforcement
+
+👉 Must be enforced:
+
+* at API level
+* never at frontend only
+
+---
+
+## 9.2 Entitlement Mapping
+
+Defined in:
+
+* Entitlement Matrix v1.1
+
+---
+
+## 9.3 Access Logging
+
+All access must be logged for:
+
+* enterprise users
+* API usage
+
+Table:
+
+* `souvera_audit_events`
+
+---
+
+# 10. 🏢 MULTI-TENANT DATA GOVERNANCE
+
+---
+
+## 10.1 Isolation
+
+* organization data isolated via RLS
+* user data scoped to org
+
+---
+
+## 10.2 Data Sharing
+
+| Scope               | Allowed    |
+| ------------------- | ---------- |
+| Global intelligence | yes        |
+| Org data            | restricted |
+| API access          | scoped     |
+
+---
+
+# 11. 🔌 API GOVERNANCE
+
+---
+
+## 11.1 API Contract
+
+* versioned (`/api/v1`)
+* stable schema
+* no breaking changes without version bump
+
+---
+
+## 11.2 API Security
+
+* rate limiting
+* API key validation
+* scope-based access
+
+---
+
+## 11.3 API Logging
+
+All enterprise API usage logged in:
+
+* `souvera_audit_events`
+
+---
+
+# 12. 📤 DATA EXPORT GOVERNANCE
+
+---
+
+## 12.1 Export Rules
+
+| Tier          | Access   |
+| ------------- | -------- |
+| Business      | limited  |
+| Investor      | expanded |
+| Institutional | full     |
+
+---
+
+## 12.2 Formats
+
+* CSV
+* JSON
+
+---
+
+## 12.3 Restrictions
+
+* licensed data may be restricted
+* large exports rate-limited
+
+---
+
+# 13. 🔗 AFDEC GOVERNANCE
+
+---
+
+## 13.1 AfDEC Role
+
+* consumer of Souvera-lite APIs
+* not a data owner
+
+---
+
+## 13.2 Allowed Data
+
+* teaser metrics
+* summary insights
+* signal labels
+
+---
+
+## 13.3 Forbidden
+
+* full datasets
+* exports
+* API access
+* signal logic
+
+---
+
+## 13.4 Branding
+
+AfDEC must show:
+
+* “Powered by Souvera Terminal”
+* “Engineered by Afronovation, Inc.”
+
+---
+
+# 14. 📊 AUDIT & TRACEABILITY
+
+---
+
+## 14.1 Audit Requirements
+
+Track:
+
+* data access
+* API usage
+* export events
+* admin actions
+
+---
+
+## 14.2 Required Fields
+
+* user_id
+* org_id
+* action
+* timestamp
+* metadata
+
+---
+
+# 15. 🧪 COMPLIANCE CHECKLIST
+
+---
+
+Before production:
+
+* all sources approved
+* licensing reviewed
+* attribution implemented
+* freshness displayed
+* RLS enforced
+* API secured
+* audit logs active
+
+---
+
+# 16. 🚨 RISK MANAGEMENT
+
+---
+
+| Risk                | Mitigation               |
+| ------------------- | ------------------------ |
+| License violation   | source registry + review |
+| stale data          | freshness tracking       |
+| unauthorized access | entitlement enforcement  |
+| data inconsistency  | normalization            |
+| API abuse           | rate limiting            |
+
+---
+
+# 🏁 FINAL SUMMARY
+
+This document ensures:
+
+* legal safety
+* enterprise trust
+* audit readiness
+* scalable governance
+
+---
+
+## What this enables
+
+You can now:
+
+* sell to governments
+* sell to institutions
+* onboard enterprise clients
+* defend your data legally
+
+---
+
+# 🚀 NEXT DOCUMENT
+
+👉 **Souvera Source Registry (Expanded) v1.0**
+
+This will:
+
+* operationalize all sources
+* assign ownership
+* define SLA
+* define cost structure
+* define fallback priority clearly
+
+---
+
+Say:
+
+**“Proceed Source Registry Expanded”**

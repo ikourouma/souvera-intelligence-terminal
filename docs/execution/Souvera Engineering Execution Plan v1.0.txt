@@ -1,0 +1,661 @@
+This is where everything becomes executable. No more abstraction—this is how Antigravity (or any elite team) builds Souvera **cleanly, once, and without rework**.
+
+---
+
+# 🧠 **Souvera Engineering Execution Plan v1.0**
+
+**Owner:** Afronovation, Inc.
+**Product:** Souvera Intelligence Terminal
+**Standard:** Fortune-5 / FlowMode (zero rework, audit-grade)
+
+---
+
+# 1. 🎯 EXECUTION OBJECTIVE
+
+Build Souvera as:
+
+* a **standalone SaaS platform**
+* a **multi-tenant intelligence system**
+* a **data-first architecture**
+* with **AfDEC as a downstream consumer**
+
+---
+
+# 2. 🏗️ REPOSITORY STRUCTURE (MANDATORY)
+
+## 🔷 Monorepo (recommended)
+
+```
+/souvera
+  /apps
+    /terminal-web        → Next.js (user-facing terminal)
+    /admin-console       → Next.js (admin/internal)
+    /api-gateway         → Next.js / Edge (API layer)
+  
+  /packages
+    /ui                  → shadcn components (shared)
+    /config              → env, constants
+    /types               → TS types
+    /auth                → auth utilities
+    /entitlements        → access logic
+    /api-client          → fetch wrappers
+    /utils               → helpers
+  
+  /services
+    /ingestion           → edge functions / cron jobs
+    /signal-engine       → scoring logic
+    /normalization       → data transforms
+  
+  /infra
+    /supabase            → SQL, RLS, seeds
+    /vercel              → deployment configs
+  
+  /docs
+    /prd
+    /trd
+    /sql-pack
+    /api-binding
+    /route-spec
+    /execution-plan
+```
+
+---
+
+# 3. ⚙️ TECH STACK LOCK
+
+## Frontend
+
+* Next.js (App Router)
+* TypeScript
+* Tailwind
+* shadcn/ui
+
+## Backend
+
+* Supabase (Postgres + Auth + RLS)
+* Edge Functions (data ingestion)
+
+## Hosting
+
+* Vercel (apps)
+* Supabase Cloud (DB)
+
+## Observability
+
+* PostHog (analytics)
+* Sentry (errors)
+
+---
+
+# 4. 🔐 ENVIRONMENT SETUP
+
+## Environments
+
+| Env     | Purpose         |
+| ------- | --------------- |
+| dev     | local + preview |
+| staging | QA + demo       |
+| prod    | production      |
+
+---
+
+## Required ENV variables
+
+```
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+
+WORLD_BANK_API_URL=
+IMF_API_URL=
+OXR_API_KEY=
+NEWS_API_KEY=
+GDELT_BASE_URL=
+
+APP_ENV=dev|staging|prod
+```
+
+---
+
+# 5. 🧬 DATABASE DEPLOYMENT (PHASE 0)
+
+## Step 1
+
+* Deploy **SQL Pack v1.1** to Supabase
+
+## Step 2
+
+* Seed:
+
+  * plans
+  * entitlements
+  * data sources
+  * indicators
+
+## Step 3
+
+* Validate:
+
+  * RLS enabled
+  * functions working
+  * views returning data
+
+---
+
+# 6. 🔄 DATA INGESTION BUILD (PHASE 1)
+
+## Priority Order
+
+### 1. REST Countries
+
+* populate `souvera_countries`
+
+### 2. World Bank
+
+* GDP
+* population
+* growth
+
+### 3. IMF
+
+* forecasts
+
+### 4. Open Exchange Rates
+
+* FX
+
+### 5. GDELT
+
+* signals
+
+---
+
+## Structure
+
+```
+/services/ingestion
+  worldbank.ts
+  imf.ts
+  oecd.ts
+  comtrade.ts
+  gdelt.ts
+  oxr.ts
+  restcountries.ts
+```
+
+---
+
+## Each ingestion must:
+
+1. fetch
+2. transform
+3. normalize
+4. insert into DB
+5. log into:
+
+   * `souvera_ingestion_jobs`
+   * `souvera_source_payload_archive`
+   * `souvera_source_health`
+
+---
+
+## CRON Setup
+
+| Job            | Frequency |
+| -------------- | --------- |
+| rest countries | monthly   |
+| world bank     | weekly    |
+| imf            | monthly   |
+| oxr            | hourly    |
+| gdelt          | hourly    |
+
+---
+
+# 7. 🔌 API LAYER BUILD (PHASE 2)
+
+## Location
+
+```
+/apps/api-gateway/app/api/v1/
+```
+
+---
+
+## Core APIs (build first)
+
+### Lite APIs (AfDEC)
+
+* `/country-lite`
+* `/countries-lite`
+* `/compare-lite`
+* `/insight-teaser`
+
+---
+
+### Terminal APIs
+
+* `/country`
+* `/country/series`
+* `/sectors`
+* `/signals`
+* `/compare`
+* `/reports`
+
+---
+
+## Required middleware
+
+```
+/packages/entitlements
+  resolveAccess.ts
+  hasEntitlement.ts
+  filterResponse.ts
+```
+
+---
+
+## Rule
+
+👉 ALL filtering must happen server-side
+👉 Never send unauthorized fields
+
+---
+
+# 8. 🎨 FRONTEND BUILD (PHASE 3)
+
+---
+
+## 8.1 Public Marketing
+
+```
+/apps/terminal-web/app/
+  page.tsx                → landing
+  platform/page.tsx
+  data-sources/page.tsx
+  request-access/page.tsx
+```
+
+---
+
+## 8.2 Teaser
+
+```
+/intelligence
+/intelligence/[iso3]
+/compare-preview
+```
+
+---
+
+## 8.3 Terminal
+
+```
+/terminal
+/terminal/map
+/terminal/country/[iso3]
+/terminal/compare
+/terminal/sectors
+/terminal/reports
+/terminal/watchlists
+```
+
+---
+
+## 8.4 Admin
+
+```
+/admin
+/admin/sources
+/admin/ingestion
+/admin/countries
+/admin/editorial/[iso3]
+/admin/reports
+```
+
+---
+
+# 9. 🧩 COMPONENT SYSTEM (LOCKED)
+
+## Core Components
+
+* `TerminalShell`
+* `AfricaMapShell`
+* `CountryIntelligencePanel`
+* `SignalCard`
+* `CompareGrid`
+* `SectorTable`
+* `ReportCard`
+* `LockedContentCard`
+* `SourceFreshnessPill`
+
+---
+
+## Rule
+
+All components must support:
+
+* loading state
+* empty state
+* locked state
+* degraded state
+
+---
+
+# 10. 🔐 AUTH & ACCESS (PHASE 4)
+
+---
+
+## Phase 1
+
+* email login (invite-only)
+
+## Phase 2
+
+* org-based access
+
+## Phase 3
+
+* enterprise SSO (future)
+
+---
+
+## Access flow
+
+1. user logs in
+2. resolve:
+
+   * user plan
+   * org plan
+3. compute highest plan
+4. resolve entitlements
+5. pass to API + UI
+
+---
+
+# 11. 🧠 SIGNAL ENGINE (PHASE 5)
+
+---
+
+## Location
+
+```
+/services/signal-engine
+```
+
+---
+
+## Inputs
+
+* GDP growth
+* FDI
+* inflation
+* debt
+* sector scores
+* news signals
+
+---
+
+## Outputs
+
+* `souvera_country_signal_scores`
+
+---
+
+## Execution
+
+* scheduled job
+* or triggered after ingestion
+
+---
+
+# 12. 🏢 ENTERPRISE FEATURES (PHASE 6)
+
+---
+
+## Build
+
+* API clients
+* export endpoints
+* audit logs
+
+---
+
+## Tables
+
+* `souvera_api_clients`
+* `souvera_audit_events`
+
+---
+
+## UI
+
+```
+/terminal/api
+/terminal/exports
+/terminal/audit
+```
+
+---
+
+# 13. 🔗 AFDEC INTEGRATION (PHASE 7)
+
+---
+
+## Steps
+
+1. Deploy Souvera Lite APIs
+2. Replace AfDEC data with:
+
+   * `/country-lite`
+   * `/compare-lite`
+3. Add:
+
+   * “Powered by Souvera Terminal”
+   * unlock CTA
+
+---
+
+## Rule
+
+AfDEC must NOT:
+
+* query Souvera DB
+* replicate logic
+* expose premium data
+
+---
+
+# 14. 📊 ANALYTICS & MONITORING
+
+---
+
+## Events
+
+* teaser viewed
+* country opened
+* locked clicked
+* access requested
+* compare started
+* report downloaded
+* API key created
+
+---
+
+## Monitoring
+
+* ingestion success rate
+* source health
+* API latency
+* error rate
+
+---
+
+# 15. 🧪 TESTING PLAN
+
+---
+
+## Unit
+
+* API handlers
+* entitlement logic
+
+## Integration
+
+* DB queries
+* ingestion
+
+## E2E
+
+* login
+* country view
+* compare
+* locked behavior
+
+---
+
+# 16. 🚀 DEPLOYMENT FLOW
+
+---
+
+## CI/CD
+
+1. PR → preview (Vercel)
+2. merge → staging
+3. validate → prod deploy
+
+---
+
+## Migration flow
+
+1. update SQL
+2. run migration
+3. validate views
+4. deploy API
+5. deploy frontend
+
+---
+
+# 17. ⚠️ CRITICAL RULES (NON-NEGOTIABLE)
+
+---
+
+## 1. No data outside Souvera
+
+* all intelligence lives in Souvera
+
+## 2. No frontend filtering
+
+* all access enforced server-side
+
+## 3. No direct DB access for AfDEC
+
+* API only
+
+## 4. No duplicate logic
+
+* signals, normalization, ingestion centralized
+
+## 5. No uncontrolled sources
+
+* only approved registry
+
+---
+
+# 18. 📦 DELIVERY SPRINT PLAN
+
+---
+
+## Sprint 1 (Week 1–2)
+
+* repo setup
+* SQL deploy
+* REST Countries ingestion
+* World Bank ingestion
+* country-lite API
+
+---
+
+## Sprint 2 (Week 3–4)
+
+* IMF ingestion
+* FX ingestion
+* signals basic
+* `/intelligence` page
+
+---
+
+## Sprint 3 (Week 5–6)
+
+* terminal routes
+* `/terminal/country`
+* entitlement filtering
+
+---
+
+## Sprint 4 (Week 7–8)
+
+* compare engine
+* sectors
+* reports
+
+---
+
+## Sprint 5 (Week 9–10)
+
+* enterprise API
+* exports
+* audit logs
+
+---
+
+## Sprint 6 (Week 11–12)
+
+* AfDEC integration
+* optimization
+* QA + launch prep
+
+---
+
+# 🏁 FINAL EXECUTIVE SUMMARY
+
+You now have:
+
+* PRD → what to build
+* TRD → how to build
+* SQL Pack → data foundation
+* API Binding Map → data flow
+* Route Spec → UX structure
+* Execution Plan → delivery blueprint
+
+---
+
+## What this enables
+
+You can now:
+
+* assign Antigravity immediately
+* track progress sprint-by-sprint
+* avoid architecture drift
+* build at enterprise level from day 1
+
+---
+
+# 🚀 FINAL RECOMMENDATION
+
+Next (and final missing piece for execution discipline):
+
+👉 **FlowMode Execution Charter v1.0 (Souvera-specific)**
+
+This will:
+
+* lock governance
+* prevent rework
+* enforce standards across teams
+
+---
+
+If you say:
+
+**“Proceed FlowMode Charter v1.0”**
+
+I’ll lock execution discipline at Fortune-5 level.

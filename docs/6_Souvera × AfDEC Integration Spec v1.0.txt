@@ -1,0 +1,452 @@
+This is the document that **locks the strategic separation** between AfDEC and Souvera—while turning that relationship into a **powerful growth engine** instead of a source of confusion.
+
+If done right:
+
+* AfDEC becomes a **distribution + credibility layer**
+* Souvera becomes the **intelligence infrastructure + monetization engine**
+
+---
+
+# 🧠 **Souvera × AfDEC Integration Spec v1.0**
+
+**Owner:** Afronovation, Inc.
+**Platforms:**
+
+* **Souvera Intelligence Terminal (SIT)**
+* **AfDEC (North Carolina African Diaspora Economic Council)**
+
+**Purpose:**
+Define **strict technical, product, and branding boundaries** between Souvera and AfDEC, while enabling **seamless integration and conversion**.
+
+---
+
+# 1. 🎯 STRATEGIC POSITIONING
+
+---
+
+## 1.1 Platform Roles
+
+| Entity      | Role                                                    |
+| ----------- | ------------------------------------------------------- |
+| **Souvera** | Intelligence platform (product, SaaS, monetization)     |
+| **AfDEC**   | Economic organization (policy, community, distribution) |
+
+---
+
+## 1.2 Core Principle
+
+> AfDEC uses Souvera.
+> AfDEC does not replicate or own Souvera.
+
+---
+
+## 1.3 Outcome
+
+* Souvera = scalable SaaS
+* AfDEC = trusted gateway + demand generator
+
+---
+
+# 2. 🧭 INTEGRATION MODEL
+
+---
+
+## Architecture
+
+```text
+AfDEC Website
+     ↓
+Souvera Lite APIs
+     ↓
+Souvera Platform (Full Terminal)
+```
+
+---
+
+## Data Flow
+
+* AfDEC → consumes Souvera-lite APIs
+* Souvera → remains the source of truth
+
+---
+
+# 3. 🔌 ALLOWED API INTEGRATION
+
+---
+
+## 3.1 AfDEC Allowed Endpoints
+
+| Endpoint                 | Purpose            |
+| ------------------------ | ------------------ |
+| `/api/v1/countries-lite` | map rendering      |
+| `/api/v1/country-lite`   | country teaser     |
+| `/api/v1/compare-lite`   | comparison preview |
+| `/api/v1/insight-teaser` | narrative insight  |
+
+---
+
+## 3.2 Access Level
+
+* Public-level data only
+* No authentication required
+* Rate-limited
+
+---
+
+## 3.3 Data Scope
+
+Allowed:
+
+* country identity
+* GDP, population, GDP growth
+* signal label
+* teaser narrative
+* sector highlights
+
+---
+
+## 3.4 Forbidden
+
+AfDEC must NOT access:
+
+* `/api/v1/country`
+* `/api/v1/trade`
+* `/api/v1/series`
+* `/api/v1/reports`
+* `/api/v1/enterprise/*`
+
+---
+
+# 4. 🔐 DATA GOVERNANCE RULES
+
+---
+
+## 4.1 Source of Truth
+
+👉 All intelligence must come from Souvera APIs
+
+---
+
+## 4.2 No Data Duplication
+
+AfDEC must not:
+
+* store Souvera datasets permanently
+* rebuild intelligence logic
+* calculate signals
+
+---
+
+## 4.3 Cache Policy
+
+AfDEC may:
+
+* cache responses temporarily (CDN)
+
+AfDEC may NOT:
+
+* maintain independent data stores
+
+---
+
+# 5. 🎨 UX INTEGRATION
+
+---
+
+## 5.1 AfDEC Intelligence Map
+
+Uses:
+
+* `/countries-lite`
+* `/country-lite`
+
+---
+
+## UI Behavior
+
+| Interaction           | Result              |
+| --------------------- | ------------------- |
+| hover country         | show teaser         |
+| click country         | open drawer         |
+| click “more insights” | redirect to Souvera |
+
+---
+
+## 5.2 Drawer Structure
+
+* country name
+* GDP / population / growth
+* signal label
+* sector highlights
+* teaser insight
+* CTA
+
+---
+
+## CTA
+
+👉 “View Full Intelligence in Souvera Terminal”
+
+---
+
+# 6. 🔄 CONVERSION FLOW
+
+---
+
+## Flow
+
+```text
+AfDEC Visitor
+   ↓
+Views Intelligence Map
+   ↓
+Clicks Country
+   ↓
+Sees Limited Data
+   ↓
+Clicks Unlock CTA
+   ↓
+Redirect to Souvera
+   ↓
+Request Access / Login
+```
+
+---
+
+## Conversion Points
+
+* locked content
+* compare preview limit
+* insight teaser truncation
+
+---
+
+# 7. 🏷️ BRANDING RULES
+
+---
+
+## 7.1 Mandatory Attribution
+
+AfDEC must display:
+
+* “Powered by Souvera Intelligence Terminal”
+* “Engineered by Afronovation, Inc.”
+
+---
+
+## 7.2 Placement
+
+* below map
+* in drawer
+* in footer
+
+---
+
+## 7.3 Visual Hierarchy
+
+| Element             | Priority              |
+| ------------------- | --------------------- |
+| AfDEC brand         | primary               |
+| Souvera attribution | secondary but visible |
+
+---
+
+## 7.4 Prohibited
+
+* removing attribution
+* rebranding Souvera as AfDEC product
+* white-labeling without agreement
+
+---
+
+# 8. 📊 FEATURE DIFFERENTIATION
+
+---
+
+## AfDEC (Lite)
+
+* static + teaser intelligence
+* awareness
+* community engagement
+
+---
+
+## Souvera (Full)
+
+* full country intelligence
+* time series
+* trade data
+* sector analysis
+* reports
+* API access
+
+---
+
+## Rule
+
+👉 AfDEC must never feel like a replacement for Souvera
+
+---
+
+# 9. 🔐 ACCESS CONTROL
+
+---
+
+## AfDEC Users
+
+* anonymous or registered
+* no Souvera entitlements
+
+---
+
+## Souvera Users
+
+* authenticated
+* tier-based access
+
+---
+
+## Separation
+
+👉 No shared authentication initially
+👉 Later: optional SSO bridge
+
+---
+
+# 10. 📡 PERFORMANCE & RATE LIMITING
+
+---
+
+## Limits
+
+| Endpoint       | Limit        |
+| -------------- | ------------ |
+| countries-lite | cached       |
+| country-lite   | rate-limited |
+| compare-lite   | strict limit |
+
+---
+
+## Reason
+
+* protect Souvera infrastructure
+* prevent abuse
+
+---
+
+# 11. 📊 ANALYTICS & TRACKING
+
+---
+
+## Required Tracking
+
+| Event              | Platform        |
+| ------------------ | --------------- |
+| map viewed         | AfDEC           |
+| country clicked    | AfDEC           |
+| CTA clicked        | AfDEC → Souvera |
+| redirect completed | Souvera         |
+| account created    | Souvera         |
+
+---
+
+## Goal
+
+👉 measure conversion from AfDEC → Souvera
+
+---
+
+# 12. ⚠️ RISK MANAGEMENT
+
+---
+
+| Risk                     | Mitigation             |
+| ------------------------ | ---------------------- |
+| AfDEC becomes substitute | strict data limits     |
+| data leakage             | API-only access        |
+| branding confusion       | attribution rules      |
+| performance issues       | rate limiting          |
+| misuse of data           | governance enforcement |
+
+---
+
+# 13. 🧪 QA CHECKLIST
+
+---
+
+Before launch:
+
+* API endpoints restricted correctly
+* no premium data visible
+* attribution present
+* CTA working
+* redirect functioning
+* rate limits tested
+
+---
+
+# 14. 🚀 FUTURE EVOLUTION
+
+---
+
+## Phase 2
+
+* AfDEC login → Souvera SSO
+* personalized dashboards
+* diaspora investment insights
+
+---
+
+## Phase 3
+
+* AfDEC becomes:
+
+  * strategic partner
+  * data contributor (optional)
+  * distribution channel
+
+---
+
+# 🏁 FINAL SUMMARY
+
+This spec ensures:
+
+* clean separation
+* strong integration
+* monetization path
+* brand clarity
+
+---
+
+## What you now have
+
+You have now fully defined:
+
+* Souvera as a platform
+* AfDEC as a gateway
+* clear API boundaries
+* conversion funnel
+* governance model
+
+---
+
+# 🚀 FINAL MISSING DOCUMENT
+
+Only ONE remains before FlowMode:
+
+👉 **Souvera Pricing & Packaging Strategy v1.0**
+
+This will define:
+
+* revenue model
+* tier structure (aligned with entitlements)
+* enterprise positioning
+* go-to-market leverage
+
+---
+
+Say:
+
+**“Proceed Pricing Strategy”**
+
+Then we lock the system and move to **FlowMode Charter v1.0**.

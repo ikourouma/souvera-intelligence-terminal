@@ -1,0 +1,28 @@
+{
+  "name": "souvera-intelligence-terminal",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Souvera Intelligence Terminal — Sovereign-grade intelligence platform by Afronovation, Inc.",
+  "author": "Afronovation, Inc.",
+  "license": "UNLICENSED",
+  "packageManager": "npm@11.12.1",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "clean": "turbo clean",
+    "ingest": "npx tsx"
+  },
+  "devDependencies": {
+    "@supabase/supabase-js": "^2.104.1",
+    "dotenv": "^17.4.2",
+    "postgres": "^3.4.9",
+    "tsx": "^4.21.0",
+    "turbo": "^2.5.0",
+    "typescript": "^5.7.0"
+  }
+}

@@ -1,0 +1,101 @@
+﻿Γû▓ Next.js 16.2.4 (Turbopack)
+
+  Creating an optimized production build ...
+npx : 
+At line:1 char:71
++ ... s\nodejs;$env:Path"; 
+cd apps\api-gateway; npx 
+next build 2>&1 | Out-F ...
++                          
+                     
+~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo         
+     : NotSpecified: (:St  
+  ring) [], RemoteExcept   
+ ion
+    + FullyQualifiedErrorI 
+   d : NativeCommandError
+ 
+> Build error occurred
+Error: Turbopack build 
+failed with 1 errors:
+./apps/api-gateway/src/app/
+globals.css
+Error evaluating Node.js 
+code
+Error: It looks like 
+you're trying to use 
+`tailwindcss` directly as 
+a PostCSS plugin. The 
+PostCSS plugin has moved 
+to a separate package, so 
+to continue using Tailwind 
+CSS with PostCSS you'll 
+need to install 
+`@tailwindcss/postcss` and 
+update your PostCSS 
+configuration.
+    [at ft (C:\Users\ikour\
+Projects\souvera\node_modul
+es\tailwindcss\dist\lib.js:
+38:1643)]
+    at pluginFactory (turbo
+pack:///[turbopack-node]/tr
+ansforms/postcss.ts:56:14) 
+[C:\Users\ikour\Projects\so
+uvera\apps\api-gateway\.nex
+t\build\chunks\[root-of-the
+-server]__0oggg_2._.js:165:
+20]
+    [at <anonymous>]
+    at map (turbopack:///[t
+urbopack-node]/transforms/p
+ostcss.ts:43:33) [C:\Users\
+ikour\Projects\souvera\apps
+\api-gateway\.next\build\ch
+unks\[root-of-the-server]__
+0oggg_2._.js:155:35]
+    at init (turbopack:///[
+turbopack-node]/child_proce
+ss/evaluate.ts:74:20) [C:\U
+sers\ikour\Projects\souvera
+\apps\api-gateway\.next\bui
+ld\chunks\[root-of-the-serv
+er]__000u9lg._.js:429:26]
+    [at process.processTick
+sAndRejections (node:intern
+al/process/task_queues:104:
+5)]
+
+Import trace:
+  Client Component Browser:
+    ./apps/api-gateway/src/
+app/globals.css [Client 
+Component Browser]
+    ./apps/api-gateway/src/
+app/layout.tsx [Server 
+Component]
+
+
+    at pluginFactory (turbo
+pack:///[turbopack-node]/tr
+ansforms/postcss.ts:56:14) 
+[C:\Users\ikour\Projects\so
+uvera\apps\api-gateway\.nex
+t\build\chunks\[root-of-the
+-server]__0oggg_2._.js:165:
+20])
+    at map (turbopack:///[t
+urbopack-node]/transforms/p
+ostcss.ts:43:33) [C:\Users\
+ikour\Projects\souvera\apps
+\api-gateway\.next\build\ch
+unks\[root-of-the-server]__
+0oggg_2._.js:155:35])
+    at init (turbopack:///[
+turbopack-node]/child_proce
+ss/evaluate.ts:74:20) [C:\U
+sers\ikour\Projects\souvera
+\apps\api-gateway\.next\bui
+ld\chunks\[root-of-the-serv
+er]__000u9lg._.js:429:26])

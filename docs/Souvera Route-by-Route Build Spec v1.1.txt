@@ -1,0 +1,904 @@
+# Souvera Route-by-Route Build Spec v1.1
+
+**Owner:** Afronovation, Inc.
+**Product:** Souvera Intelligence Terminal
+**Purpose:** define every core route, page objective, data source, API dependency, access behavior, UI modules, lock states, and integration boundaries.
+
+---
+
+## 1. Build principle
+
+Souvera is the source of truth. AfDEC is a governed lite consumer.
+
+No Souvera route should depend on AfDEC.
+AfDEC should depend only on versioned Souvera lite APIs.
+
+---
+
+# 2. Route groups
+
+| Route Group        | Purpose                                       |
+| ------------------ | --------------------------------------------- |
+| Public Marketing   | Position Souvera and capture enterprise leads |
+| Public Teaser      | Limited intelligence preview                  |
+| Auth / Onboarding  | Invite-only access, org setup                 |
+| Terminal Workspace | Full intelligence product                     |
+| Reports            | Downloadable intelligence assets              |
+| Enterprise / API   | API clients, usage, exports                   |
+| Admin Console      | Source, ingestion, editorial, governance      |
+| AfDEC Integration  | Lite endpoints consumed by AfDEC              |
+
+---
+
+# 3. Public marketing routes
+
+## 3.1 `/`
+
+### Purpose
+
+Primary product landing page for Souvera Intelligence Terminal.
+
+### Audience
+
+Governments, investors, institutions, chambers, corporates, diaspora economic leaders.
+
+### Page sections
+
+1. Hero: “Africa Intelligence Terminal for Markets, Capital, and Strategic Growth”
+2. Terminal preview
+3. Why now
+4. Product modules
+5. Who it serves
+6. Data foundation
+7. Engineered by Afronovation, Inc.
+8. Endorsed by AfDEC
+9. Request access CTA
+
+### Components
+
+* `MarketingHero`
+* `TerminalPreviewMock`
+* `ModuleGrid`
+* `DataSourceTrustStrip`
+* `AudienceCards`
+* `AfronovationAttribution`
+* `AfDECEndorsementBlock`
+* `RequestAccessCTA`
+
+### Data
+
+Static + source registry preview.
+
+### CTA
+
+* Request Demo
+* Request Enterprise Access
+* View Intelligence Preview
+
+---
+
+## 3.2 `/platform`
+
+### Purpose
+
+Explain Souvera as a platform, not a map.
+
+### Sections
+
+* Country Intelligence
+* Market Signals
+* Trade & Corridor Intelligence
+* Sector Intelligence
+* Reports & Briefings
+* API & Institutional Access
+
+### Components
+
+* `PlatformModuleOverview`
+* `SignalEngineExplainer`
+* `ApiAccessPreview`
+
+---
+
+## 3.3 `/data-sources`
+
+### Purpose
+
+Trust and transparency page.
+
+### Data source
+
+* `souvera_data_sources`
+* public subset only
+
+### Display fields
+
+* provider name
+* domain
+* refresh cadence
+* public/premium label
+* attribution note
+
+### Do not display
+
+* internal legal notes
+* API keys
+* source health internals
+* fallback logic details if sensitive
+
+---
+
+## 3.4 `/request-access`
+
+### Purpose
+
+Enterprise-first lead capture.
+
+### Form fields
+
+* name
+* email
+* organization
+* role
+* organization type
+* intended use
+* countries / regions of interest
+* access type requested
+
+### Writes to
+
+Recommended future table:
+
+* `souvera_access_requests`
+
+### CTA language
+
+“Request Souvera Terminal Access”
+
+---
+
+# 4. Public teaser routes
+
+## 4.1 `/intelligence`
+
+### Purpose
+
+Public intelligence preview.
+
+### Access
+
+Public.
+
+### Data
+
+Uses:
+
+* `/api/v1/country-lite`
+* batch country-lite endpoint if created
+
+### UI
+
+* map
+* limited stat cards
+* country drawer teaser
+* locked premium cards
+
+### Components
+
+* `AfricaMapShell`
+* `CountryLiteDrawer`
+* `SignalLegend`
+* `LockedContentCard`
+* `UnlockSouveraCTA`
+
+### Lock behavior
+
+Show:
+
+* country name
+* GDP
+* population
+* GDP growth
+* top sectors
+* teaser insight
+
+Lock:
+
+* FDI
+* forecasts
+* trade
+* full signals
+* reports
+* compare engine
+
+---
+
+## 4.2 `/intelligence/[iso3]`
+
+### Purpose
+
+SEO-friendly country teaser page.
+
+### Example
+
+`/intelligence/ZMB`
+
+### API
+
+* `/api/v1/country-lite?iso3=ZMB`
+* `/api/v1/insight-teaser?iso3=ZMB`
+
+### Sections
+
+1. Country identity
+2. headline indicators
+3. signal teaser
+4. top sector preview
+5. locked full terminal preview
+6. request access CTA
+
+---
+
+## 4.3 `/compare-preview`
+
+### Purpose
+
+Public teaser for comparison.
+
+### API
+
+* `/api/v1/compare-lite?countries=ZMB,AGO`
+
+### Access
+
+Public.
+
+### Limits
+
+* max 2 countries
+* GDP, population, GDP growth only
+* no historical charts
+* no trade
+* no sector rationale
+
+---
+
+# 5. Auth and onboarding routes
+
+## 5.1 `/login`
+
+### Purpose
+
+Invite-only user login.
+
+### Auth
+
+Supabase Auth.
+
+### Components
+
+* `AuthShell`
+* `LoginForm`
+* `InviteOnlyNotice`
+
+### Notes
+
+Enterprise-first positioning. Avoid mass consumer language.
+
+---
+
+## 5.2 `/onboarding`
+
+### Purpose
+
+User profile completion and organization selection.
+
+### Reads
+
+* `souvera_profiles`
+* `souvera_organization_members`
+* `souvera_subscriptions`
+
+### Writes
+
+* `souvera_profiles`
+
+### Steps
+
+1. user profile
+2. organization confirmation
+3. role confirmation
+4. access tier confirmation
+5. redirect to terminal
+
+---
+
+## 5.3 `/no-access`
+
+### Purpose
+
+Graceful access denial.
+
+### UI
+
+* explain account is pending approval
+* request upgrade / contact support
+* no technical error messaging
+
+---
+
+# 6. Terminal workspace routes
+
+## 6.1 `/terminal`
+
+### Purpose
+
+Main authenticated terminal dashboard.
+
+### Access
+
+Explorer+
+
+### Data
+
+* user plan
+* entitlements
+* saved watchlists
+* top country signals
+* recent source freshness
+* recommended countries
+
+### Components
+
+* `TerminalShell`
+* `WorkspaceHeader`
+* `SignalOverviewCards`
+* `CountrySearch`
+* `WatchlistPanel`
+* `RecentBriefingsPanel`
+* `SourceFreshnessPill`
+
+### API
+
+* `/api/v1/me/access`
+* `/api/v1/countries`
+* `/api/v1/signals/overview`
+
+---
+
+## 6.2 `/terminal/map`
+
+### Purpose
+
+Full map-driven intelligence workspace.
+
+### Access
+
+Explorer+
+
+### Data
+
+* country-lite for Explorer
+* entitlement-aware country data on click
+
+### APIs
+
+* `/api/v1/country-lite`
+* `/api/v1/country`
+
+### Components
+
+* `TerminalMapShell`
+* `CountryIntelligencePanel`
+* `CompareTray`
+* `LayerToggle`
+* `SignalLegend`
+
+---
+
+## 6.3 `/terminal/country/[iso3]`
+
+### Purpose
+
+Full country intelligence page.
+
+### Access
+
+Explorer+ with tiered sections.
+
+### API
+
+* `/api/v1/country?iso3=ZMB`
+* `/api/v1/country/series?iso3=ZMB&indicator=gdp_growth_pct`
+* `/api/v1/sectors?iso3=ZMB`
+* `/api/v1/signals?iso3=ZMB`
+
+### Sections
+
+1. Country header
+2. executive snapshot
+3. Souvera signal card
+4. overview
+5. economy
+6. sectors
+7. opportunity
+8. risk
+9. reports
+10. source freshness
+
+### Tier behavior
+
+* Explorer: overview + teaser
+* Professional: macro + sector rationale
+* Business: forecasts + trade + reports
+* Investor: investor memos + signal logic
+* Institutional: export/API options
+
+---
+
+## 6.4 `/terminal/compare`
+
+### Purpose
+
+Full compare engine.
+
+### API
+
+* `/api/v1/compare`
+
+### Access
+
+Professional+
+
+### Tier limits
+
+| Tier          |        Limit |
+| ------------- | -----------: |
+| Professional  |  2 countries |
+| Business      |  3 countries |
+| Investor      |  5 countries |
+| Institutional | configurable |
+
+### Components
+
+* `CompareSelector`
+* `CompareMetricGrid`
+* `CompareSignalMatrix`
+* `CompareSectorTable`
+* `LockedCompareModule`
+
+---
+
+## 6.5 `/terminal/sectors`
+
+### Purpose
+
+Sector intelligence hub.
+
+### Access
+
+Professional+
+
+### API
+
+* `/api/v1/sectors`
+* future `/api/v1/sector/[sectorKey]`
+
+### Sections
+
+* sector list
+* top countries by sector
+* opportunity signals
+* locked sector theses
+
+---
+
+## 6.6 `/terminal/reports`
+
+### Purpose
+
+Report library.
+
+### Access
+
+Business+
+
+### API
+
+* `/api/v1/reports`
+
+### Components
+
+* `ReportLibrary`
+* `ReportCard`
+* `DownloadButton`
+* `LockedReportCard`
+
+### Report tiers
+
+* country brief: Business+
+* investor memo: Investor+
+* institutional pack: Institutional+
+
+---
+
+## 6.7 `/terminal/watchlists`
+
+### Purpose
+
+Saved countries and monitored markets.
+
+### Access
+
+Explorer+
+
+### Tables
+
+* `souvera_watchlists`
+* `souvera_watchlist_items`
+
+### API
+
+* `/api/v1/watchlists`
+
+---
+
+# 7. Enterprise and API routes
+
+## 7.1 `/terminal/api`
+
+### Purpose
+
+Institutional API management.
+
+### Access
+
+Institutional only.
+
+### Tables
+
+* `souvera_api_clients`
+* `souvera_audit_events`
+
+### Components
+
+* `ApiClientList`
+* `CreateApiClientDialog`
+* `ApiScopeManager`
+* `ApiUsagePreview`
+
+### Lock behavior
+
+Investor tier may see API-lite preview, but cannot create full clients unless allowed.
+
+---
+
+## 7.2 `/terminal/exports`
+
+### Purpose
+
+Data export center.
+
+### Access
+
+Institutional.
+
+### API
+
+* `/api/v1/enterprise/export`
+
+### Formats
+
+* CSV
+* JSON
+* future: scheduled exports
+
+---
+
+## 7.3 `/terminal/audit`
+
+### Purpose
+
+Org audit log.
+
+### Access
+
+Institutional org admin / executive.
+
+### Table
+
+* `souvera_audit_events`
+
+---
+
+# 8. Admin console routes
+
+## 8.1 `/admin`
+
+### Purpose
+
+Internal platform admin dashboard.
+
+### Access
+
+Platform Admin only.
+
+### Components
+
+* `AdminOverview`
+* `SourceHealthSummary`
+* `IngestionJobSummary`
+* `EditorialQueue`
+* `DataCompletenessPanel`
+
+---
+
+## 8.2 `/admin/sources`
+
+### Purpose
+
+Manage approved data sources.
+
+### Tables
+
+* `souvera_data_sources`
+* `souvera_source_health`
+
+### Actions
+
+* view provider
+* update status
+* update legal status
+* update refresh cadence
+* mark source paused
+
+---
+
+## 8.3 `/admin/ingestion`
+
+### Purpose
+
+Monitor and trigger ingestion jobs.
+
+### Tables
+
+* `souvera_ingestion_jobs`
+* `souvera_source_payload_archive`
+* `souvera_source_health`
+
+### Actions
+
+* run source job
+* view last failures
+* inspect transformation errors
+* view record counts
+
+---
+
+## 8.4 `/admin/countries`
+
+### Purpose
+
+Manage countries and completeness.
+
+### Tables
+
+* `souvera_countries`
+* `souvera_country_profiles`
+* `souvera_country_sectors`
+
+---
+
+## 8.5 `/admin/editorial/[iso3]`
+
+### Purpose
+
+Edit country intelligence narrative.
+
+### Writes
+
+* `souvera_country_profiles`
+* `souvera_country_sectors`
+
+### Required fields
+
+* summary
+* AfDEC teaser
+* why now
+* opportunity thesis
+* risk narrative
+* signal level
+* sector teasers
+
+---
+
+## 8.6 `/admin/reports`
+
+### Purpose
+
+Upload and manage reports.
+
+### Tables
+
+* `souvera_reports`
+
+### Storage
+
+* `souvera-country-reports`
+
+---
+
+# 9. API routes
+
+## 9.1 Public / Lite
+
+| Route                    | Purpose          | Access         |
+| ------------------------ | ---------------- | -------------- |
+| `/api/v1/country-lite`   | country teaser   | Public / AfDEC |
+| `/api/v1/compare-lite`   | limited compare  | Public / AfDEC |
+| `/api/v1/insight-teaser` | narrative teaser | Public / AfDEC |
+| `/api/v1/countries-lite` | batch map feed   | Public / AfDEC |
+
+---
+
+## 9.2 Authenticated Terminal
+
+| Route                    | Purpose                           | Access           |
+| ------------------------ | --------------------------------- | ---------------- |
+| `/api/v1/me/access`      | access context                    | Authenticated    |
+| `/api/v1/countries`      | searchable country list           | Explorer+        |
+| `/api/v1/country`        | entitlement-aware country payload | Explorer+        |
+| `/api/v1/country/series` | chart series                      | Professional+    |
+| `/api/v1/sectors`        | sector data                       | Professional+    |
+| `/api/v1/trade`          | trade data                        | Business+        |
+| `/api/v1/signals`        | signal scores                     | Explorer+ tiered |
+| `/api/v1/compare`        | full compare                      | Professional+    |
+| `/api/v1/reports`        | report access                     | Business+        |
+| `/api/v1/watchlists`     | saved watchlists                  | Explorer+        |
+
+---
+
+## 9.3 Enterprise
+
+| Route                                 | Purpose               | Access                  |
+| ------------------------------------- | --------------------- | ----------------------- |
+| `/api/v1/enterprise/export`           | exports               | Institutional           |
+| `/api/v1/enterprise/source-freshness` | source freshness      | Institutional           |
+| `/api/v1/enterprise/countries`        | bulk country payload  | Institutional           |
+| `/api/v1/enterprise/api-clients`      | API client management | Institutional org admin |
+
+---
+
+## 9.4 Admin
+
+| Route                        | Purpose                   |
+| ---------------------------- | ------------------------- |
+| `/api/admin/sources`         | source registry           |
+| `/api/admin/ingestion/jobs`  | ingestion jobs            |
+| `/api/admin/ingestion/run`   | trigger ingestion         |
+| `/api/admin/country-profile` | editorial country profile |
+| `/api/admin/reports`         | reports                   |
+| `/api/admin/source-health`   | source health             |
+
+---
+
+# 10. AfDEC integration routes
+
+AfDEC should call only these Souvera endpoints:
+
+| AfDEC Need            | Souvera Endpoint         |
+| --------------------- | ------------------------ |
+| Africa map teaser     | `/api/v1/countries-lite` |
+| Country drawer teaser | `/api/v1/country-lite`   |
+| Compare teaser        | `/api/v1/compare-lite`   |
+| Insight block         | `/api/v1/insight-teaser` |
+
+AfDEC should not:
+
+* access Souvera Supabase directly
+* store full Souvera intelligence
+* expose Souvera premium fields
+* duplicate signal logic
+
+---
+
+# 11. Lock states by route
+
+| Route                      | Locked modules                               |
+| -------------------------- | -------------------------------------------- |
+| `/intelligence`            | full panel, trade, reports, compare          |
+| `/intelligence/[iso3]`     | forecasts, trade, risk, opportunity, reports |
+| `/terminal/country/[iso3]` | based on entitlement                         |
+| `/terminal/compare`        | over country limit, premium metrics          |
+| `/terminal/sectors`        | sector thesis                                |
+| `/terminal/reports`        | higher-tier reports                          |
+| `/terminal/api`            | full API creation                            |
+| `/terminal/exports`        | all exports unless institutional             |
+
+---
+
+# 12. Analytics events
+
+Every major route should emit product analytics events.
+
+| Event                     | Trigger                     |
+| ------------------------- | --------------------------- |
+| `public_teaser_viewed`    | user visits `/intelligence` |
+| `country_lite_opened`     | country drawer opened       |
+| `locked_module_clicked`   | locked module selected      |
+| `request_access_clicked`  | CTA clicked                 |
+| `terminal_country_opened` | full country page opened    |
+| `compare_started`         | compare route used          |
+| `report_downloaded`       | report downloaded           |
+| `api_key_created`         | enterprise API key created  |
+| `ingestion_job_failed`    | admin ingestion failure     |
+
+---
+
+# 13. Build order
+
+## Phase 1 — Souvera foundation
+
+* repo setup
+* Supabase schema
+* source registry
+* plans and entitlements
+* public marketing pages
+
+## Phase 2 — Lite API and teaser
+
+* `country-lite`
+* `countries-lite`
+* `insight-teaser`
+* public intelligence map
+
+## Phase 3 — Terminal MVP
+
+* auth
+* `/terminal`
+* `/terminal/map`
+* `/terminal/country/[iso3]`
+* entitlement filtering
+
+## Phase 4 — Data ingestion
+
+* REST Countries
+* World Bank
+* IMF
+* OXR
+* GDELT
+
+## Phase 5 — Business/Investor intelligence
+
+* compare
+* sectors
+* trade
+* reports
+* investor memos
+
+## Phase 6 — Enterprise
+
+* API clients
+* exports
+* audit logs
+* source freshness
+
+## Phase 7 — AfDEC connection
+
+* connect AfDEC map to Souvera-lite APIs
+* add “Powered by Souvera Terminal”
+* add conversion CTAs
+
+---
+
+# 14. Final route rule
+
+Each route must answer one question:
+
+* Public routes: “Why should I care?”
+* Teaser routes: “What can Souvera show me?”
+* Terminal routes: “What decision can I make?”
+* Enterprise routes: “How do I operationalize this?”
+* Admin routes: “Can Afronovation trust the system?”
+
+Recommended next artifact: **Souvera Engineering Execution Plan v1.0** for Antigravity task sequencing, repo structure, sprint plan, and build governance.

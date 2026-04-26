@@ -1,0 +1,414 @@
+
+
+---
+
+# 📄 **DOCUMENT 1 — Souvera PRD v2.0 (Consolidated & Final)**
+
+---
+
+# 🧠 **Souvera Product Requirements Document (PRD) v2.0**
+
+**Owner:** Afronovation, Inc.
+**Product:** Souvera Intelligence Terminal (SIT)
+**Type:** Enterprise SaaS Platform
+**Standard:** Fortune-5 / Sovereign-grade
+
+---
+
+# 1. 🎯 PRODUCT VISION
+
+---
+
+## Vision Statement
+
+Souvera is a **sovereign-grade intelligence terminal** designed to provide:
+
+* structured country intelligence
+* investment signals
+* economic insights
+* strategic decision support
+
+for:
+
+* governments
+* investors
+* institutions
+* enterprises
+* diaspora economic actors
+
+---
+
+## Positioning
+
+> “The Bloomberg Terminal for African and frontier market intelligence.”
+
+---
+
+# 2. 🧭 PROBLEM STATEMENT
+
+---
+
+## Current Market Gaps
+
+| Problem                                | Impact                  |
+| -------------------------------------- | ----------------------- |
+| fragmented data sources                | slow decision-making    |
+| lack of structured intelligence        | poor investment clarity |
+| inconsistent country insights          | unreliable comparisons  |
+| no unified African intelligence system | missed opportunities    |
+
+---
+
+## Key Insight
+
+👉 Data exists
+👉 Intelligence does not
+
+---
+
+# 3. 💡 SOLUTION
+
+---
+
+Souvera delivers:
+
+### 1. Unified Intelligence Layer
+
+* integrates multiple data sources
+* normalizes into one system
+
+---
+
+### 2. Country Intelligence Terminal
+
+* structured country profiles
+* decision-ready insights
+
+---
+
+### 3. Signal Engine
+
+* investment signals
+* growth indicators
+* risk detection
+
+---
+
+### 4. Sector Intelligence
+
+* industry-level opportunity mapping
+
+---
+
+### 5. Reports & Briefings
+
+* investor-grade documentation
+
+---
+
+### 6. Enterprise API Layer
+
+* institutional integration
+
+---
+
+# 4. 👥 TARGET USERS
+
+---
+
+## Primary Personas
+
+### 1. Institutional Investor
+
+* needs: opportunity + risk clarity
+* uses: signals, reports, compare
+
+---
+
+### 2. Government / Ministry
+
+* needs: benchmarking + strategy
+* uses: country intelligence, trade, sectors
+
+---
+
+### 3. Corporate Expansion Teams
+
+* needs: market entry insights
+* uses: sectors, opportunity, macro
+
+---
+
+### 4. Diaspora Investors
+
+* needs: trusted insights
+* uses: simplified signals + overview
+
+---
+
+### 5. Development Institutions
+
+* needs: macro + policy insights
+* uses: full terminal
+
+---
+
+# 5. 🧱 CORE PRODUCT MODULES
+
+---
+
+## 5.1 Country Intelligence
+
+* executive snapshot
+* narrative overview
+* opportunity + risk
+* sector analysis
+* trade data
+
+---
+
+## 5.2 Signal Engine
+
+* investment score
+* growth signal
+* risk classification
+
+---
+
+## 5.3 Data Engine
+
+* multi-source ingestion
+* normalization
+* validation
+
+---
+
+## 5.4 Compare Engine
+
+* country-to-country comparison
+* tier-limited
+
+---
+
+## 5.5 Reports Engine
+
+* downloadable insights
+* investor memos
+* institutional briefs
+
+---
+
+## 5.6 API Engine
+
+* enterprise integration
+* export capability
+
+---
+
+# 6. 🧩 FEATURE SET
+
+---
+
+## Tiered Features
+
+| Feature          | Public  | Explorer | Pro | Business | Investor | Institutional |
+| ---------------- | ------- | -------- | --- | -------- | -------- | ------------- |
+| Country overview | ✓       | ✓        | ✓   | ✓        | ✓        | ✓             |
+| Macro metrics    | limited | limited  | ✓   | ✓        | ✓        | ✓             |
+| Forecasts        | ✗       | ✗        | ✗   | ✓        | ✓        | ✓             |
+| Sectors          | teaser  | partial  | ✓   | ✓        | ✓        | ✓             |
+| Trade data       | ✗       | ✗        | ✗   | ✓        | ✓        | ✓             |
+| Signals          | label   | limited  | ✓   | ✓        | ✓        | ✓             |
+| Compare          | ✗       | limited  | ✓   | ✓        | ✓        | ✓             |
+| Reports          | ✗       | ✗        | ✗   | ✓        | ✓        | ✓             |
+| Investor memos   | ✗       | ✗        | ✗   | ✗        | ✓        | ✓             |
+| API access       | ✗       | ✗        | ✗   | ✗        | limited  | ✓             |
+
+---
+
+# 7. 📊 DATA STRATEGY (HIGH LEVEL)
+
+---
+
+## Data Types
+
+* macroeconomic
+* forecasts
+* trade
+* FX
+* news signals
+* derived intelligence
+
+---
+
+## Source Strategy
+
+* primary + fallback
+* normalized into unified schema
+* governed by Source Registry
+
+---
+
+# 8. 🔐 ACCESS MODEL
+
+---
+
+## Core Principle
+
+👉 Entitlement-based access (server-side enforced)
+
+---
+
+## Layers
+
+* user
+* organization
+* subscription
+* entitlements
+
+---
+
+# 9. 🔗 INTEGRATIONS
+
+---
+
+## Internal
+
+* Signal Engine
+* Ingestion Engine
+
+---
+
+## External
+
+* APIs (World Bank, IMF, etc.)
+
+---
+
+## AfDEC
+
+* consumes lite APIs
+* conversion funnel into Souvera
+
+---
+
+# 10. 🎨 UX PRINCIPLES
+
+---
+
+* decision-first design
+* high-density layout
+* structured hierarchy
+* fast navigation
+* clear data attribution
+
+---
+
+# 11. 📈 SUCCESS METRICS
+
+---
+
+## Product Metrics
+
+* country panel engagement
+* compare usage
+* report downloads
+
+---
+
+## Business Metrics
+
+* conversion (AfDEC → Souvera)
+* enterprise onboarding
+* API usage
+
+---
+
+## Data Metrics
+
+* freshness
+* coverage
+* reliability
+
+---
+
+# 12. 🚀 ROADMAP (HIGH LEVEL)
+
+---
+
+## Phase 1
+
+* core data ingestion
+* country panel
+* lite APIs
+
+---
+
+## Phase 2
+
+* signals
+* compare
+* sectors
+
+---
+
+## Phase 3
+
+* reports
+* enterprise API
+
+---
+
+## Phase 4
+
+* premium data
+* advanced intelligence
+
+---
+
+# 13. ⚠️ RISKS
+
+---
+
+| Risk               | Mitigation    |
+| ------------------ | ------------- |
+| data inconsistency | normalization |
+| licensing issues   | governance    |
+| poor UX            | design system |
+| slow adoption      | AfDEC funnel  |
+
+---
+
+# 🏁 FINAL SUMMARY
+
+Souvera is:
+
+* not a dashboard
+* not a data aggregator
+
+👉 It is an **intelligence platform**
+👉 designed for **real decision-making**
+
+---
+
+## ✅ PRD Status: LOCKED
+
+---
+
+# 🚀 NEXT DOCUMENT
+
+If ready, I proceed with:
+
+👉 **Souvera TRD v2.0 (Final Consolidated Version)**
+
+This will align:
+
+* architecture
+* services
+* system interactions
+
+---
+
+Say:
+
+**“Proceed TRD v2.0”**

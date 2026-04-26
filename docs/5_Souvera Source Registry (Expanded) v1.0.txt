@@ -1,0 +1,494 @@
+This is where Souvera becomes **operationally real**.
+The Source Registry is not just a list—it is your **data supply chain control tower**.
+
+This document must be **precise, actionable, and owned**.
+
+---
+
+# 🧠 **Souvera Source Registry (Expanded) v1.0**
+
+**Owner:** Afronovation, Inc.
+**Product:** Souvera Intelligence Terminal
+**Purpose:** Operational control of all data sources powering Souvera
+**Scope:** APIs, ingestion, ownership, SLA, cost, fallback, compliance
+
+---
+
+# 1. 🎯 OBJECTIVE
+
+Provide a **single authoritative registry** that defines:
+
+* what data sources are used
+* how they are accessed
+* who owns them
+* how often they refresh
+* what happens if they fail
+* how they are legally used
+
+---
+
+# 2. 🧭 DESIGN PRINCIPLE
+
+> No data enters Souvera unless it exists in this registry.
+
+---
+
+# 3. 📊 SOURCE REGISTRY STRUCTURE
+
+Each source must define:
+
+| Field               | Description               |
+| ------------------- | ------------------------- |
+| Source Key          | Unique identifier         |
+| Name                | Provider name             |
+| Domain              | Data domain               |
+| API Base URL        | Primary endpoint          |
+| Docs URL            | Documentation             |
+| Auth Model          | API key / public / OAuth  |
+| Data Type           | Open / Licensed / Premium |
+| Refresh Cadence     | Expected update frequency |
+| SLA Tier            | Reliability level         |
+| Priority Rank       | Source selection priority |
+| Fallback Sources    | Backup providers          |
+| Cost Tier           | Free / Paid               |
+| Legal Status        | Approved / Review         |
+| Redistribution Rule | Allowed / Restricted      |
+| Owner               | Responsible team          |
+| Status              | Active / Paused / Retired |
+
+---
+
+# 4. 📡 CORE SOURCE REGISTRY
+
+---
+
+## 4.1 MACROECONOMIC DATA
+
+---
+
+### 🌍 World Bank
+
+| Field          | Value                                                                    |
+| -------------- | ------------------------------------------------------------------------ |
+| Source Key     | `world_bank`                                                             |
+| Domain         | Macro                                                                    |
+| API            | [https://api.worldbank.org/v2](https://api.worldbank.org/v2)             |
+| Docs           | [https://datahelpdesk.worldbank.org](https://datahelpdesk.worldbank.org) |
+| Auth           | Public                                                                   |
+| Data Type      | Open                                                                     |
+| Refresh        | Weekly                                                                   |
+| SLA            | Tier 1                                                                   |
+| Priority       | 1                                                                        |
+| Fallback       | IMF, OECD                                                                |
+| Cost           | Free                                                                     |
+| Legal          | Approved                                                                 |
+| Redistribution | Allowed with attribution                                                 |
+| Owner          | Data Engineering                                                         |
+| Status         | Active                                                                   |
+
+---
+
+### 🌍 IMF
+
+| Field          | Value                                        |
+| -------------- | -------------------------------------------- |
+| Source Key     | `imf`                                        |
+| Domain         | Forecast                                     |
+| API            | [https://api.imf.org](https://api.imf.org)   |
+| Docs           | [https://data.imf.org](https://data.imf.org) |
+| Auth           | Public                                       |
+| Data Type      | Open                                         |
+| Refresh        | Monthly                                      |
+| SLA            | Tier 1                                       |
+| Priority       | 2                                            |
+| Fallback       | OECD                                         |
+| Cost           | Free                                         |
+| Legal          | Approved                                     |
+| Redistribution | Allowed with attribution                     |
+| Owner          | Data Engineering                             |
+| Status         | Active                                       |
+
+---
+
+### 🌍 OECD
+
+| Field          | Value                                                                        |
+| -------------- | ---------------------------------------------------------------------------- |
+| Source Key     | `oecd`                                                                       |
+| Domain         | Comparative macro                                                            |
+| API            | [https://sdmx.oecd.org/public/rest/v1](https://sdmx.oecd.org/public/rest/v1) |
+| Docs           | [https://www.oecd.org](https://www.oecd.org)                                 |
+| Auth           | Public                                                                       |
+| Data Type      | Open                                                                         |
+| Refresh        | Monthly                                                                      |
+| SLA            | Tier 2                                                                       |
+| Priority       | 3                                                                            |
+| Fallback       | IMF                                                                          |
+| Cost           | Free                                                                         |
+| Legal          | Approved                                                                     |
+| Redistribution | Allowed with attribution                                                     |
+| Owner          | Data Engineering                                                             |
+| Status         | Active                                                                       |
+
+---
+
+## 4.2 TRADE DATA
+
+---
+
+### 🌐 UN Comtrade
+
+| Field          | Value                                                              |
+| -------------- | ------------------------------------------------------------------ |
+| Source Key     | `un_comtrade`                                                      |
+| Domain         | Trade                                                              |
+| API            | [https://comtradeapi.un.org](https://comtradeapi.un.org)           |
+| Docs           | [https://comtradeapi.un.org/docs](https://comtradeapi.un.org/docs) |
+| Auth           | API Key                                                            |
+| Data Type      | Mixed                                                              |
+| Refresh        | Monthly / Quarterly                                                |
+| SLA            | Tier 1                                                             |
+| Priority       | 1                                                                  |
+| Fallback       | World Bank                                                         |
+| Cost           | Free / Paid                                                        |
+| Legal          | Review Required                                                    |
+| Redistribution | Restricted                                                         |
+| Owner          | Data Engineering                                                   |
+| Status         | Active                                                             |
+
+---
+
+## 4.3 COUNTRY METADATA
+
+---
+
+### 🌍 REST Countries
+
+| Field          | Value                                                            |
+| -------------- | ---------------------------------------------------------------- |
+| Source Key     | `rest_countries`                                                 |
+| Domain         | Metadata                                                         |
+| API            | [https://restcountries.com/v3.1](https://restcountries.com/v3.1) |
+| Docs           | [https://restcountries.com](https://restcountries.com)           |
+| Auth           | Public                                                           |
+| Data Type      | Open                                                             |
+| Refresh        | Monthly                                                          |
+| SLA            | Tier 2                                                           |
+| Priority       | 1                                                                |
+| Fallback       | None                                                             |
+| Cost           | Free                                                             |
+| Legal          | Approved                                                         |
+| Redistribution | Allowed                                                          |
+| Owner          | Platform                                                         |
+| Status         | Active                                                           |
+
+---
+
+## 4.4 FX DATA
+
+---
+
+### 💱 Open Exchange Rates
+
+| Field          | Value                                                                    |
+| -------------- | ------------------------------------------------------------------------ |
+| Source Key     | `open_exchange_rates`                                                    |
+| Domain         | FX                                                                       |
+| API            | [https://openexchangerates.org/api](https://openexchangerates.org/api)   |
+| Docs           | [https://docs.openexchangerates.org](https://docs.openexchangerates.org) |
+| Auth           | API Key                                                                  |
+| Data Type      | Licensed                                                                 |
+| Refresh        | Hourly                                                                   |
+| SLA            | Tier 1                                                                   |
+| Priority       | 1                                                                        |
+| Fallback       | Trading Economics                                                        |
+| Cost           | Freemium                                                                 |
+| Legal          | Approved                                                                 |
+| Redistribution | Restricted                                                               |
+| Owner          | Data Engineering                                                         |
+| Status         | Active                                                                   |
+
+---
+
+## 4.5 NEWS & SIGNALS
+
+---
+
+### 📰 GDELT
+
+| Field          | Value                                                                      |
+| -------------- | -------------------------------------------------------------------------- |
+| Source Key     | `gdelt`                                                                    |
+| Domain         | News signals                                                               |
+| API            | [https://api.gdeltproject.org/api/v2](https://api.gdeltproject.org/api/v2) |
+| Docs           | [https://gdeltproject.org](https://gdeltproject.org)                       |
+| Auth           | Public                                                                     |
+| Data Type      | Open                                                                       |
+| Refresh        | Hourly                                                                     |
+| SLA            | Tier 2                                                                     |
+| Priority       | 1                                                                          |
+| Fallback       | NewsAPI                                                                    |
+| Cost           | Free                                                                       |
+| Legal          | Approved                                                                   |
+| Redistribution | Allowed (processed)                                                        |
+| Owner          | Data Engineering                                                           |
+| Status         | Active                                                                     |
+
+---
+
+### 📰 NewsAPI
+
+| Field          | Value                                                |
+| -------------- | ---------------------------------------------------- |
+| Source Key     | `newsapi`                                            |
+| Domain         | Headlines                                            |
+| API            | [https://newsapi.org/v2](https://newsapi.org/v2)     |
+| Docs           | [https://newsapi.org/docs](https://newsapi.org/docs) |
+| Auth           | API Key                                              |
+| Data Type      | Licensed                                             |
+| Refresh        | Hourly                                               |
+| SLA            | Tier 2                                               |
+| Priority       | 2                                                    |
+| Fallback       | GDELT                                                |
+| Cost           | Freemium                                             |
+| Legal          | Review Required                                      |
+| Redistribution | Restricted                                           |
+| Owner          | Data Engineering                                     |
+| Status         | Active                                               |
+
+---
+
+## 4.6 AFRICA-SPECIFIC DATA
+
+---
+
+### 🌍 African Development Bank (AfDB)
+
+| Field          | Value                                                                                |
+| -------------- | ------------------------------------------------------------------------------------ |
+| Source Key     | `afdb`                                                                               |
+| Domain         | Africa macro                                                                         |
+| API            | [https://apiportal.opendataforafrica.org](https://apiportal.opendataforafrica.org)   |
+| Docs           | [https://dataportal.opendataforafrica.org](https://dataportal.opendataforafrica.org) |
+| Auth           | API Key                                                                              |
+| Data Type      | Open                                                                                 |
+| Refresh        | Monthly                                                                              |
+| SLA            | Tier 1                                                                               |
+| Priority       | 2                                                                                    |
+| Fallback       | World Bank                                                                           |
+| Cost           | Free                                                                                 |
+| Legal          | Approved                                                                             |
+| Redistribution | Allowed with attribution                                                             |
+| Owner          | Data Engineering                                                                     |
+| Status         | Active                                                                               |
+
+---
+
+# 5. 🏆 PREMIUM / PHASE 2 SOURCES
+
+---
+
+## Trading Economics
+
+* premium macro
+* fallback enrichment
+
+---
+
+## IEA (Energy)
+
+* sector intelligence
+* energy forecasts
+
+---
+
+## Private Data Providers (Future)
+
+* McKinsey
+* Bloomberg
+* Refinitiv
+
+---
+
+# 6. 🔁 SOURCE PRIORITY LOGIC
+
+---
+
+## Selection Order
+
+```text
+Primary → Fallback → Last Known Value
+```
+
+---
+
+## Example
+
+GDP:
+
+1. World Bank
+2. IMF
+3. OECD
+
+---
+
+## Rule
+
+👉 Never mix sources blindly
+👉 Always resolve priority
+
+---
+
+# 7. ⚠️ SOURCE FAILURE HANDLING
+
+---
+
+## Levels
+
+| Level     | Action      |
+| --------- | ----------- |
+| Temporary | retry       |
+| Degraded  | fallback    |
+| Down      | cached data |
+| Critical  | alert admin |
+
+---
+
+## Table used
+
+* `souvera_source_health`
+
+---
+
+# 8. 💰 COST GOVERNANCE
+
+---
+
+## Categories
+
+| Tier     | Strategy        |
+| -------- | --------------- |
+| Free     | maximize usage  |
+| Freemium | controlled      |
+| Paid     | enterprise only |
+
+---
+
+## Rule
+
+👉 Paid APIs must:
+
+* justify ROI
+* be tier-gated
+
+---
+
+# 9. 👥 OWNERSHIP MODEL
+
+---
+
+## Teams
+
+| Area            | Owner            |
+| --------------- | ---------------- |
+| Ingestion       | Data Engineering |
+| Source approval | Product + Legal  |
+| Compliance      | Governance       |
+| Monitoring      | Platform         |
+
+---
+
+## Rule
+
+👉 Every source must have an owner
+
+---
+
+# 10. 📊 SLA TIERS
+
+---
+
+| Tier   | Reliability |
+| ------ | ----------- |
+| Tier 1 | Critical    |
+| Tier 2 | Important   |
+| Tier 3 | Optional    |
+
+---
+
+# 11. 🧪 SOURCE VALIDATION CHECKLIST
+
+---
+
+Before activation:
+
+* API tested
+* data mapped
+* schema aligned
+* license reviewed
+* fallback defined
+* refresh cadence confirmed
+
+---
+
+# 12. 🚨 CRITICAL RULES
+
+---
+
+## NEVER:
+
+* ingest unknown sources
+* expose raw licensed data
+* mix inconsistent sources
+* bypass registry
+
+---
+
+## ALWAYS:
+
+* log ingestion
+* store payload
+* assign source
+* enforce entitlement
+
+---
+
+# 🏁 FINAL SUMMARY
+
+This registry ensures:
+
+* operational control
+* data reliability
+* legal compliance
+* scalability
+
+---
+
+## What this unlocks
+
+You now have:
+
+* controlled ingestion
+* reliable data pipeline
+* enterprise trust
+* scalable architecture
+
+---
+
+# 🚀 NEXT DOCUMENT
+
+👉 **Souvera AfDEC Integration Spec v1.0**
+
+This will finalize:
+
+* separation of platform vs organization
+* API boundaries
+* branding
+* data control
+* conversion funnel
+
+---
+
+Say:
+
+**“Proceed AfDEC Integration Spec”**

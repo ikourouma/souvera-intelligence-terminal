@@ -1,0 +1,705 @@
+# Souvera API Binding Map v1.1
+
+**Owner:** Afronovation, Inc.
+**Product:** Souvera Intelligence Terminal
+**Purpose:** Define how Souvera APIs, external data sources, Supabase tables, entitlements, AfDEC-lite endpoints, and UI components connect.
+
+---
+
+## 1. Core principle
+
+Souvera is the intelligence source of truth.
+
+AfDEC, partners, dashboards, and enterprise clients consume Souvera through controlled APIs only.
+
+```text
+External Data Sources
+        ↓
+Souvera Ingestion Adapters
+        ↓
+Souvera Supabase Intelligence Database
+        ↓
+Souvera API Layer
+        ↓
+Souvera Terminal / AfDEC Lite / Enterprise Clients
+```
+
+---
+
+# 2. API groups
+
+| API Group       | Purpose                                    | Consumer               |
+| --------------- | ------------------------------------------ | ---------------------- |
+| Public Lite API | Teaser data                                | AfDEC, public site     |
+| Terminal API    | Full authenticated intelligence            | Souvera users          |
+| Enterprise API  | Institutional access, exports, API clients | Licensed organizations |
+| Admin API       | Source, ingestion, editorial, governance   | Afronovation admins    |
+| Ingestion API   | Data-provider ingestion jobs               | Backend only           |
+
+---
+
+# 3. External source → ingestion → table binding
+
+| Source              | API Base URL                              | Domain            | Ingestion Adapter            | Target Tables                        | Refresh                  |
+| ------------------- | ----------------------------------------- | ----------------- | ---------------------------- | ------------------------------------ | ------------------------ |
+| World Bank          | `https://api.worldbank.org/v2`            | Macro             | `fetchWorldBankIndicators()` | `souvera_country_observations`       | Weekly                   |
+| IMF                 | `https://api.imf.org`                     | Forecast          | `fetchImfForecasts()`        | `souvera_country_observations`       | Monthly / release-driven |
+| OECD                | `https://sdmx.oecd.org/public/rest/v1`    | Comparative macro | `fetchOecdIndicators()`      | `souvera_country_observations`       | Monthly                  |
+| UN Comtrade         | `https://comtradeapi.un.org`              | Trade             | `fetchComtradeSnapshots()`   | `souvera_country_trade_snapshots`    | Monthly / quarterly      |
+| REST Countries      | `https://restcountries.com/v3.1`          | Metadata          | `fetchCountryMetadata()`     | `souvera_countries`                  | Monthly                  |
+| Open Exchange Rates | `https://openexchangerates.org/api`       | FX                | `fetchFxRates()`             | `souvera_country_observations`       | Hourly cached            |
+| GDELT               | `https://api.gdeltproject.org/api/v2`     | News signals      | `fetchGdeltSignals()`        | `souvera_country_news_signals`       | Hourly                   |
+| NewsAPI             | `https://newsapi.org/v2`                  | Headlines         | `fetchNewsApiHeadlines()`    | `souvera_country_news_signals`       | Hourly cached            |
+| AfDB                | `https://apiportal.opendataforafrica.org` | Africa enrichment | `fetchAfdbIndicators()`      | `souvera_country_observations`       | Monthly                  |
+| IEA                 | `https://api.iea.org`                     | Energy            | `fetchIeaEnergyData()`       | future `souvera_sector_observations` | Phase 2                  |
+| Trading Economics   | `https://api.tradingeconomics.com`        | Premium macro     | `fetchTradingEconomics()`    | `souvera_country_observations`       | Paid / Phase 2           |
+
+---
+
+# 4. Public / AfDEC-lite API bindings
+
+AfDEC should only consume lite endpoints.
+
+## 4.1 `GET /api/v1/country-lite`
+
+**Purpose:** Return controlled teaser data for one country.
+
+### Query
+
+```http
+GET /api/v1/country-lite?iso3=ZMB
+```
+
+### Reads from
+
+* `souvera_country_lite_v`
+* `souvera_country_sectors`
+* `souvera_country_news_signals`
+
+### Returns
+
+```ts
+type CountryLiteResponse = {
+  country: {
+    iso2: string
+    iso3: string
+    name: string
+    region: string
+    subregion?: string
+    capital?: string
+    currencyCode?: string
+    flagUrl?: string
+  }
+  metrics: {
+    gdpCurrentUsd?: number
+    gdpGrowthPct?: number
+    populationTotal?: number
+  }
+  signal: {
+    level?: "high_growth" | "emerging" | "stable" | "watchlist" | "risk_elevated"
+    investmentScore?: number
+    confidenceScore?: number
+  }
+  sectors: Array<{
+    label: string
+    teaser?: string
+  }>
+  teaser: {
+    afdecTeaser?: string
+  }
+  freshness: {
+    updatedAt?: string
+  }
+}
+```
+
+### Access
+
+* Public
+* AfDEC
+* Explorer
+* Any higher tier
+
+### Not allowed
+
+* FDI detail
+* full risk narrative
+* full opportunity thesis
+* reports
+* exports
+* raw source payloads
+
+---
+
+## 4.2 `GET /api/v1/compare-lite`
+
+**Purpose:** Allow limited public / AfDEC comparison.
+
+### Query
+
+```http
+GET /api/v1/compare-lite?countries=ZMB,AGO
+```
+
+### Reads from
+
+* `souvera_country_lite_v`
+
+### Returns
+
+* country identity
+* GDP
+* population
+* GDP growth
+* signal label
+
+### Access
+
+* Public / AfDEC allowed
+
+### Limits
+
+* max 2 countries
+* no historical charts
+* no trade comparison
+* no risk comparison
+
+---
+
+## 4.3 `GET /api/v1/insight-teaser`
+
+**Purpose:** Return one curated teaser insight for a country or region.
+
+### Query
+
+```http
+GET /api/v1/insight-teaser?iso3=ZMB
+```
+
+### Reads from
+
+* `souvera_country_profiles.afdec_teaser_md`
+* `souvera_country_signal_scores`
+* selected latest observations
+
+### Returns
+
+```ts
+{
+  country: "Zambia",
+  teaser: "Zambia is positioned as an emerging market signal...",
+  signal: "emerging",
+  updatedAt: "2026-04-24T00:00:00Z"
+}
+```
+
+---
+
+# 5. Souvera Terminal API bindings
+
+These are for authenticated Souvera users.
+
+## 5.1 `GET /api/v1/country`
+
+**Purpose:** Entitlement-aware country panel payload.
+
+### Query
+
+```http
+GET /api/v1/country?iso3=ZMB
+```
+
+### Binding by tier
+
+| Tier          | View / Tables                                  |
+| ------------- | ---------------------------------------------- |
+| Public        | `souvera_country_lite_v`                       |
+| Explorer      | `souvera_country_lite_v` + limited sectors     |
+| Professional  | `souvera_country_professional_v` + sectors     |
+| Business      | `souvera_country_business_v` + trade snapshots |
+| Investor      | Business + reports + investor memos            |
+| Institutional | Investor + API metadata + audit availability   |
+
+### Core reads
+
+* `souvera_countries`
+* `souvera_country_lite_v`
+* `souvera_country_professional_v`
+* `souvera_country_business_v`
+* `souvera_country_sectors`
+* `souvera_country_trade_snapshots`
+* `souvera_country_news_signals`
+* `souvera_country_signal_scores`
+* `souvera_reports`
+
+---
+
+## 5.2 `GET /api/v1/country/series`
+
+**Purpose:** Return time-series data for charts.
+
+### Query
+
+```http
+GET /api/v1/country/series?iso3=ZMB&indicator=gdp_growth_pct
+```
+
+### Reads from
+
+* `souvera_country_observations`
+* `souvera_indicators`
+* `souvera_data_sources`
+
+### Access
+
+| Access        | Behavior                                  |
+| ------------- | ----------------------------------------- |
+| Professional  | limited indicators                        |
+| Business      | macro + forecasts                         |
+| Investor      | macro + forecasts + investment indicators |
+| Institutional | expanded access                           |
+
+---
+
+## 5.3 `GET /api/v1/sectors`
+
+**Purpose:** Return sector intelligence by country.
+
+### Query
+
+```http
+GET /api/v1/sectors?iso3=ZMB
+```
+
+### Reads from
+
+* `souvera_country_sectors`
+* future sector observations
+
+### Access
+
+| Tier          | Access                  |
+| ------------- | ----------------------- |
+| Public        | top sector labels only  |
+| Explorer      | labels + teaser         |
+| Professional  | scores + rationale      |
+| Business      | scores + full rationale |
+| Investor      | sector thesis           |
+| Institutional | full + API export       |
+
+---
+
+## 5.4 `GET /api/v1/trade`
+
+**Purpose:** Return trade summaries and partner data.
+
+### Query
+
+```http
+GET /api/v1/trade?iso3=ZMB&year=2024
+```
+
+### Reads from
+
+* `souvera_country_trade_snapshots`
+
+### Access
+
+* Business+
+* Investor+
+* Institutional+
+
+---
+
+## 5.5 `GET /api/v1/signals`
+
+**Purpose:** Return Souvera-derived intelligence scores.
+
+### Query
+
+```http
+GET /api/v1/signals?iso3=ZMB
+```
+
+### Reads from
+
+* `souvera_country_signal_scores`
+* `souvera_country_news_signals`
+* `souvera_country_profiles`
+
+### Access
+
+| Tier          | Access                    |
+| ------------- | ------------------------- |
+| Public        | signal label only         |
+| Explorer      | signal label + confidence |
+| Professional  | scores                    |
+| Business      | full scores               |
+| Investor      | score logic summary       |
+| Institutional | full score payload        |
+
+---
+
+## 5.6 `GET /api/v1/compare`
+
+**Purpose:** Full comparison engine.
+
+### Query
+
+```http
+GET /api/v1/compare?countries=ZMB,AGO,KEN
+```
+
+### Reads from
+
+* `souvera_country_business_v`
+* `souvera_country_observations`
+* `souvera_country_signal_scores`
+* `souvera_country_trade_snapshots`
+* `souvera_country_sectors`
+
+### Limits
+
+| Tier          | Max countries |
+| ------------- | ------------: |
+| Professional  |             2 |
+| Business      |             3 |
+| Investor      |             5 |
+| Institutional |  configurable |
+
+---
+
+## 5.7 `GET /api/v1/reports`
+
+**Purpose:** Return report metadata and download permissions.
+
+### Query
+
+```http
+GET /api/v1/reports?iso3=ZMB
+```
+
+### Reads from
+
+* `souvera_reports`
+* `souvera_plans`
+
+### Access
+
+| Report Type        | Minimum Plan                            |
+| ------------------ | --------------------------------------- |
+| country_brief      | Business                                |
+| business_brief     | Business                                |
+| investor_memo      | Investor                                |
+| institutional_pack | Institutional                           |
+| sector_brief       | Business / Investor depending on report |
+
+---
+
+# 6. Enterprise API bindings
+
+## 6.1 `GET /api/v1/enterprise/countries`
+
+**Purpose:** Bulk country access for licensed institutional clients.
+
+### Access
+
+* Institutional only
+* Requires API key with `api_full`
+
+### Reads from
+
+* entitlement-filtered views
+* never raw payload archive by default
+
+---
+
+## 6.2 `GET /api/v1/enterprise/export`
+
+**Purpose:** CSV / JSON export.
+
+### Query
+
+```http
+GET /api/v1/enterprise/export?type=country_metrics&format=json
+```
+
+### Access
+
+* Institutional only
+* API client must have correct scope
+
+### Audit event
+
+Insert into:
+
+* `souvera_audit_events`
+
+---
+
+## 6.3 `GET /api/v1/enterprise/source-freshness`
+
+**Purpose:** Provide source freshness and reliability metadata.
+
+### Reads from
+
+* `souvera_source_health`
+* `souvera_data_sources`
+* latest observation timestamps
+
+---
+
+# 7. Admin API bindings
+
+Admin APIs are for Afronovation platform admins only.
+
+## 7.1 `GET /api/admin/sources`
+
+Reads:
+
+* `souvera_data_sources`
+* `souvera_source_health`
+
+## 7.2 `POST /api/admin/sources`
+
+Creates or updates:
+
+* `souvera_data_sources`
+
+## 7.3 `GET /api/admin/ingestion/jobs`
+
+Reads:
+
+* `souvera_ingestion_jobs`
+
+## 7.4 `POST /api/admin/ingestion/run`
+
+Triggers:
+
+* provider-specific ingestion job
+
+Example:
+
+```json
+{
+  "sourceKey": "world_bank",
+  "jobType": "macro_refresh"
+}
+```
+
+## 7.5 `POST /api/admin/country-profile`
+
+Writes:
+
+* `souvera_country_profiles`
+* `souvera_country_sectors`
+
+## 7.6 `POST /api/admin/reports`
+
+Writes:
+
+* `souvera_reports`
+
+---
+
+# 8. Ingestion API bindings
+
+Backend-only functions.
+
+| Function                     | Source              | Writes                            |
+| ---------------------------- | ------------------- | --------------------------------- |
+| `ingest:rest-countries`      | REST Countries      | `souvera_countries`               |
+| `ingest:world-bank`          | World Bank          | `souvera_country_observations`    |
+| `ingest:imf`                 | IMF                 | `souvera_country_observations`    |
+| `ingest:oecd`                | OECD                | `souvera_country_observations`    |
+| `ingest:comtrade`            | UN Comtrade         | `souvera_country_trade_snapshots` |
+| `ingest:open-exchange-rates` | Open Exchange Rates | `souvera_country_observations`    |
+| `ingest:gdelt`               | GDELT               | `souvera_country_news_signals`    |
+| `ingest:newsapi`             | NewsAPI             | `souvera_country_news_signals`    |
+| `ingest:afdb`                | AfDB                | `souvera_country_observations`    |
+| `ingest:iea`                 | IEA                 | future sector/energy tables       |
+
+Every ingestion function must write:
+
+* `souvera_ingestion_jobs`
+* `souvera_source_payload_archive`
+* `souvera_source_health`
+
+---
+
+# 9. UI component binding map
+
+## 9.1 Souvera Terminal
+
+| Component                  | API                          | Data                             |
+| -------------------------- | ---------------------------- | -------------------------------- |
+| `CountrySearch`            | `/api/v1/countries`          | country list                     |
+| `AfricaMapShell`           | `/api/v1/country-lite` batch | lite country metadata            |
+| `CountryIntelligencePanel` | `/api/v1/country`            | entitlement-aware payload        |
+| `ExecutiveSnapshotGrid`    | `/api/v1/country`            | GDP, growth, population, FDI, FX |
+| `SignalCard`               | `/api/v1/signals`            | scores, signal level             |
+| `SectorTab`                | `/api/v1/sectors`            | sector scores                    |
+| `EconomyTab`               | `/api/v1/country/series`     | chart data                       |
+| `TradeTab`                 | `/api/v1/trade`              | trade snapshots                  |
+| `CompareEngine`            | `/api/v1/compare`            | compare data                     |
+| `ReportsPanel`             | `/api/v1/reports`            | reports and permissions          |
+| `LockedContentCard`        | entitlement middleware       | lock state                       |
+
+---
+
+## 9.2 AfDEC gateway
+
+| AfDEC Component      | Souvera API              |
+| -------------------- | ------------------------ |
+| `AfdecAfricaMap`     | `/api/v1/country-lite`   |
+| `AfdecCountryDrawer` | `/api/v1/country-lite`   |
+| `AfdecCompareTeaser` | `/api/v1/compare-lite`   |
+| `AfdecInsightBlock`  | `/api/v1/insight-teaser` |
+| `UnlockSouveraCTA`   | static / marketing route |
+
+---
+
+# 10. Entitlement middleware binding
+
+Every Souvera route should use a server-side access resolver.
+
+```ts
+type SouveraAccessContext = {
+  userId?: string
+  organizationId?: string
+  planId: "public" | "explorer" | "professional" | "business" | "investor" | "institutional" | "platform_admin"
+  entitlements: string[]
+  role?: "viewer" | "analyst" | "strategist" | "executive" | "org_admin" | "platform_admin"
+}
+```
+
+## Required logic
+
+* resolve user
+* resolve organization
+* resolve highest plan rank
+* resolve entitlements
+* filter response server-side
+* audit premium and enterprise access
+
+---
+
+# 11. Response metadata standard
+
+Every API response should include:
+
+```ts
+meta: {
+  product: "souvera"
+  owner: "Afronovation, Inc."
+  accessTier: string
+  generatedAt: string
+  freshness: {
+    macro?: string
+    forecast?: string
+    fx?: string
+    news?: string
+    trade?: string
+  }
+  sources: Array<{
+    key: string
+    name: string
+    asOf?: string
+  }>
+}
+```
+
+This is mandatory for credibility.
+
+---
+
+# 12. Error and degradation binding
+
+| Condition              | API behavior                       | UI behavior                        |
+| ---------------------- | ---------------------------------- | ---------------------------------- |
+| Source down            | return cached data + degraded flag | show stale badge                   |
+| User lacks entitlement | return locked module metadata      | show locked card                   |
+| No data available      | return null field + reason         | show unavailable state             |
+| API key invalid        | 401                                | enterprise error                   |
+| Rate limit exceeded    | 429                                | retry / contact admin              |
+| Legal restriction      | suppress restricted field          | show “not available for this plan” |
+
+---
+
+# 13. AfDEC-lite contract
+
+AfDEC must never receive full Souvera payloads.
+
+## Allowed
+
+* `country-lite`
+* `compare-lite`
+* `insight-teaser`
+
+## Not allowed
+
+* `/api/v1/country`
+* `/api/v1/country/series`
+* `/api/v1/trade`
+* `/api/v1/reports`
+* `/api/v1/enterprise/export`
+* direct Supabase access
+
+## AfDEC display rule
+
+AfDEC must show:
+
+* “Powered by Souvera Terminal”
+* “Engineered by Afronovation, Inc.”
+* optional “Endorsed by AfDEC” only where appropriate
+
+---
+
+# 14. Implementation order
+
+## Phase 1 — API foundation
+
+* access resolver
+* country-lite
+* countries list
+* source freshness
+* REST Countries ingestion
+* World Bank ingestion
+
+## Phase 2 — Country panel
+
+* `/api/v1/country`
+* sectors
+* signals
+* professional/business filtering
+
+## Phase 3 — AfDEC integration
+
+* connect AfDEC map to `country-lite`
+* replace static AfDEC map data
+* add Souvera CTA flow
+
+## Phase 4 — Enterprise
+
+* API clients
+* export endpoint
+* audit events
+* institutional access
+
+## Phase 5 — Advanced intelligence
+
+* Comtrade
+* GDELT
+* reports
+* investor memos
+* premium sector feeds
+
+---
+
+# 15. Final binding rule
+
+The API layer is the contract.
+
+Souvera’s database may evolve, providers may change, and UI may improve, but **external consumers and AfDEC must only depend on the versioned Souvera API contract**.
+
+Recommended next artifact: **Souvera Route-by-Route Build Spec v1.1**, updated for the standalone Souvera platform and AfDEC-lite integration.

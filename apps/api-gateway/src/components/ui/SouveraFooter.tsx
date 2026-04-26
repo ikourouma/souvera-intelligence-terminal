@@ -1,0 +1,188 @@
+import React from 'react';
+import Link from 'next/link';
+import { ArrowUpRight } from 'lucide-react';
+
+const footerLinks = {
+  platform: [
+    { name: 'Africa Command Center', href: '/terminal' },
+    { name: 'Caribbean Command Center', href: '/terminal/caribbean' },
+    { name: 'Intelligence Map', href: '/terminal/map' },
+    { name: 'Sector Intelligence', href: '/terminal/sectors' },
+    { name: 'API Documentation', href: '/api-docs' },
+  ],
+  intelligence: [
+    { name: 'Top 10 African Economies', href: '/terminal/economies' },
+    { name: 'Top Caribbean Economies', href: '/terminal/caribbean/economies' },
+    { name: 'Signal Engine', href: '/signals' },
+    { name: 'Data Sources', href: '/data' },
+    { name: 'Source Registry', href: '/data#sources' },
+  ],
+  access: [
+    { name: 'Explorer — Free', href: '/subscriptions', highlight: true },
+    { name: 'Professional Plan', href: '/subscriptions' },
+    { name: 'Business Plan', href: '/subscriptions' },
+    { name: 'Institutional Plan', href: '/subscriptions' },
+    { name: 'Contact for Demo', href: 'https://afdec-nc.vercel.app/contact' },
+  ],
+  company: [
+    { name: 'About Afronovation', href: 'https://www.afronovation.com' },
+    { name: 'AfDEC Partnership', href: 'https://afdec-nc.vercel.app' },
+    { name: 'Media & Press', href: 'https://afdec-nc.vercel.app/media' },
+    { name: 'Careers', href: 'https://afdec-nc.vercel.app/careers' },
+  ],
+  legal: [
+    { name: 'Privacy Policy', href: '/legal/privacy' },
+    { name: 'Terms of Service', href: '/legal/terms' },
+    { name: 'Cookie Policy', href: '/legal/cookies' },
+    { name: 'Data Attribution', href: '/data#attribution' },
+    { name: 'Compliance', href: '/legal' },
+  ],
+};
+
+export function SouveraFooter() {
+  return (
+    <footer style={{ background: '#070B0F', borderTop: '1px solid #1F2A37' }} className="pt-20 pb-10">
+      <div className="max-w-[1600px] mx-auto px-6 lg:px-12">
+
+        {/* Main grid: Brand(2) + 4 link columns */}
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-y-12 gap-x-8 xl:gap-x-10 mb-16">
+
+          {/* Brand Identity — spans 2 cols */}
+          <div className="col-span-2">
+            <div className="flex items-center gap-2 mb-5">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+              </span>
+              <span className="text-white font-bold tracking-[0.2em] uppercase text-sm" style={{ fontFamily: 'Space Grotesk, Inter, sans-serif' }}>
+                SOUVERA
+              </span>
+            </div>
+            <p className="text-[13px] leading-relaxed max-w-xs mb-6" style={{ color: '#6B7280' }}>
+              Sovereign-grade macroeconomic intelligence for African and Caribbean markets. Powered by IMF, World Bank, and real-time data infrastructure.
+            </p>
+            <div className="flex items-center gap-2 mb-5">
+              <div className="px-2 py-1 rounded-sm text-[9px] font-bold tracking-widest uppercase font-mono" style={{ background: 'rgba(34,197,94,0.1)', color: '#22C55E', border: '1px solid rgba(34,197,94,0.2)' }}>
+                System Live
+              </div>
+              <span className="text-[10px] font-mono" style={{ color: '#4B5563' }}>74 Markets · 42ms</span>
+            </div>
+            {/* Social links */}
+            <div className="flex items-center gap-2">
+              {[
+                { label: 'LinkedIn', icon: <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" /> },
+                { label: 'X', icon: <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /> },
+              ].map(({ label, icon }) => (
+                <Link key={label} href="#" aria-label={label} className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 hover:border-souvera-blue hover:text-souvera-blue" style={{ background: '#161D26', border: '1px solid #1F2A37', color: '#6B7280' }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">{icon}</svg>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Platform */}
+          <div>
+            <h4 className="section-label mb-4">Platform</h4>
+            <ul className="space-y-2.5">
+              {footerLinks.platform.map((link) => (
+                <li key={link.name}>
+                  <Link href={link.href} className="text-[13px] transition-colors hover:text-souvera-blue" style={{ color: '#6B7280' }}>
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Intelligence */}
+          <div>
+            <h4 className="section-label mb-4">Intelligence</h4>
+            <ul className="space-y-2.5">
+              {footerLinks.intelligence.map((link) => (
+                <li key={link.name}>
+                  <Link href={link.href} className="text-[13px] transition-colors hover:text-souvera-blue" style={{ color: '#6B7280' }}>
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Access */}
+          <div>
+            <h4 className="section-label mb-4">Access</h4>
+            <ul className="space-y-2.5">
+              {footerLinks.access.map((link) => (
+                <li key={link.name}>
+                  <Link
+                    href={link.href}
+                    className={`text-[13px] transition-colors flex items-center gap-1 ${link.highlight ? 'font-semibold hover:text-emerald-300' : 'hover:text-souvera-blue'}`}
+                    style={{ color: link.highlight ? '#22C55E' : '#6B7280' }}
+                  >
+                    {link.name}
+                    {link.highlight && <ArrowUpRight className="w-3 h-3" />}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Company */}
+          <div>
+            <h4 className="section-label mb-4">Company</h4>
+            <ul className="space-y-2.5">
+              {footerLinks.company.map((link) => (
+                <li key={link.name}>
+                  <Link href={link.href} className="text-[13px] transition-colors flex items-center gap-1 hover:text-souvera-blue" style={{ color: '#6B7280' }}>
+                    {link.name}
+                    {link.href.startsWith('http') && <ArrowUpRight className="w-3 h-3 opacity-50" />}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* Bottom bar */}
+        <div style={{ paddingTop: '2rem', borderTop: '1px solid #1F2A37' }}>
+          {/* Legal links */}
+          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 mb-8">
+            {footerLinks.legal.map((link) => (
+              <Link
+                key={link.name}
+                href={link.href}
+                className="text-[10px] font-bold uppercase tracking-[0.18em] transition-colors hover:text-souvera-blue"
+                style={{ color: '#4B5563' }}
+              >
+                {link.name}
+              </Link>
+            ))}
+          </div>
+
+          <div className="w-full h-px mb-8" style={{ background: '#1F2A37' }} />
+
+          {/* Copyright */}
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-4 text-center lg:text-left">
+            <div className="text-[11px] font-mono" style={{ color: '#4B5563' }}>
+              <span className="font-bold uppercase tracking-widest" style={{ color: '#6B7280' }}>
+                © {new Date().getFullYear()} Souvera Intelligence Terminal.
+              </span>
+              <span className="hidden sm:inline mx-3" style={{ color: '#1F2A37' }}>|</span>
+              <br className="sm:hidden" />
+              <span className="uppercase">A product of Afronovation, Inc.</span>
+            </div>
+
+            <div className="flex items-center gap-6 text-[10px] font-mono uppercase tracking-widest" style={{ color: '#4B5563' }}>
+              <span>Data: IMF · World Bank · UNCTAD</span>
+              <span style={{ color: '#1F2A37' }}>|</span>
+              <Link href="https://www.afronovation.com" target="_blank" rel="noopener noreferrer" className="hover:text-souvera-blue transition-colors underline underline-offset-4" style={{ textDecorationColor: 'rgba(37,99,235,0.3)', color: '#6B7280' }}>
+                Afronovation, Inc.
+              </Link>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </footer>
+  );
+}

@@ -1,0 +1,593 @@
+# Souvera Data Source & Ingestion Strategy v1.0
+
+**Owner:** Afronovation, Inc.
+**Product:** Souvera Intelligence Terminal (SIT)
+**Document Type:** Canonical Data Operations + Ingestion Strategy
+**Status:** Final documentation draft for project folder
+
+---
+
+## 1. Purpose
+
+This document defines how Souvera acquires, validates, normalizes, stores, refreshes, and serves data.
+
+It governs:
+
+* approved data sources
+* API access links
+* ingestion pipelines
+* source priority
+* failover
+* transformation rules
+* data freshness
+* validation
+* source attribution
+* tier-based access
+* AfDEC-lite consumption
+
+Souvera does not exist without this layer. The data engine is the product foundation.
+
+---
+
+## 2. Core data principle
+
+> Souvera does not merely display data. Souvera transforms fragmented external data into decision-grade intelligence.
+
+All external data must flow through the Souvera ingestion and normalization layer before it reaches any user interface, API, report, or AfDEC integration.
+
+---
+
+## 3. Data architecture overview
+
+```text
+Approved External Sources
+        ↓
+Provider Adapters
+        ↓
+Raw Payload Archive
+        ↓
+Validation Layer
+        ↓
+Normalization Layer
+        ↓
+Souvera Supabase Database
+        ↓
+Signal Engine
+        ↓
+Entitlement Filter
+        ↓
+Terminal UI / Enterprise API / AfDEC Lite
+```
+
+---
+
+## 4. Non-negotiable rules
+
+1. No frontend calls external APIs directly.
+2. No unregistered source enters production.
+3. No data point is displayed without source attribution.
+4. No premium data is sent to unauthorized users.
+5. No AfDEC route receives full Souvera data.
+6. All ingestion jobs must log success, failure, record count, and source health.
+7. Licensed or restricted data must be tier-gated and legally reviewed before production use.
+
+---
+
+## 5. Primary data domains
+
+| Domain                 | Purpose                                    | Primary surfaces                  |
+| ---------------------- | ------------------------------------------ | --------------------------------- |
+| Country Metadata       | Country identity, flags, currency, capital | Map, country panel, search        |
+| Macroeconomic Data     | GDP, growth, population, inflation, FDI    | Snapshot, economy tab, compare    |
+| Forecasts              | Forward-looking macro projections          | Business, investor, institutional |
+| Trade                  | Exports, imports, partners                 | Trade tab, sector analysis        |
+| FX                     | Currency context                           | Snapshot, risk, compare           |
+| News Signals           | Media intensity, sentiment, risk pulse     | Signals, country pulse            |
+| Sector Intelligence    | Opportunity scoring                        | Sector tab, opportunity tab       |
+| Diaspora / Remittances | Diaspora-linked economic relevance         | AfDEC, corridor logic             |
+| Reports / Editorial    | Souvera-derived interpretation             | Reports, memos, thesis            |
+
+---
+
+## 6. Launch data source stack
+
+The World Bank Indicators API is the public macro backbone because it provides programmatic access to nearly 16,000 time-series indicators across 45+ databases. ([World Bank Data Help Desk][1]) IMF data should be used for forecast and macro validation because it is distributed through SDMX-based data APIs and workflows. ([teal-insights.github.io][2]) UN Comtrade is the primary trade source because it aggregates detailed global annual and monthly trade statistics by product and trading partner. ([comtrade.un.org][3]) GDELT is the primary news-signal source because it provides live realtime JSON APIs such as DOC, GEO, and TV for global media analysis. ([GDELT Project][4])
+
+| Priority | Provider            | Domain            | API base / quick link                     | Docs / reference                                                                                          | Auth                   | Cadence                  | Role                          |
+| -------: | ------------------- | ----------------- | ----------------------------------------- | --------------------------------------------------------------------------------------------------------- | ---------------------- | ------------------------ | ----------------------------- |
+|        1 | World Bank          | Macro             | `https://api.worldbank.org/v2`            | `https://datahelpdesk.worldbank.org/knowledgebase/articles/889392-about-the-indicators-api-documentation` | Public                 | Weekly                   | Primary macro backbone        |
+|        2 | IMF                 | Forecasts         | `https://api.imf.org`                     | `https://data.imf.org/en/Resource-Pages/IMF-API`                                                          | Public                 | Monthly / release-driven | Forecast and macro validation |
+|        3 | REST Countries      | Metadata          | `https://restcountries.com/v3.1`          | `https://restcountries.com`                                                                               | Public                 | Monthly                  | Country metadata and flags    |
+|        4 | Open Exchange Rates | FX                | `https://openexchangerates.org/api`       | `https://docs.openexchangerates.org`                                                                      | API key                | Hourly cached            | FX context                    |
+|        5 | GDELT               | News signals      | `https://api.gdeltproject.org/api/v2`     | `https://www.gdeltproject.org/data.html`                                                                  | Public                 | Hourly summarized        | Media and signal engine       |
+|        6 | UN Comtrade         | Trade             | `https://comtradeapi.un.org`              | `https://comtradeapi.un.org/docs`                                                                         | API key / account      | Monthly / quarterly      | Trade backbone                |
+|        7 | OECD                | Comparative macro | `https://sdmx.oecd.org/public/rest/v1`    | `https://www.oecd.org/en/data/insights/data-explainers/2024/09/api.html`                                  | Public / rate-limited  | Monthly                  | Comparative validation        |
+|        8 | AfDB                | Africa enrichment | `https://apiportal.opendataforafrica.org` | `https://dataportal.opendataforafrica.org`                                                                | API key / account      | Monthly                  | Africa-specific enrichment    |
+|        9 | NewsAPI             | Headlines         | `https://newsapi.org/v2`                  | `https://newsapi.org/docs`                                                                                | API key                | Hourly cached            | UI-friendly headline layer    |
+|       10 | Trading Economics   | Premium macro     | `https://api.tradingeconomics.com`        | `https://docs.tradingeconomics.com`                                                                       | API key                | Paid / on-demand         | Premium fallback              |
+|       11 | IEA                 | Energy            | `https://api.iea.org`                     | `https://www.iea.org/data-and-statistics`                                                                 | Bearer token / license | Release-driven           | Phase 2 energy intelligence   |
+
+---
+
+## 7. Source priority and failover
+
+| Data type    | Primary             | Secondary             | Final fallback                   |
+| ------------ | ------------------- | --------------------- | -------------------------------- |
+| GDP          | World Bank          | IMF / OECD            | cached last-good value           |
+| GDP growth   | World Bank          | IMF / OECD            | cached last-good value           |
+| Population   | World Bank          | IMF                   | cached last-good value           |
+| Inflation    | World Bank          | IMF / OECD            | cached last-good value           |
+| FDI          | World Bank          | IMF                   | cached last-good value           |
+| Forecasts    | IMF                 | Trading Economics     | cached forecast with stale badge |
+| Trade        | UN Comtrade         | World Bank proxy      | cached trade snapshot            |
+| FX           | Open Exchange Rates | Trading Economics     | previous-day cached FX           |
+| News signals | GDELT               | NewsAPI               | previous signal + degraded badge |
+| Metadata     | REST Countries      | internal seed         | internal seed                    |
+| Energy       | IEA                 | premium future source | hidden until available           |
+
+---
+
+## 8. Ingestion adapter architecture
+
+All providers should be implemented as isolated adapters.
+
+```text
+/services/ingestion
+  restcountries.ts
+  worldbank.ts
+  imf.ts
+  oecd.ts
+  comtrade.ts
+  oxr.ts
+  gdelt.ts
+  newsapi.ts
+  afdb.ts
+  tradingeconomics.ts
+  iea.ts
+```
+
+Each adapter must expose:
+
+```ts
+type IngestionResult<T> = {
+  sourceKey: string
+  jobId: string
+  success: boolean
+  recordsProcessed: number
+  recordsFailed: number
+  fetchedAt: string
+  data?: T[]
+  error?: string
+}
+```
+
+---
+
+## 9. Ingestion process standard
+
+Every ingestion job must follow this order:
+
+1. create ingestion job record
+2. fetch provider payload
+3. archive raw payload
+4. validate response
+5. transform provider payload
+6. normalize to Souvera schema
+7. upsert into target tables
+8. update source health
+9. compute derived signals if applicable
+10. close ingestion job
+
+---
+
+## 10. Ingestion logging
+
+Each job writes to:
+
+| Table                             | Purpose                    |
+| --------------------------------- | -------------------------- |
+| `souvera_ingestion_jobs`          | job status, counts, errors |
+| `souvera_source_payload_archive`  | raw provider response      |
+| `souvera_source_health`           | source reliability state   |
+| `souvera_country_observations`    | normalized metric data     |
+| `souvera_country_news_signals`    | news/signal outputs        |
+| `souvera_country_trade_snapshots` | processed trade snapshots  |
+
+---
+
+## 11. Target table mapping
+
+| Source              | Adapter               | Target table                         |
+| ------------------- | --------------------- | ------------------------------------ |
+| REST Countries      | `restcountries.ts`    | `souvera_countries`                  |
+| World Bank          | `worldbank.ts`        | `souvera_country_observations`       |
+| IMF                 | `imf.ts`              | `souvera_country_observations`       |
+| OECD                | `oecd.ts`             | `souvera_country_observations`       |
+| Open Exchange Rates | `oxr.ts`              | `souvera_country_observations`       |
+| UN Comtrade         | `comtrade.ts`         | `souvera_country_trade_snapshots`    |
+| GDELT               | `gdelt.ts`            | `souvera_country_news_signals`       |
+| NewsAPI             | `newsapi.ts`          | `souvera_country_news_signals`       |
+| AfDB                | `afdb.ts`             | `souvera_country_observations`       |
+| Trading Economics   | `tradingeconomics.ts` | `souvera_country_observations`       |
+| IEA                 | `iea.ts`              | future `souvera_sector_observations` |
+
+---
+
+## 12. Normalization standard
+
+Every metric observation must normalize into:
+
+```ts
+type SouveraObservation = {
+  countryIso3: string
+  indicatorKey: string
+  periodDate: string
+  periodType: "daily" | "monthly" | "quarterly" | "annual"
+  valueNumeric?: number
+  valueText?: string
+  sourceKey: string
+  sourceSeriesKey?: string
+  isForecast: boolean
+  isEstimate: boolean
+  qualityScore: number
+  fetchedAt: string
+  publishedAt?: string
+}
+```
+
+---
+
+## 13. Country metadata transformation
+
+REST Countries maps into:
+
+| External field | Souvera field                    |
+| -------------- | -------------------------------- |
+| `cca2`         | `iso2`                           |
+| `cca3`         | `iso3`                           |
+| `name.common`  | `name`                           |
+| `region`       | `region`                         |
+| `subregion`    | `subregion`                      |
+| `capital[0]`   | `capital`                        |
+| `currencies`   | `currency_code`, `currency_name` |
+| `flags.svg`    | `flag_svg_url`                   |
+| `flags.png`    | `flag_png_url`                   |
+| `latlng`       | `lat`, `lng`                     |
+
+---
+
+## 14. Macro indicator mapping
+
+| Souvera indicator          | Source priority                         | Minimum plan  |
+| -------------------------- | --------------------------------------- | ------------- |
+| `gdp_current_usd`          | World Bank → IMF → OECD                 | Public teaser |
+| `gdp_growth_pct`           | World Bank → IMF → OECD                 | Public teaser |
+| `population_total`         | World Bank → IMF                        | Public teaser |
+| `fdi_net_inflows_usd`      | World Bank → IMF                        | Professional  |
+| `inflation_cpi_pct`        | World Bank → IMF → OECD                 | Professional  |
+| `gdp_forecast_pct`         | IMF → Trading Economics                 | Business      |
+| `remittances_received_usd` | World Bank                              | Business      |
+| `fx_to_usd`                | Open Exchange Rates → Trading Economics | Professional  |
+
+---
+
+## 15. News signal transformation
+
+GDELT and NewsAPI should not be dumped raw into the terminal. They should be summarized into signal fields:
+
+```ts
+type NewsSignal = {
+  countryIso3: string
+  signalDate: string
+  headlineCount: number
+  riskIntensity: number
+  opportunityIntensity: number
+  sentimentScore: number
+  topHeadlines: Array<{
+    title: string
+    source?: string
+    url?: string
+    publishedAt?: string
+  }>
+  sourceMix: Record<string, number>
+}
+```
+
+UI must show a signal, not a noisy news feed.
+
+---
+
+## 16. Trade snapshot transformation
+
+UN Comtrade should be transformed into summary snapshots:
+
+```ts
+type TradeSnapshot = {
+  countryIso3: string
+  year: number
+  topExports: Array<{
+    label: string
+    valueUsd?: number
+    sharePct?: number
+  }>
+  topImports: Array<{
+    label: string
+    valueUsd?: number
+    sharePct?: number
+  }>
+  topTradePartners: Array<{
+    country: string
+    valueUsd?: number
+    relationship?: "export" | "import" | "both"
+  }>
+}
+```
+
+Avoid exposing raw commodity-level complexity in v1.
+
+---
+
+## 17. Validation rules
+
+### Required validation
+
+* valid country ISO3
+* known indicator key
+* valid period date
+* source exists in registry
+* value is numeric where expected
+* data point is not absurdly out of range
+* source timestamp is recorded
+
+### Reject or quarantine when:
+
+* country cannot be mapped
+* source is not approved
+* payload shape is invalid
+* value is corrupt or non-parsable
+* legal status is not approved for production
+
+---
+
+## 18. Quality scoring
+
+Each observation should receive a quality score from 0 to 1.
+
+Suggested scoring:
+
+| Factor                    | Weight |
+| ------------------------- | -----: |
+| source reliability        |   0.35 |
+| freshness                 |   0.25 |
+| completeness              |   0.20 |
+| transformation confidence |   0.20 |
+
+Example:
+
+```ts
+qualityScore =
+  sourceReliability * 0.35 +
+  freshnessScore * 0.25 +
+  completenessScore * 0.20 +
+  transformConfidence * 0.20
+```
+
+---
+
+## 19. Freshness policy
+
+| Data domain  | Refresh cadence     | Warning threshold | Hard stale threshold |
+| ------------ | ------------------- | ----------------: | -------------------: |
+| FX           | hourly              |               24h |                  72h |
+| News signals | hourly              |               12h |                  48h |
+| Macro        | weekly              |               45d |                 120d |
+| Forecasts    | monthly / release   |               90d |                 180d |
+| Trade        | monthly / quarterly |              120d |                 365d |
+| Metadata     | monthly             |              180d |                 365d |
+| Editorial    | ad hoc              |              180d |                 365d |
+
+---
+
+## 20. Source health policy
+
+| Status   | Meaning                   | Action                   |
+| -------- | ------------------------- | ------------------------ |
+| Healthy  | last job succeeded        | continue                 |
+| Degraded | repeated failure or stale | activate fallback        |
+| Down     | unusable source           | use cached/fallback data |
+| Paused   | manually disabled         | no ingestion             |
+| Retired  | removed from production   | no ingestion             |
+
+---
+
+## 21. Entitlement-aware serving
+
+The ingestion system stores the full normalized dataset. The API layer decides what a user may receive.
+
+| Tier           | Data access behavior                                  |
+| -------------- | ----------------------------------------------------- |
+| Public         | country identity, headline macro, teaser sectors      |
+| Explorer       | public + limited comparison                           |
+| Professional   | full macro, FX, sectors, signals                      |
+| Business       | forecasts, trade, reports                             |
+| Investor       | investor memos, deeper signal logic, expanded compare |
+| Institutional  | API, export, org workspace, audit                     |
+| Platform Admin | full internal access                                  |
+
+No frontend-only filtering is allowed.
+
+---
+
+## 22. AfDEC-lite serving model
+
+AfDEC consumes only:
+
+* `/api/v1/countries-lite`
+* `/api/v1/country-lite`
+* `/api/v1/compare-lite`
+* `/api/v1/insight-teaser`
+
+AfDEC must not receive:
+
+* raw time series
+* trade datasets
+* investor memos
+* export endpoints
+* source payload archives
+* full signal logic
+* direct Supabase credentials
+
+---
+
+## 23. Ingestion scheduling
+
+| Job                     | Frequency         | Trigger     |
+| ----------------------- | ----------------- | ----------- |
+| `ingest:rest-countries` | monthly           | cron        |
+| `ingest:world-bank`     | weekly            | cron        |
+| `ingest:imf`            | monthly / release | cron/manual |
+| `ingest:oecd`           | monthly           | cron        |
+| `ingest:oxr`            | hourly            | cron        |
+| `ingest:gdelt`          | hourly            | cron        |
+| `ingest:newsapi`        | hourly cached     | cron        |
+| `ingest:comtrade`       | monthly/quarterly | cron/manual |
+| `ingest:afdb`           | monthly           | cron/manual |
+| `ingest:iea`            | phase 2           | manual/cron |
+
+---
+
+## 24. Environment variables
+
+```env
+WORLD_BANK_API_BASE_URL=https://api.worldbank.org/v2
+IMF_API_BASE_URL=https://api.imf.org
+OECD_API_BASE_URL=https://sdmx.oecd.org/public/rest/v1
+REST_COUNTRIES_API_BASE_URL=https://restcountries.com/v3.1
+UN_COMTRADE_API_BASE_URL=https://comtradeapi.un.org
+UN_COMTRADE_API_KEY=
+OPEN_EXCHANGE_RATES_API_BASE_URL=https://openexchangerates.org/api
+OPEN_EXCHANGE_RATES_API_KEY=
+GDELT_API_BASE_URL=https://api.gdeltproject.org/api/v2
+NEWSAPI_BASE_URL=https://newsapi.org/v2
+NEWSAPI_KEY=
+AFDB_API_BASE_URL=https://apiportal.opendataforafrica.org
+AFDB_API_KEY=
+TRADING_ECONOMICS_API_BASE_URL=https://api.tradingeconomics.com
+TRADING_ECONOMICS_API_KEY=
+IEA_API_BASE_URL=https://api.iea.org
+IEA_API_TOKEN=
+```
+
+---
+
+## 25. Admin monitoring requirements
+
+Admin console must show:
+
+* source status
+* last success
+* last failure
+* failure count
+* records processed
+* stale country count
+* stale metric count
+* countries with missing GDP
+* countries with missing population
+* countries with missing signal scores
+* ingestion job history
+
+---
+
+## 26. Error handling standard
+
+| Error             | System behavior                    |
+| ----------------- | ---------------------------------- |
+| API timeout       | retry with backoff                 |
+| auth failure      | mark source degraded + alert admin |
+| schema change     | fail safely + archive payload      |
+| partial data      | ingest valid rows, flag partial    |
+| provider down     | use fallback / cached              |
+| legal restriction | suppress field                     |
+
+---
+
+## 27. Audit requirements
+
+Audit these events:
+
+* source added
+* source paused
+* ingestion manually triggered
+* ingestion failed
+* premium data accessed
+* report downloaded
+* export generated
+* API client created
+* AfDEC-lite endpoint rate limit exceeded
+
+---
+
+## 28. Build phases
+
+### Phase 1 — Launch ingestion foundation
+
+* REST Countries
+* World Bank
+* IMF
+* Open Exchange Rates
+* GDELT
+
+### Phase 2 — Business intelligence
+
+* UN Comtrade
+* OECD
+* AfDB
+* reports metadata
+
+### Phase 3 — Premium intelligence
+
+* Trading Economics
+* IEA
+* advanced signal engine
+* institutional export
+
+---
+
+## 29. Delivery checklist
+
+Before production:
+
+* all launch sources registered
+* API keys configured
+* ingestion jobs logging
+* payload archive working
+* source health working
+* country metadata populated
+* core macro populated
+* country-lite API working
+* entitlement filtering active
+* AfDEC-lite endpoints restricted
+* freshness metadata displayed
+
+---
+
+## 30. Final governance rule
+
+Souvera’s data layer is not a technical support function. It is the core product moat.
+
+Any feature that introduces data must first update:
+
+1. Source Registry
+2. Ingestion Strategy
+3. SQL Pack
+4. API Binding Map
+5. Entitlement Matrix
+
+---
+
+**Status:** Locked for documentation.
+
+[1]: https://datahelpdesk.worldbank.org/knowledgebase/articles/889392-about-the-indicators-api-documentation?utm_source=chatgpt.com "About the Indicators API Documentation"
+[2]: https://teal-insights.github.io/r-imfapi/?utm_source=chatgpt.com "Econdataverse IMF Data API Client • imfapi"
+[3]: https://comtrade.un.org/?utm_source=chatgpt.com "UN Comtrade"
+[4]: https://www.gdeltproject.org/data.html?utm_source=chatgpt.com "Data: Querying, Analyzing and Downloading"

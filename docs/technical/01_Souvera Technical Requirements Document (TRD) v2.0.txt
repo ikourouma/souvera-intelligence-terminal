@@ -1,0 +1,577 @@
+This is where everything becomes **engineering-grade and unambiguous**.
+This TRD aligns fully with your SQL Pack, API Map, Route Spec, and Execution Plan.
+
+---
+
+# 🧠 **Souvera Technical Requirements Document (TRD) v2.0**
+
+**Owner:** Afronovation, Inc.
+**Product:** Souvera Intelligence Terminal (SIT)
+**Standard:** Fortune-5 / Sovereign-grade architecture
+**Scope:** System architecture, services, data flow, security, scalability
+
+---
+
+# 1. 🎯 OBJECTIVE
+
+Define **how Souvera is built and operates**:
+
+* system architecture
+* data pipelines
+* service interactions
+* API layer
+* access control
+* performance and scalability
+
+---
+
+# 2. 🏗️ SYSTEM ARCHITECTURE
+
+---
+
+## 2.1 High-Level Architecture
+
+```text
+External Data Sources
+        ↓
+Ingestion Services (Edge Functions / CRON)
+        ↓
+Normalization Layer
+        ↓
+Supabase Database (Source of Truth)
+        ↓
+API Gateway (Next.js / Edge)
+        ↓
+Frontend Applications (Terminal / Admin / AfDEC-lite)
+```
+
+---
+
+## 2.2 Core Layers
+
+| Layer        | Responsibility                 |
+| ------------ | ------------------------------ |
+| Data Sources | External providers             |
+| Ingestion    | Fetch + normalize              |
+| Storage      | Central database               |
+| API          | Access + entitlement filtering |
+| UI           | User interaction               |
+
+---
+
+# 3. 🧬 DATA ARCHITECTURE
+
+---
+
+## 3.1 Database
+
+Platform: Supabase (PostgreSQL)
+
+---
+
+## 3.2 Core Tables
+
+| Table                             | Purpose                |
+| --------------------------------- | ---------------------- |
+| `souvera_countries`               | country metadata       |
+| `souvera_indicators`              | metric definitions     |
+| `souvera_country_observations`    | normalized metrics     |
+| `souvera_country_profiles`        | narrative intelligence |
+| `souvera_country_sectors`         | sector insights        |
+| `souvera_country_trade_snapshots` | trade data             |
+| `souvera_country_news_signals`    | signals                |
+| `souvera_country_signal_scores`   | computed intelligence  |
+| `souvera_reports`                 | reports                |
+
+---
+
+## 3.3 Supporting Tables
+
+| Table                            | Purpose         |
+| -------------------------------- | --------------- |
+| `souvera_data_sources`           | source registry |
+| `souvera_ingestion_jobs`         | ingestion logs  |
+| `souvera_source_payload_archive` | raw data        |
+| `souvera_source_health`          | reliability     |
+| `souvera_plans`                  | pricing tiers   |
+| `souvera_entitlements`           | access control  |
+| `souvera_plan_entitlements`      | mapping         |
+| `souvera_profiles`               | users           |
+| `souvera_organizations`          | tenants         |
+| `souvera_api_clients`            | API keys        |
+| `souvera_audit_events`           | audit logs      |
+
+---
+
+## 3.4 Data Model Principles
+
+* normalized structure
+* source traceability
+* time-series support
+* multi-source fallback
+* auditability
+
+---
+
+# 4. 🔄 DATA INGESTION ARCHITECTURE
+
+---
+
+## 4.1 Ingestion Flow
+
+```text
+Fetch → Validate → Transform → Normalize → Store → Log
+```
+
+---
+
+## 4.2 Ingestion Services
+
+Location:
+
+```text
+/services/ingestion
+```
+
+---
+
+## 4.3 Core Adapters
+
+| Adapter          | Source      |
+| ---------------- | ----------- |
+| worldbank.ts     | World Bank  |
+| imf.ts           | IMF         |
+| oecd.ts          | OECD        |
+| comtrade.ts      | UN Comtrade |
+| oxr.ts           | FX          |
+| gdelt.ts         | signals     |
+| newsapi.ts       | headlines   |
+| restcountries.ts | metadata    |
+
+---
+
+## 4.4 Logging
+
+All ingestion must write to:
+
+* `souvera_ingestion_jobs`
+* `souvera_source_payload_archive`
+* `souvera_source_health`
+
+---
+
+## 4.5 Scheduling
+
+| Job       | Frequency         |
+| --------- | ----------------- |
+| FX        | hourly            |
+| news      | hourly            |
+| macro     | weekly            |
+| forecasts | monthly           |
+| trade     | monthly/quarterly |
+
+---
+
+# 5. 🧠 SIGNAL ENGINE
+
+---
+
+## 5.1 Purpose
+
+Compute:
+
+* investment score
+* growth signal
+* risk classification
+
+---
+
+## 5.2 Inputs
+
+* GDP growth
+* FDI
+* inflation
+* sector scores
+* news signals
+
+---
+
+## 5.3 Output
+
+Stored in:
+
+* `souvera_country_signal_scores`
+
+---
+
+## 5.4 Execution
+
+* scheduled job
+* triggered post-ingestion
+
+---
+
+# 6. 🔌 API ARCHITECTURE
+
+---
+
+## 6.1 API Gateway
+
+Location:
+
+```text
+/apps/api-gateway
+```
+
+---
+
+## 6.2 API Types
+
+| Type        | Purpose        |
+| ----------- | -------------- |
+| Public Lite | AfDEC + teaser |
+| Terminal    | authenticated  |
+| Enterprise  | API clients    |
+| Admin       | internal       |
+
+---
+
+## 6.3 Core Endpoints
+
+### Lite
+
+* `/country-lite`
+* `/countries-lite`
+* `/compare-lite`
+* `/insight-teaser`
+
+---
+
+### Terminal
+
+* `/country`
+* `/country/series`
+* `/sectors`
+* `/signals`
+* `/compare`
+* `/reports`
+
+---
+
+### Enterprise
+
+* `/enterprise/export`
+* `/enterprise/countries`
+* `/enterprise/source-freshness`
+
+---
+
+---
+
+# 7. 🔐 ACCESS CONTROL ARCHITECTURE
+
+---
+
+## 7.1 Model
+
+```text
+User → Subscription → Plan → Entitlements → API Filtering
+```
+
+---
+
+## 7.2 Enforcement
+
+* server-side only
+* via middleware
+
+---
+
+## 7.3 Functions
+
+* `souvera_current_user_has_entitlement`
+* `souvera_current_user_plan_rank`
+
+---
+
+## 7.4 RLS
+
+Applied on:
+
+* user data
+* organization data
+* API clients
+* audit logs
+
+---
+
+# 8. 🏢 MULTI-TENANT ARCHITECTURE
+
+---
+
+## 8.1 Tenancy Model
+
+* organization-based
+* user belongs to org
+* org owns subscription
+
+---
+
+## 8.2 Isolation
+
+* enforced via RLS
+* org-scoped data
+
+---
+
+# 9. 🎨 FRONTEND ARCHITECTURE
+
+---
+
+## 9.1 Applications
+
+```text
+/apps/terminal-web
+/apps/admin-console
+/apps/api-gateway
+```
+
+---
+
+## 9.2 UI System
+
+* Tailwind
+* shadcn/ui
+* shared component library
+
+---
+
+## 9.3 Key Components
+
+* CountryPanel
+* SignalCard
+* MetricCard
+* CompareGrid
+* ReportCard
+
+---
+
+# 10. ⚡ PERFORMANCE ARCHITECTURE
+
+---
+
+## 10.1 Targets
+
+* API latency < 300ms
+* first paint < 1.5s
+
+---
+
+## 10.2 Strategies
+
+* caching (server + CDN)
+* precomputed views
+* lazy loading
+* batch queries
+
+---
+
+# 11. 📊 DATA ACCESS PATTERNS
+
+---
+
+## 11.1 Views
+
+* `souvera_country_lite_v`
+* `souvera_country_professional_v`
+* `souvera_country_business_v`
+
+---
+
+## 11.2 Queries
+
+* latest observation queries
+* grouped aggregations
+* indexed filters
+
+---
+
+# 12. 🔐 SECURITY ARCHITECTURE
+
+---
+
+## 12.1 Authentication
+
+* Supabase Auth
+* JWT-based
+
+---
+
+## 12.2 Authorization
+
+* entitlements
+* RLS policies
+
+---
+
+## 12.3 API Security
+
+* rate limiting
+* API keys (enterprise)
+* scope validation
+
+---
+
+## 12.4 Data Protection
+
+* no sensitive raw exposure
+* audit logging
+
+---
+
+# 13. 📤 EXPORT ARCHITECTURE
+
+---
+
+## 13.1 Formats
+
+* JSON
+* CSV
+
+---
+
+## 13.2 Controls
+
+* tier-based
+* rate-limited
+* logged
+
+---
+
+# 14. 🔍 OBSERVABILITY
+
+---
+
+## 14.1 Monitoring
+
+* ingestion success
+* API latency
+* error rates
+
+---
+
+## 14.2 Tools
+
+* PostHog
+* Sentry
+
+---
+
+# 15. 🧪 TESTING STRATEGY
+
+---
+
+## Unit
+
+* API handlers
+* entitlement logic
+
+---
+
+## Integration
+
+* ingestion pipelines
+* DB writes
+
+---
+
+## E2E
+
+* login
+* country panel
+* compare
+* export
+
+---
+
+# 16. 🚀 DEPLOYMENT ARCHITECTURE
+
+---
+
+## CI/CD
+
+1. PR → preview
+2. merge → staging
+3. validation → production
+
+---
+
+## Environments
+
+* dev
+* staging
+* production
+
+---
+
+# 17. ⚠️ CRITICAL ENGINEERING RULES
+
+---
+
+## NEVER:
+
+* bypass API layer
+* expose raw provider data
+* enforce access in frontend
+* duplicate ingestion logic
+
+---
+
+## ALWAYS:
+
+* log ingestion
+* enforce entitlements
+* maintain source traceability
+* use normalized schema
+
+---
+
+# 🏁 FINAL SUMMARY
+
+This TRD ensures:
+
+* system clarity
+* engineering alignment
+* scalability
+* security
+* maintainability
+
+---
+
+## What this unlocks
+
+You now have:
+
+* full architecture
+* clear services
+* controlled data flow
+* enterprise readiness
+
+---
+
+# 🚀 NEXT DOCUMENT
+
+👉 **Souvera Data Source & Ingestion Strategy v1.0**
+
+This will go deeper than the registry:
+
+* ingestion pipelines (detailed)
+* transformation rules
+* normalization standards
+* data validation logic
+
+---
+
+Say:
+
+**“Proceed Data Ingestion Strategy”**
