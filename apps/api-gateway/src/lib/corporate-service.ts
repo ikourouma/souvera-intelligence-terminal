@@ -1,9 +1,26 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Initialize Supabase for server-side fetching in Gateway
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseKey);
+let supabaseInstance: any = null;
+
+function getSupabase() {
+  if (supabaseInstance) return supabaseInstance;
+  
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.PROJECT_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.ANON_PUBLIC;
+
+  if (!supabaseUrl || !supabaseKey) {
+    console.warn('[Souvera Service] Supabase credentials missing. Operating in SNAPSHOT-ONLY mode.');
+    return null;
+  }
+
+  try {
+    supabaseInstance = createClient(supabaseUrl, supabaseKey);
+    return supabaseInstance;
+  } catch (err) {
+    console.error('[Souvera Service] Failed to initialize Supabase client:', err);
+    return null;
+  }
+}
 
 /**
  * DEFAULT CORPORATE CONTENT SNAPSHOTS
@@ -317,6 +334,9 @@ const CORPORATE_SNAPSHOTS: Record<string, any> = {
  */
 export async function getInstitutionalBrief(key: string) {
   try {
+    const supabase = getSupabase();
+    if (!supabase) return CORPORATE_SNAPSHOTS[key] || CORPORATE_SNAPSHOTS['africa-command'];
+
     const { data, error } = await supabase
       .from('institutional_briefs')
       .select('*')

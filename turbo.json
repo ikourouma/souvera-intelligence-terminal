@@ -3,7 +3,15 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
+      "env": [
+        "NEXT_PUBLIC_SUPABASE_URL",
+        "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+        "PROJECT_URL",
+        "ANON_PUBLIC",
+        "SERVICE_ROLE",
+        "TERMINAL_URL"
+      ]
     },
     "dev": {
       "cache": false,
