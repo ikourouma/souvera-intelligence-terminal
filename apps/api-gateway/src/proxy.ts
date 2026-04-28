@@ -7,9 +7,11 @@ export function proxy(request: NextRequest) {
   const referer = request.headers.get('referer') || '';
 
   // 1. Handle Terminal and Regional Routes
+  // We only proxy if it's explicitly a terminal path or a direct regional functional path
   const isTerminalPath = pathname.startsWith('/terminal') || 
-                         pathname.startsWith('/africa') || 
-                         pathname.startsWith('/caribbean') || 
+                         pathname === '/africa/map' || 
+                         pathname === '/caribbean/map' ||
+                         pathname.startsWith('/data/') ||
                          pathname.startsWith('/dashboard');
 
   if (isTerminalPath) {
@@ -18,29 +20,31 @@ export function proxy(request: NextRequest) {
       return NextResponse.redirect(new URL('/terminal/africa', request.url));
     }
 
-    const url = request.nextUrl.clone();
-    url.hostname = 'localhost';
-    url.port = '3000';
+    // Determine target URL (Vercel-friendly)
+    const terminalUrl = process.env.TERMINAL_URL || 'http://localhost:3000';
     
-    // Rewrite /terminal/xxx -> /xxx, but keep /africa as /africa
-    url.pathname = pathname.replace(/^\/terminal/, '') || '/';
+    // Normalize path for the terminal app
+    let terminalPath = pathname;
+    if (pathname.startsWith('/terminal')) {
+      terminalPath = pathname.replace(/^\/terminal/, '') || '/';
+    }
     
-    return NextResponse.rewrite(url);
+    const targetUrl = new URL(terminalPath, terminalUrl);
+    return NextResponse.rewrite(targetUrl);
   }
 
   // 2. Handle Static Assets for Terminal/Regional pages
   const isAssetForTerminal = pathname.startsWith('/_next') && (
     referer.includes('/terminal') || 
-    referer.includes('/africa') || 
-    referer.includes('/caribbean') || 
+    referer.includes('/africa/map') || 
+    referer.includes('/caribbean/map') || 
     referer.includes('/dashboard')
   );
 
   if (isAssetForTerminal) {
-    const url = request.nextUrl.clone();
-    url.hostname = 'localhost';
-    url.port = '3000';
-    return NextResponse.rewrite(url);
+    const terminalUrl = process.env.TERMINAL_URL || 'http://localhost:3000';
+    const targetUrl = new URL(pathname, terminalUrl);
+    return NextResponse.rewrite(targetUrl);
   }
 
   // 3. Default: Next.js handles it locally (Landing Page, etc.)

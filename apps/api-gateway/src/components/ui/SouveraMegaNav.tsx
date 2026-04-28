@@ -12,49 +12,23 @@ import {
 
 const navigation = [
   {
-    name: 'Platform',
-    icon: Zap,
-    sections: [
-      {
-        title: 'Intelligence Terminal',
-        links: [
-          { name: '● Africa Command Center', href: '/terminal/africa' },
-          { name: '● Caribbean Command Center', href: '/terminal/caribbean' },
-          { name: 'Intelligence Map', href: '/terminal/africa/map' },
-          { name: 'Sector Intelligence', href: '/terminal/africa/sectors' },
-        ],
-      },
-      {
-        title: 'Data Engine',
-        links: [
-          { name: 'Data Sources & Methodology', href: '/data' },
-          { name: 'Signal Engine', href: '/signals' },
-          { name: 'API Documentation', href: '/api-docs' },
-          { name: 'Source Registry', href: '/data#sources' },
-        ],
-      },
-    ],
-  },
-  {
     name: 'Intelligence',
     icon: Globe,
     sections: [
       {
-        title: 'Africa Command',
+        title: 'Command Nodes',
         links: [
-          { name: 'Africa Overview', href: '/terminal/africa' },
-          { name: 'Top 10 Economies by GDP', href: '/terminal/africa/economies' },
-          { name: 'Sector Intelligence', href: '/terminal/africa/sectors' },
-          { name: 'Intelligence Map (54 Nations)', href: '/terminal/africa/map' },
+          { name: 'Africa Command Center', href: '/africa-command-center' },
+          { name: 'Caribbean Command Center', href: '/caribbean-command-center' },
+          { name: 'Intelligence Map Briefing', href: '/intelligence-map' },
         ],
       },
       {
-        title: 'Caribbean Command',
+        title: 'Access Terminal',
         links: [
-          { name: 'Caribbean Overview', href: '/terminal/caribbean' },
-          { name: 'Top Economies', href: '/terminal/caribbean/economies' },
-          { name: 'Caribbean Map', href: '/terminal/caribbean/map' },
-          { name: 'CARICOM Intelligence', href: '/terminal/caribbean/sectors' },
+          { name: '● Africa Dashboard', href: '/terminal/africa' },
+          { name: '● Caribbean Dashboard', href: '/terminal/caribbean' },
+          { name: 'Geospatial Terminal', href: '/terminal/africa/map' },
         ],
       },
     ],
@@ -64,21 +38,19 @@ const navigation = [
     icon: Building2,
     sections: [
       {
-        title: 'Africa Sectors',
+        title: 'Institutional Briefings',
         links: [
-          { name: 'Fintech & Digital Finance', href: '/terminal/africa/sectors#fintech' },
-          { name: 'Mining & Critical Minerals', href: '/terminal/africa/sectors#mining' },
-          { name: 'Energy & Renewables', href: '/terminal/africa/sectors#energy' },
-          { name: 'Agriculture & Agribusiness', href: '/terminal/africa/sectors#agriculture' },
+          { name: 'Sector Intelligence Overview', href: '/sector-intelligence' },
+          { name: 'Energy & Renewables', href: '/sector/energy-&-renewables' },
+          { name: 'Mining & Critical Minerals', href: '/sector/mining-&-critical-minerals' },
         ],
       },
       {
-        title: 'Caribbean Sectors',
+        title: 'Sector Dashboards',
         links: [
-          { name: 'Tourism & Hospitality', href: '/terminal/caribbean/sectors#tourism' },
-          { name: 'Energy (LNG & Oil)', href: '/terminal/caribbean/sectors#energy' },
-          { name: 'Financial Services', href: '/terminal/caribbean/sectors#finance' },
-          { name: 'Logistics & Trade', href: '/terminal/caribbean/sectors#logistics' },
+          { name: 'Fintech & Digital Finance', href: '/sector/fintech-&-digital-finance' },
+          { name: 'Tourism & Hospitality', href: '/sector/tourism-&-hospitality' },
+          { name: 'Logistics & Trade', href: '/sector/logistics-&-trade' },
         ],
       },
     ],
@@ -88,44 +60,41 @@ const navigation = [
     icon: TrendingUp,
     sections: [
       {
-        title: 'Rankings',
+        title: 'Signal Analysis',
         links: [
-          { name: 'Top 10 African Economies', href: '/terminal/africa/economies' },
-          { name: 'Fastest Growing Markets', href: '/terminal/africa#signals' },
-          { name: 'FDI Inflow Rankings', href: '/terminal/africa/economies#fdi' },
-          { name: 'Risk Index', href: '/terminal/africa#risk' },
+          { name: 'Signal Engine Briefing', href: '/signal-engine' },
+          { name: 'Growth Market Rankings', href: '/terminal/africa#signals' },
+          { name: 'Risk Index monitoring', href: '/terminal/africa#risk' },
         ],
       },
       {
-        title: 'Reports',
+        title: 'Institutional Reports',
         links: [
           { name: 'Country Intelligence Briefs', href: '/subscriptions' },
           { name: 'Investor Memos', href: '/subscriptions' },
-          { name: 'Sector Flash Reports', href: '/subscriptions' },
-          { name: 'Compare Countries', href: '/subscriptions' },
+          { name: 'FDI Inflow Rankings', href: '/terminal/africa/economies#fdi' },
         ],
       },
     ],
   },
   {
     name: 'Access',
-    icon: Map,
+    icon: Zap,
     sections: [
       {
-        title: 'Subscription Plans',
+        title: 'Gateway',
         links: [
-          { name: 'Explorer — Free', href: '/subscriptions' },
-          { name: 'Professional', href: '/subscriptions' },
-          { name: 'Business', href: '/subscriptions' },
-          { name: 'Institutional', href: '/subscriptions' },
+          { name: 'Subscription Plans', href: '/subscriptions' },
+          { name: 'API Documentation', href: '/api-documentation' },
+          { name: 'Enterprise Solutions', href: '/solutions' },
         ],
       },
       {
-        title: 'Enterprise',
+        title: 'Authentication',
         links: [
-          { name: 'API Access', href: '/subscriptions#api' },
-          { name: 'White-Label Intelligence', href: '/subscriptions#enterprise' },
-          { name: 'Contact for Demo', href: '/contact' },
+          { name: 'Sign In to Terminal', href: '/login' },
+          { name: 'Create Free Account', href: '/login' },
+          { name: 'Request Demo', href: '/contact' },
         ],
       },
     ],
@@ -135,21 +104,20 @@ const navigation = [
     icon: Globe,
     sections: [
       {
-        title: 'Insights & Strategy',
+        title: 'Institutional',
         links: [
-          { name: 'Documentation', href: '/docs' },
-          { name: 'Use Cases', href: '/use-cases' },
-          { name: 'Case Studies', href: '/case-studies' },
-          { name: 'System Status', href: '/status' },
+          { name: 'Data Sources & Methodology', href: '/Data-Sources-&-Methodology' },
+          { name: 'Institutional Signal Ledger', href: '/source-registry' },
+          { name: 'About Souvera', href: '/about' },
         ],
       },
       {
-        title: 'Corporate',
+        title: 'Resources',
         links: [
-          { name: 'About Souvera', href: '/about' },
-          { name: 'Our Methodology', href: '/methodology' },
-          { name: 'Compliance Vault', href: '/compliance' },
-          { name: 'FAQs', href: '/faqs' },
+          { name: 'Source Registry', href: '/source-registry' },
+          { name: 'Methodology', href: '/Data-Sources-&-Methodology' },
+          { name: 'Legal Hub', href: '/legal' },
+          { name: 'Sitemap', href: '/sitemap' },
         ],
       },
     ],
@@ -158,8 +126,8 @@ const navigation = [
 
 const mobileUtilityLinks = [
   { name: 'Subscriptions', href: '/subscriptions' },
-  { name: 'API Docs', href: '/api-docs' },
-  { name: 'Contact', href: 'https://afdec-nc.vercel.app/contact' },
+  { name: 'Latest Insights', href: '/insights' },
+  { name: 'Contact', href: '/contact' },
 ];
 
 export function SouveraMegaNav() {
