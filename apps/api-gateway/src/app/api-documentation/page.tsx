@@ -11,7 +11,7 @@ const CONTENT: PresentationContent = {
     points: [
       'High-frequency data streaming nodes',
       'Full macroeconomic time-series access',
-      'Real-time signal alert webhooks',
+      'Signal alert webhooks',
       'Institutional-grade security & encryption'
     ]
   },

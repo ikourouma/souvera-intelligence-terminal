@@ -17,10 +17,10 @@ const CONTENT: PresentationContent = {
   },
   who: {
     title: 'For High-Frequency Strategists.',
-    description: 'Designed for users who require real-time alerts on macroeconomic shifts.',
+    description: 'Designed for users who require signal-driven alerts on macroeconomic shifts.',
     segments: [
       { name: 'Hedge Funds', benefit: 'Identifying early-stage growth triggers in emerging nodes.' },
-      { name: 'Risk Managers', benefit: 'Monitoring debt-to-GDP and inflation spikes in real-time.' },
+      { name: 'Risk Managers', benefit: 'Monitoring debt-to-GDP and inflation spikes (high-frequency).' },
       { name: 'Strategic Advisors', benefit: 'Providing evidence-based policy and investment guidance.' }
     ]
   },

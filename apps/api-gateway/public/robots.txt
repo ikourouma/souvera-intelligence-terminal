@@ -1,0 +1,19 @@
+# Souvera Intelligence Terminal
+# https://souvera.vercel.app
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://souvera.vercel.app/sitemap.xml
+
+# Disallow private/auth routes
+Disallow: /api/
+Disallow: /auth/
+Disallow: /login
+Disallow: /profile
+Disallow: /terminal
+Disallow: /dashboard
+Disallow: /settings
+Disallow: /admin
+Disallow: /org

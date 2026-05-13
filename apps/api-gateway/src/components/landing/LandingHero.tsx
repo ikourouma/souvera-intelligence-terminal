@@ -26,7 +26,7 @@ export default function LandingHero() {
             </h1>
             
             <p className="text-lg md:text-xl text-zinc-400 font-light max-w-lg leading-relaxed">
-              Institutional-grade macroeconomic signaling, real-time corridor intelligence, and sovereign risk models for the African and Caribbean footprint.
+              Institutional-grade macroeconomic signaling, curated corridor intelligence, and sovereign risk models for the African and Caribbean footprint.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center gap-4 pt-4">

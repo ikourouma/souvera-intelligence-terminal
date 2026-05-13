@@ -42,3 +42,16 @@ yarn-error.log*
 # Misc
 *.log
 coverage/
+
+# Sensitive files - DO NOT COMMIT
+docs/Souvera Test Users.txt
+**/test-users*.txt
+**/credentials*.txt
+
+# Test user provisioning credentials - NEVER COMMIT
+scripts/test-users.local.json
+scripts/souvera-test-users.local.json
+souvera-test-users.local.json
+.env.test-users
+*.test-users.json
+**/test-users.local.json

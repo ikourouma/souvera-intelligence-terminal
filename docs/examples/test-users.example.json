@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Souvera Test User Provisioning Template - DO NOT COMMIT ACTUAL CREDENTIALS",
+  "users": [
+    {
+      "email": "explorer@example.com",
+      "password": "PLACEHOLDER_MIN_8_CHARS",
+      "planId": "explorer",
+      "fullName": "Test Explorer User"
+    },
+    {
+      "email": "professional@example.com",
+      "password": "PLACEHOLDER_MIN_8_CHARS",
+      "planId": "professional",
+      "fullName": "Test Professional User"
+    },
+    {
+      "email": "business@example.com",
+      "password": "PLACEHOLDER_MIN_8_CHARS",
+      "planId": "business",
+      "fullName": "Test Business User"
+    },
+    {
+      "email": "institutional@example.com",
+      "password": "PLACEHOLDER_MIN_8_CHARS",
+      "planId": "institutional",
+      "fullName": "Test Institutional User"
+    }
+  ]
+}

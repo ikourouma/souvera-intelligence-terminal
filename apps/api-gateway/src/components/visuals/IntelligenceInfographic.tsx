@@ -74,7 +74,7 @@ export function IntelligenceInfographic() {
             <div className="bg-[#0B0F14] rounded-sm p-12 text-center overflow-hidden relative">
               <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px)', backgroundSize: '24px 24px' }} />
               <div className="relative z-10 inline-flex flex-col items-center">
-                 <div className="text-[10px] font-mono tracking-[0.3em] uppercase text-zinc-600 mb-6">Real-Time Data Stream Visualization</div>
+                 <div className="text-[10px] font-mono tracking-[0.3em] uppercase text-zinc-600 mb-6">Data Stream Visualization</div>
                  <div className="flex gap-4 items-end">
                     {[24, 45, 32, 56, 28, 42, 35, 48, 30, 52, 38, 44].map((h, i) => (
                       <div key={i} className="w-1 bg-blue-600/30 rounded-full animate-bounce" style={{ height: `${h}px`, animationDelay: `${i * 0.1}s` }} />

@@ -1,0 +1,28 @@
+{
+  "users": [
+    {
+      "email": "explorer@example.com",
+      "password": "PLACEHOLDER_PASSWORD_123!",
+      "planId": "explorer",
+      "fullName": "Test Explorer User"
+    },
+    {
+      "email": "professional@example.com",
+      "password": "PLACEHOLDER_PASSWORD_456!",
+      "planId": "professional",
+      "fullName": "Test Professional User"
+    },
+    {
+      "email": "business@example.com",
+      "password": "PLACEHOLDER_PASSWORD_789!",
+      "planId": "business",
+      "fullName": "Test Business User"
+    },
+    {
+      "email": "institutional@example.com",
+      "password": "PLACEHOLDER_PASSWORD_ABC!",
+      "planId": "institutional",
+      "fullName": "Test Institutional User"
+    }
+  ]
+}

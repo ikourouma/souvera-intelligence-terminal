@@ -10,7 +10,7 @@ const SOLUTIONS = [
     icon: LineChart,
     tagline: 'Precision Investment Alpha',
     description: 'High-fidelity macro signals and deep sector intelligence for private equity, venture capital, and hedge funds targeting emerging corridors.',
-    features: ['Real-time growth vectors', 'Risk trigger monitoring', 'Transatlantic trade mapping'],
+    features: ['Growth vector tracking', 'Risk trigger monitoring', 'Transatlantic trade mapping'],
     color: '#3B82F6'
   },
   {

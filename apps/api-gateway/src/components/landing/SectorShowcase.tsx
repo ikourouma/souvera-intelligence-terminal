@@ -13,18 +13,18 @@ const SECTORS = [
     color: '#3B82F6',
     countries: ['Nigeria', 'Kenya', 'South Africa', 'Egypt'],
     highlights: ['Mobile Money Interop', 'B2B Payments Infrastructure', 'Regulatory Sandbox'],
-    href: '/terminal/sectors#fintech',
+    href: '/sectors/fintech',
   },
   {
     id: 'mining',
-    name: 'Mining & Critical Minerals',
+    name: 'Critical Minerals & Mining',
     region: 'Africa',
     marketSize: '$320B',
     cagr: '+12%',
     color: '#F59E0B',
     countries: ['DRC', 'South Africa', 'Zambia', 'Zimbabwe'],
     highlights: ['Cobalt · Lithium · Copper', 'EV Supply Chain', 'Critical Minerals Race'],
-    href: '/terminal/sectors#mining',
+    href: '/sectors/critical-minerals',
   },
   {
     id: 'energy',
@@ -35,7 +35,7 @@ const SECTORS = [
     color: '#22C55E',
     countries: ['Mozambique', 'Namibia', 'Nigeria', 'Tanzania'],
     highlights: ['Green Hydrogen (Namibia)', 'LNG (Mozambique)', 'Solar Grid Build-Out'],
-    href: '/terminal/sectors#energy',
+    href: '/sectors/energy',
   },
   {
     id: 'agriculture',
@@ -46,7 +46,7 @@ const SECTORS = [
     color: '#10B981',
     countries: ['Ghana', 'Ethiopia', 'Côte d\'Ivoire', 'Kenya'],
     highlights: ['Cocoa · Coffee · Cashew', 'AfCFTA Corridors', 'AgriTech Platforms'],
-    href: '/terminal/sectors#agriculture',
+    href: '/sectors/agriculture',
   },
   {
     id: 'tourism-caribbean',
@@ -57,18 +57,18 @@ const SECTORS = [
     color: '#06B6D4',
     countries: ['Dominican Republic', 'Jamaica', 'The Bahamas', 'Barbados'],
     highlights: ['Eco-Tourism', 'Luxury Resort Development', 'Cultural Tourism'],
-    href: '/terminal/caribbean/sectors#tourism',
+    href: '/sectors/tourism',
   },
   {
-    id: 'energy-caribbean',
-    name: 'Energy (LNG & Oil)',
-    region: 'Caribbean',
+    id: 'logistics',
+    name: 'Logistics & Trade',
+    region: 'Transatlantic',
     marketSize: '$25B',
     cagr: '+5%',
     color: '#A78BFA',
-    countries: ['Trinidad & Tobago', 'Guyana', 'Suriname', 'Barbados'],
-    highlights: ['LNG Expansion', 'Offshore Oil (Guyana)', 'Petrochemicals'],
-    href: '/terminal/caribbean/sectors#energy',
+    countries: ['Nigeria', 'Kenya', 'South Africa', 'Trinidad & Tobago'],
+    highlights: ['Port Infrastructure', 'Trade Corridors', 'Supply Chain'],
+    href: '/sectors/logistics',
   },
 ];
 
@@ -85,7 +85,7 @@ export function SectorShowcase() {
               $600B+ Opportunity Map
             </h2>
           </div>
-          <Link href="/terminal/sectors" className="hidden md:flex items-center gap-2 text-[11px] font-bold tracking-widest uppercase transition-colors hover:text-white" style={{ color: '#6B7280' }}>
+          <Link href="/sectors" className="hidden md:flex items-center gap-2 text-[11px] font-bold tracking-widest uppercase transition-colors hover:text-white" style={{ color: '#6B7280' }}>
             Full Sector Intelligence <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>

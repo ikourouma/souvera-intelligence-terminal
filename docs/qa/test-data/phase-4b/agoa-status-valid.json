@@ -1,0 +1,29 @@
+[
+  {
+    "iso3": "NGA",
+    "country_name": "Nigeria",
+    "agoa_status": "eligible",
+    "apparel_status": "not_verified",
+    "as_of_date": "2026-05-06",
+    "source_url": "https://ustr.gov/issue-areas/trade-development/preference-programs/african-growth-and-opportunity-act-agoa",
+    "notes": "Test upload only"
+  },
+  {
+    "iso3": "KEN",
+    "country_name": "Kenya",
+    "agoa_status": "eligible",
+    "apparel_status": "not_verified",
+    "as_of_date": "2026-05-06",
+    "source_url": "https://ustr.gov/issue-areas/trade-development/preference-programs/african-growth-and-opportunity-act-agoa",
+    "notes": "Test upload only"
+  },
+  {
+    "iso3": "GHA",
+    "country_name": "Ghana",
+    "agoa_status": "eligible",
+    "apparel_status": "not_verified",
+    "as_of_date": "2026-05-06",
+    "source_url": "https://ustr.gov/issue-areas/trade-development/preference-programs/african-growth-and-opportunity-act-agoa",
+    "notes": "Test upload only"
+  }
+]

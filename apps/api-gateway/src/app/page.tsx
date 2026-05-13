@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { FlashBanner } from '@/components/ui/FlashBanner';
 import { SouveraMegaNav } from '@/components/ui/SouveraMegaNav';
 import { SouveraHero } from '@/components/landing/SouveraHero';
@@ -14,10 +15,33 @@ import { IntelligenceInfographic } from '@/components/visuals/IntelligenceInfogr
 import { ProductSuiteSection } from '@/components/landing/ProductSuiteSection';
 import { InsightsShowcase } from '@/components/landing/InsightsShowcase';
 import { ComplianceBanner } from '@/components/ui/ComplianceBanner';
+import { organizationSchema, webSiteSchema, generateJsonLd } from '@/lib/jsonld';
+
+export const metadata: Metadata = {
+  title: 'Souvera Intelligence Terminal | Macroeconomic Intelligence for Africa & Caribbean',
+  description: 'Institutional-grade macroeconomic intelligence for African and Caribbean markets. Country profiles, sector analysis, and market data for governments, investors, and enterprises.',
+  openGraph: {
+    title: 'Souvera Intelligence Terminal',
+    description: 'Institutional-grade macroeconomic intelligence for African and Caribbean markets.',
+    url: 'https://souvera.vercel.app',
+  },
+  alternates: {
+    canonical: 'https://souvera.vercel.app',
+  },
+};
 
 export default function Home() {
   return (
     <main className="min-h-screen" style={{ background: '#0B0F14' }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: generateJsonLd(organizationSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: generateJsonLd(webSiteSchema) }}
+      />
+
       {/* Global announcement banner — admin managed via Supabase */}
       <FlashBanner />
 

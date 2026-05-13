@@ -38,7 +38,7 @@ export function TopEconomiesSection() {
               Largest Economies by GDP
             </h2>
           </div>
-          <Link href="/terminal/economies" className="hidden md:flex items-center gap-2 text-[11px] font-bold tracking-widest uppercase transition-colors hover:text-white" style={{ color: '#6B7280' }}>
+          <Link href="/insights/rankings" className="hidden md:flex items-center gap-2 text-[11px] font-bold tracking-widest uppercase transition-colors hover:text-white" style={{ color: '#6B7280' }}>
             Full Rankings <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -133,7 +133,7 @@ export function TopEconomiesSection() {
             ))}
 
             <div className="mt-auto px-5 py-4" style={{ borderTop: '1px solid #1F2A37' }}>
-              <Link href="/terminal/caribbean/economies" className="flex items-center justify-center gap-2 w-full py-3 text-[11px] font-bold tracking-widest uppercase transition-all hover:text-white" style={{ border: '1px solid #1F2A37', color: '#6B7280', background: 'transparent' }}>
+              <Link href="/intelligence/caribbean" className="flex items-center justify-center gap-2 w-full py-3 text-[11px] font-bold tracking-widest uppercase transition-all hover:text-white" style={{ border: '1px solid #1F2A37', color: '#6B7280', background: 'transparent' }}>
                 Full Caribbean Rankings <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>

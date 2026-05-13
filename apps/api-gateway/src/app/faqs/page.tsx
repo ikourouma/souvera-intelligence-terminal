@@ -9,7 +9,7 @@ const faqs = [
   {
     category: "Market Signals",
     q: "How does the Souvera Signal Engine determine market levels?",
-    a: "The Signal Engine utilizes a proprietary weighting algorithm that correlates live data from the World Bank, IMF, and regional African/Caribbean data nodes. We analyze FDI inflows, currency stability, and infrastructure pipeline density to assign levels from 'Risk Elevated' to 'High Growth'."
+    a: "The Signal Engine utilizes a proprietary weighting algorithm that correlates curated data from the World Bank, IMF, and regional African/Caribbean data nodes. We analyze FDI inflows, currency stability, and infrastructure pipeline density to assign levels from 'Risk Elevated' to 'High Growth'."
   },
   {
     category: "Terminal Access",
@@ -19,7 +19,7 @@ const faqs = [
   {
     category: "Data Integrity",
     q: "How often is the macroeconomic data refreshed?",
-    a: "Public signals are updated every 15 minutes. 'Professional' and 'Institutional' tiers receive real-time telemetry updates for high-volatility markets and active infrastructure deal-flow monitoring."
+    a: "Public signals are updated every 15 minutes. 'Professional' and 'Institutional' tiers receive high-frequency telemetry updates for high-volatility markets and active infrastructure deal-flow monitoring."
   },
   {
     category: "Sovereign Framework",
@@ -123,7 +123,7 @@ export default function FAQPage() {
           {[
             { icon: Globe, title: "Dual Regions", desc: "Africa and Caribbean specific signal corridors." },
             { icon: Shield, title: "Verified Data", desc: "Correlated IMF, World Bank, and local node data." },
-            { icon: Zap, title: "Real-time", desc: "High-frequency signal updates for active members." }
+            { icon: Zap, title: "High-Frequency", desc: "Signal updates for active members." }
           ].map((feat, i) => (
             <div key={i} className="p-6 border border-zinc-900 rounded-sm bg-zinc-900/20">
               <feat.icon className="w-5 h-5 text-blue-500 mb-4" />

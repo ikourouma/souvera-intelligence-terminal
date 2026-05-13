@@ -1,0 +1,3 @@
+iso3,country_name,agoa_status,apparel_status,as_of_date,source_url,notes
+ZZZ,Invalid Country,eligible,not_verified,2026-05-06,https://ustr.gov/,Invalid ISO3 test
+NGA,Nigeria,eligible,not_verified,2026-05-06,https://ustr.gov/,Valid control row

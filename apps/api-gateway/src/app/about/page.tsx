@@ -1,123 +1,194 @@
-'use client';
-import React from 'react';
+import type { Metadata } from 'next';
+import Link from 'next/link';
 import { SouveraMegaNav } from '@/components/ui/SouveraMegaNav';
 import { SouveraFooter } from '@/components/ui/SouveraFooter';
-import { Target, Globe, Shield, Zap, TrendingUp, Users } from 'lucide-react';
+import { Target, Globe, Shield, ArrowRight } from 'lucide-react';
+import { organizationSchema, generateJsonLd } from '@/lib/jsonld';
+
+export const metadata: Metadata = {
+  title: 'About | Souvera',
+  description: 'Souvera provides institutional-grade macroeconomic intelligence for African and Caribbean markets. Engineered by Afronovation, Inc.',
+  openGraph: {
+    title: 'About | Souvera',
+    description: 'Souvera provides institutional-grade macroeconomic intelligence for African and Caribbean markets.',
+    url: 'https://souvera.vercel.app/about',
+  },
+  alternates: {
+    canonical: 'https://souvera.vercel.app/about',
+  },
+};
 
 const VALUES = [
-  { title: 'Transparency', desc: 'Objective, sovereign-grade data ingested directly from source repositories.', icon: Shield },
-  { title: 'Transatlantic', desc: 'Bridging the macroeconomic gap between Africa and the Caribbean.', icon: Globe },
-  { title: 'Actionable', desc: 'Not just data—strategic signals that drive multi-billion dollar convictions.', icon: Zap }
+  {
+    title: 'Transparency',
+    desc: 'Data sourced from official institutions including IMF, World Bank, and regional development banks.',
+    icon: Shield,
+  },
+  {
+    title: 'Regional Focus',
+    desc: 'Comprehensive coverage bridging African and Caribbean markets for transatlantic insight.',
+    icon: Globe,
+  },
+  {
+    title: 'Institutional Grade',
+    desc: 'Intelligence designed for governments, development finance institutions, and global enterprises.',
+    icon: Target,
+  },
 ];
 
 export default function AboutPage() {
   return (
     <main className="min-h-screen bg-[#0B0F14] text-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: generateJsonLd(organizationSchema) }}
+      />
       <SouveraMegaNav />
-      
-      {/* Identity Hero */}
-      <section className="pt-24 pb-32 border-b border-zinc-800 relative overflow-hidden">
+
+      <section className="pt-24 pb-20 border-b border-zinc-800 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-600/5 rounded-full blur-[120px] -mr-96 -mt-96" />
         <div className="max-w-[1600px] mx-auto px-6 lg:px-12 relative z-10">
           <div className="max-w-4xl">
-            <div className="section-label mb-4">Institutional Identity</div>
-            <h1 className="text-6xl md:text-8xl font-bold tracking-tight mb-8 leading-[1.0]" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-              Democratizing<br />Sovereign<br />Intelligence.
+            <div className="text-[10px] font-bold tracking-[0.2em] uppercase text-blue-500 mb-4">
+              About Souvera
+            </div>
+            <h1
+              className="text-5xl md:text-6xl font-bold tracking-tight mb-8 leading-[1.05]"
+              style={{ fontFamily: 'Space Grotesk, sans-serif' }}
+            >
+              Institutional Intelligence for Emerging Markets.
             </h1>
-            <p className="text-2xl text-zinc-400 leading-relaxed max-w-2xl font-light">
-              Souvera is the definitive intelligence engine for African and Caribbean macroeconomic corridors. We provide the transparency required for institutional capital to move with absolute conviction.
+            <p className="text-xl text-zinc-400 leading-relaxed max-w-2xl">
+              Souvera provides comprehensive macroeconomic intelligence for African and Caribbean markets, enabling informed decision-making for institutions operating in these regions.
             </p>
           </div>
         </div>
       </section>
 
-      {/* Mission Section */}
-      <section className="py-32 bg-[#121821]/30">
+      <section className="py-20 bg-[#121821]/30">
         <div className="max-w-[1600px] mx-auto px-6 lg:px-12">
-           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
-              <div className="lg:col-span-7">
-                 <div className="section-label mb-6">The Mandate</div>
-                 <h2 className="text-4xl font-bold mb-8 leading-tight" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-                    Bridging the transatlantic gap with objective truth.
-                 </h2>
-                 <div className="prose prose-invert max-w-none text-zinc-400 text-lg space-y-6">
-                    <p>
-                       For decades, African and Caribbean markets have been shrouded in fragmented data and legacy narratives. Souvera was built to change that. 
-                    </p>
-                    <p>
-                       By integrating 69+ sovereign data nodes directly into a single, high-fidelity intelligence interface, we empower global institutional investors and sovereign governments with the real-time signaling required for strategic growth.
-                    </p>
-                 </div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
+            <div className="lg:col-span-7">
+              <div className="text-[10px] font-bold tracking-[0.2em] uppercase text-zinc-500 mb-6">
+                Our Purpose
               </div>
-              <div className="lg:col-span-5 grid grid-cols-1 gap-6">
-                 {VALUES.map((v) => (
-                    <div key={v.title} className="p-8 bg-[#0B0F14] border border-zinc-800 rounded-sm hover:border-blue-600/30 transition-colors">
-                       <div className="flex items-center gap-4 mb-4">
-                          <v.icon className="w-6 h-6 text-blue-500" />
-                          <h3 className="text-xl font-bold" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>{v.title}</h3>
-                       </div>
-                       <p className="text-sm text-zinc-500 leading-relaxed">{v.desc}</p>
+              <h2
+                className="text-3xl font-bold mb-8 leading-tight"
+                style={{ fontFamily: 'Space Grotesk, sans-serif' }}
+              >
+                Bringing clarity to African and Caribbean markets.
+              </h2>
+              <div className="space-y-6 text-zinc-400 leading-relaxed">
+                <p>
+                  African and Caribbean economies represent significant global opportunities, yet comprehensive, accessible market intelligence has remained fragmented. Souvera addresses this gap by aggregating official data from international institutions into a unified platform.
+                </p>
+                <p>
+                  We serve development finance institutions, governments, investors, and enterprises who require reliable data for strategic decision-making in these markets. Our coverage spans macroeconomic indicators, sector analysis, and regional trade data.
+                </p>
+                <p>
+                  Souvera is engineered by Afronovation, Inc., with a commitment to transparency about our data sources and methodology.
+                </p>
+              </div>
+            </div>
+            <div className="lg:col-span-5 grid grid-cols-1 gap-6">
+              {VALUES.map((v) => {
+                const Icon = v.icon;
+                return (
+                  <div
+                    key={v.title}
+                    className="p-8 bg-[#0B0F14] border border-zinc-800 rounded-sm hover:border-blue-600/30 transition-colors"
+                  >
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="w-10 h-10 rounded-sm bg-blue-600/10 border border-blue-600/20 flex items-center justify-center">
+                        <Icon className="w-5 h-5 text-blue-500" />
+                      </div>
+                      <h3
+                        className="text-xl font-bold"
+                        style={{ fontFamily: 'Space Grotesk, sans-serif' }}
+                      >
+                        {v.title}
+                      </h3>
                     </div>
-                 ))}
-              </div>
-           </div>
+                    <p className="text-sm text-zinc-500 leading-relaxed">{v.desc}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* The Loop Section (Brief) */}
-      <section className="py-32">
-         <div className="max-w-[1600px] mx-auto px-6 lg:px-12 text-center">
-            <div className="section-label mb-6 mx-auto">Our Core Logic</div>
-            <h2 className="text-4xl font-bold mb-16" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-               From Raw Data to Decision Alpha.
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-               {[
-                 { step: '01', title: 'Ingestion', desc: 'Direct feeds from central bank nodes.', icon: Globe },
-                 { step: '02', title: 'Synthesis', desc: 'AI-driven signal normalization.', icon: Zap },
-                 { step: '03', title: 'Strategy', desc: 'Expert analyst verification.', icon: Users },
-                 { step: '04', title: 'Alpha', desc: 'Institutional conviction.', icon: TrendingUp }
-               ].map((item) => (
-                 <div key={item.step} className="relative group">
-                    <div className="text-6xl font-black text-zinc-900 absolute -top-10 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity">{item.step}</div>
-                    <div className="w-16 h-16 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center mx-auto mb-6 relative z-10 group-hover:border-blue-600 transition-colors">
-                       <item.icon className="w-6 h-6 text-zinc-500 group-hover:text-blue-500 transition-colors" />
-                    </div>
-                    <h3 className="text-lg font-bold mb-2 text-white">{item.title}</h3>
-                    <p className="text-[11px] text-zinc-600 uppercase tracking-widest font-mono">{item.desc}</p>
-                 </div>
-               ))}
+      <section className="py-20 border-b border-zinc-800">
+        <div className="max-w-[1600px] mx-auto px-6 lg:px-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div>
+              <h2
+                className="text-2xl font-bold mb-6"
+                style={{ fontFamily: 'Space Grotesk, sans-serif' }}
+              >
+                Data Foundation
+              </h2>
+              <p className="text-zinc-400 leading-relaxed mb-6">
+                Our intelligence is built on official data from the International Monetary Fund, World Bank, African Development Bank, Caribbean Development Bank, and national statistical agencies.
+              </p>
+              <Link
+                href="/resources/data-sources"
+                className="inline-flex items-center gap-2 text-[11px] font-bold tracking-widest uppercase text-blue-500 hover:text-blue-400"
+              >
+                View Data Sources
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
             </div>
-         </div>
+            <div>
+              <h2
+                className="text-2xl font-bold mb-6"
+                style={{ fontFamily: 'Space Grotesk, sans-serif' }}
+              >
+                Engineered by Afronovation
+              </h2>
+              <p className="text-zinc-400 leading-relaxed mb-6">
+                Souvera is a product of Afronovation, Inc., a technology company focused on building infrastructure for African and Caribbean market transparency.
+              </p>
+              <a
+                href="https://www.afronovation.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-[11px] font-bold tracking-widest uppercase text-blue-500 hover:text-blue-400"
+              >
+                Visit Afronovation
+                <ArrowRight className="w-3.5 h-3.5" />
+              </a>
+            </div>
+          </div>
+        </div>
       </section>
 
-      {/* Strategic Board Preview */}
-      <section className="py-32 bg-[#121821]/50 border-t border-zinc-800">
-         <div className="max-w-[1600px] mx-auto px-6 lg:px-12">
-            <div className="flex flex-col lg:flex-row items-end justify-between mb-16 gap-8">
-               <div className="max-w-2xl">
-                  <div className="section-label mb-4">The board</div>
-                  <h2 className="text-4xl font-bold" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>Expert-Led Intelligence.</h2>
-               </div>
-               <p className="text-sm text-zinc-500 max-w-md">
-                  Our Intelligence Board is comprised of 40+ senior macroeconomic analysts and data engineers across five global hubs.
-               </p>
-            </div>
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-               {[1, 2, 3, 4].map((i) => (
-                 <div key={i} className="space-y-4 group">
-                    <div className="aspect-[4/5] bg-zinc-900 border border-zinc-800 grayscale group-hover:grayscale-0 transition-all overflow-hidden">
-                       <div className="w-full h-full bg-gradient-to-t from-zinc-950 to-transparent opacity-50" />
-                    </div>
-                    <div>
-                       <div className="text-sm font-bold text-white uppercase tracking-widest font-mono">Senior Board Member</div>
-                       <div className="text-[10px] text-zinc-500 uppercase tracking-widest font-mono">Macroeconomic Division</div>
-                    </div>
-                 </div>
-               ))}
-            </div>
-         </div>
+      <section className="py-20">
+        <div className="max-w-[1600px] mx-auto px-6 lg:px-12 text-center">
+          <h2
+            className="text-3xl font-bold mb-6"
+            style={{ fontFamily: 'Space Grotesk, sans-serif' }}
+          >
+            Ready to explore Souvera?
+          </h2>
+          <p className="text-zinc-400 mb-10 max-w-lg mx-auto">
+            Request access to explore our intelligence platform, or contact us to discuss your specific requirements.
+          </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link
+              href="/access/request-access"
+              className="px-10 py-5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-[12px] tracking-widest uppercase transition-all rounded-sm"
+            >
+              Request Access
+            </Link>
+            <Link
+              href="/contact"
+              className="px-10 py-5 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-white font-bold text-[12px] tracking-widest uppercase transition-all rounded-sm"
+            >
+              Contact Us
+            </Link>
+          </div>
+        </div>
       </section>
 
       <SouveraFooter />

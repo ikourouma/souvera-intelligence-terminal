@@ -4,26 +4,26 @@ import { ShieldCheck, Target, Zap, Globe, BarChart3, Users } from 'lucide-react'
 
 const ADVANTAGES = [
   {
-    title: 'Sovereign-Grade Accuracy',
-    description: 'Our data is ingested directly from regional central banks, AU nodes, and CARICOM trade data repositories. No intermediary noise.',
+    title: 'Official Data Sources',
+    description: 'Our data is sourced directly from IMF, World Bank, African Development Bank, Caribbean Development Bank, and official national statistical agencies.',
     icon: ShieldCheck,
     color: '#2563EB',
   },
   {
     title: 'Transatlantic Context',
-    description: 'The only intelligence platform that bridges the macroeconomic gap between African and Caribbean investment corridors.',
+    description: 'A unified intelligence platform that bridges the macroeconomic gap between African and Caribbean investment corridors.',
     icon: Globe,
     color: '#22C55E',
   },
   {
-    title: 'Expert-Driven Logic',
-    description: 'Behind the algorithms are 40+ regional analysts delivering unbiased, objective research focused on sovereign growth.',
+    title: 'AI-Assisted Analysis',
+    description: 'Governed machine learning supports anomaly detection, source comparison, and signal clustering—always validated against official data.',
     icon: Users,
     color: '#A78BFA',
   },
   {
-    title: 'Real-Time Signaling',
-    description: 'Moving beyond static reports. Our proprietary Signal Engine identifies emerging growth vectors and risk triggers hourly.',
+    title: 'Signal Intelligence',
+    description: 'Our Signal Engine identifies growth vectors and risk indicators by analyzing patterns across macroeconomic data points.',
     icon: Zap,
     color: '#F59E0B',
   },
@@ -35,7 +35,7 @@ const ADVANTAGES = [
   },
   {
     title: 'Institutional Grade',
-    description: 'Designed for the Global 2000 and Fortune 5. We provide the data density required for billion-dollar convictions.',
+    description: 'Designed for governments, development finance institutions, and global enterprises requiring rigorous data standards.',
     icon: BarChart3,
     color: '#06B6D4',
   },

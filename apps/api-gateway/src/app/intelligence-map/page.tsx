@@ -11,7 +11,7 @@ const CONTENT: PresentationContent = {
     points: [
       'Interactive 54-nation Africa node',
       'CARICOM trade corridor mapping',
-      'Real-time policy-shift pulse indicators',
+      'Policy-shift pulse indicators',
       'Granular country-brief overlays'
     ]
   },

@@ -1,11 +1,74 @@
 'use client';
 
-import React from 'react';
+import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { AuthSlider } from '@/components/auth/AuthSlider';
-import { ArrowRight, Lock, ShieldCheck, Mail } from 'lucide-react';
+import { ArrowRight, Lock, ShieldCheck, Mail, Loader2, AlertCircle } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 
-export default function LoginPage() {
+type AuthMode = 'password' | 'magic-link';
+type FormStatus = 'idle' | 'loading' | 'success' | 'error';
+
+function LoginForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get('redirect') || '/intelligence/map';
+
+  const [mode, setMode] = useState<AuthMode>('password');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [status, setStatus] = useState<FormStatus>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const handlePasswordLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatus('loading');
+    setErrorMessage('');
+
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      setStatus('error');
+      setErrorMessage(error.message === 'Invalid login credentials'
+        ? 'Invalid email or password. Please check your credentials and try again.'
+        : error.message);
+      return;
+    }
+
+    setStatus('success');
+    router.push(redirectTo);
+    router.refresh();
+  };
+
+  const handleMagicLinkLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatus('loading');
+    setErrorMessage('');
+
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`,
+      },
+    });
+
+    if (error) {
+      setStatus('error');
+      setErrorMessage(error.message);
+      return;
+    }
+
+    setStatus('success');
+  };
+
+  const handleSubmit = mode === 'password' ? handlePasswordLogin : handleMagicLinkLogin;
+
   return (
     <main className="min-h-screen bg-zinc-950 flex flex-col md:flex-row">
       {/* Left Side: Marketing Slider */}
@@ -32,41 +95,113 @@ export default function LoginPage() {
             <p className="text-zinc-500 text-sm font-medium">Access the Souvera Intelligence Terminal</p>
           </div>
 
+          {/* Success State for Magic Link */}
+          {status === 'success' && mode === 'magic-link' && (
+            <div className="p-6 bg-emerald-500/10 border border-emerald-500/20 rounded-sm mb-6">
+              <div className="flex items-start gap-3">
+                <Mail className="w-5 h-5 text-emerald-500 mt-0.5" />
+                <div>
+                  <h3 className="text-white font-semibold mb-1">Check your email</h3>
+                  <p className="text-zinc-400 text-sm">
+                    We&apos;ve sent a magic link to <span className="text-white">{email}</span>. 
+                    Click the link in the email to sign in.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Error State */}
+          {status === 'error' && errorMessage && (
+            <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-sm mb-6">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
+                <p className="text-red-400 text-sm">{errorMessage}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Mode Toggle */}
+          <div className="flex mb-6 bg-zinc-900/50 rounded-sm p-1">
+            <button
+              type="button"
+              onClick={() => setMode('password')}
+              className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest transition-all rounded-sm ${
+                mode === 'password'
+                  ? 'bg-zinc-800 text-white'
+                  : 'text-zinc-500 hover:text-white'
+              }`}
+            >
+              Password
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode('magic-link')}
+              className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest transition-all rounded-sm ${
+                mode === 'magic-link'
+                  ? 'bg-zinc-800 text-white'
+                  : 'text-zinc-500 hover:text-white'
+              }`}
+            >
+              Magic Link
+            </button>
+          </div>
+
           {/* Form */}
-          <form className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono flex items-center gap-2">
                 <Mail className="w-3 h-3" /> Corporate Identity
               </label>
               <input 
                 type="email" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@organization.com"
-                className="w-full bg-zinc-900/50 border border-zinc-800 rounded-sm px-4 py-4 text-white text-sm focus:border-blue-600 focus:outline-none transition-all placeholder:text-zinc-700"
+                required
+                disabled={status === 'loading'}
+                className="w-full bg-zinc-900/50 border border-zinc-800 rounded-sm px-4 py-4 text-white text-sm focus:border-blue-600 focus:outline-none transition-all placeholder:text-zinc-700 disabled:opacity-50"
               />
             </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono flex items-center gap-2">
-                  <Lock className="w-3 h-3" /> Secure Passcode
-                </label>
-                <Link href="/forgot" className="text-[10px] font-bold text-blue-500 hover:text-blue-400 uppercase tracking-widest font-mono">
-                  Recovery
-                </Link>
+            {mode === 'password' && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono flex items-center gap-2">
+                    <Lock className="w-3 h-3" /> Secure Passcode
+                  </label>
+                  <Link href="/auth/forgot-password" className="text-[10px] font-bold text-blue-500 hover:text-blue-400 uppercase tracking-widest font-mono">
+                    Recovery
+                  </Link>
+                </div>
+                <input 
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••••••"
+                  required
+                  disabled={status === 'loading'}
+                  className="w-full bg-zinc-900/50 border border-zinc-800 rounded-sm px-4 py-4 text-white text-sm focus:border-blue-600 focus:outline-none transition-all placeholder:text-zinc-700 disabled:opacity-50"
+                />
               </div>
-              <input 
-                type="password" 
-                placeholder="••••••••••••"
-                className="w-full bg-zinc-900/50 border border-zinc-800 rounded-sm px-4 py-4 text-white text-sm focus:border-blue-600 focus:outline-none transition-all placeholder:text-zinc-700"
-              />
-            </div>
+            )}
 
             <button 
-              type="submit" 
-              className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold tracking-widest uppercase py-4 rounded-sm transition-all flex items-center justify-center gap-2 group shadow-xl shadow-blue-900/20"
+              type="submit"
+              disabled={status === 'loading'}
+              className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600/50 text-white font-bold tracking-widest uppercase py-4 rounded-sm transition-all flex items-center justify-center gap-2 group shadow-xl shadow-blue-900/20 disabled:cursor-not-allowed"
             >
-              Authorize Access
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              {status === 'loading' ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  {mode === 'password' ? 'Authorizing...' : 'Sending Link...'}
+                </>
+              ) : (
+                <>
+                  {mode === 'password' ? 'Authorize Access' : 'Send Magic Link'}
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </>
+              )}
             </button>
           </form>
 
@@ -74,15 +209,15 @@ export default function LoginPage() {
           <div className="mt-12 pt-8 border-t border-zinc-900 flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <span className="text-sm text-zinc-500">Need terminal access?</span>
-              <Link href="/register" className="text-sm font-bold text-white hover:text-blue-500 transition-colors flex items-center gap-1.5">
-                Register Account <ArrowRight className="w-3.5 h-3.5" />
+              <Link href="/access/request-access" className="text-sm font-bold text-white hover:text-blue-500 transition-colors flex items-center gap-1.5">
+                Request Access <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
             
             <div className="flex items-center gap-3 p-4 bg-zinc-900/30 border border-zinc-800/50 rounded-sm">
               <ShieldCheck className="w-5 h-5 text-emerald-500" />
               <p className="text-[11px] text-zinc-400 leading-relaxed">
-                Secure 256-bit AES encryption active. Access logs are monitored by the Sovereign Compliance Board.
+                Enterprise-grade security. All sessions are encrypted and access is logged for compliance.
               </p>
             </div>
           </div>
@@ -90,14 +225,26 @@ export default function LoginPage() {
           {/* Footer Branding */}
           <div className="mt-20 flex items-center justify-between opacity-30 group">
              <div className="text-[9px] font-bold text-zinc-500 uppercase tracking-[0.2em] font-mono">
-               Souvera Intel // V2.0.4
+               Souvera Intel // V2.1.0
              </div>
              <div className="text-[9px] font-bold text-zinc-500 uppercase tracking-[0.2em] font-mono">
-               AfDEC Endorsed
+               Afronovation, Inc.
              </div>
           </div>
         </div>
       </div>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen bg-zinc-950 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+      </main>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }

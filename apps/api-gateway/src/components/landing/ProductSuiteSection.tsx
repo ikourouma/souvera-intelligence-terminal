@@ -7,42 +7,42 @@ const PRODUCTS = [
   {
     id: 'terminal',
     name: 'Intelligence Terminal',
-    tagline: 'Real-Time Macro Execution',
-    description: 'The core engine of Souvera. High-fidelity geospatial intelligence, regional signal monitors, and investment-grade country dossiers.',
+    tagline: 'Macro Intelligence Engine',
+    description: 'The core engine of Souvera. Geospatial intelligence, regional market monitors, and investment-grade country profiles.',
     icon: Terminal,
-    href: '/terminal/africa',
+    href: '/platform/terminal',
     color: '#3B82F6',
-    features: ['Live Signal Feed', 'Geospatial Mapping', 'Macro KPI Engine']
+    features: ['Signal Indicators', 'Interactive Maps', 'Country Profiles']
   },
   {
     id: 'research',
     name: 'Strategic Insights',
-    tagline: 'Expert-Led Briefings',
-    description: 'Weekly and flash research reports synthesized by our regional analysts. Admin-managed briefings on emerging transatlantic corridors.',
+    tagline: 'Expert Briefings',
+    description: 'Research reports and analysis from our regional analysts. Briefings on emerging transatlantic corridors and market opportunities.',
     icon: BookOpen,
     href: '/insights',
     color: '#A78BFA',
-    features: ['Sector Drilldowns', 'Policy Analysis', 'Flash Risk Alerts']
+    features: ['Sector Analysis', 'Market Rankings', 'Strategic Reports']
   },
   {
     id: 'api',
     name: 'Institutional Data API',
-    tagline: 'Programmatic Alpha',
-    description: 'Direct WebSocket and RESTful access to our proprietary signal scores. Feed Souvera intelligence into your proprietary models.',
+    tagline: 'Programmatic Access',
+    description: 'RESTful API access to Souvera intelligence. Integrate comprehensive market data into your proprietary systems.',
     icon: Database,
-    href: '/docs/api',
+    href: '/platform/api',
     color: '#22C55E',
-    features: ['99.9% Uptime', 'JSON/CSV Formats', 'High-Frequency Updates']
+    features: ['REST API', 'JSON/CSV Formats', 'Bulk Data Access']
   },
   {
     id: 'advisory',
-    name: 'Sovereign Advisory',
-    tagline: 'Bespoke Intelligence',
-    description: 'Direct access to our senior economic analysts for custom research, risk modeling, and strategic market entry assessments.',
+    name: 'Enterprise Advisory',
+    tagline: 'Custom Intelligence',
+    description: 'Access to our economic analysts for custom research, market assessments, and strategic advisory services.',
     icon: BarChart4,
-    href: '/contact',
+    href: '/access/institutional',
     color: '#F59E0B',
-    features: ['Custom Modeling', 'Market Entry Strategy', 'On-Demand Analysts']
+    features: ['Custom Research', 'Market Strategy', 'Dedicated Support']
   }
 ];
 
@@ -61,7 +61,7 @@ export function ProductSuiteSection() {
               Souvera provides a multi-layered ecosystem of products designed to deliver transparency to African and Caribbean markets. Choose the toolset that matches your institutional requirement.
             </p>
           </div>
-          <Link href="/pricing" className="px-8 py-3 bg-white text-black text-[11px] font-black uppercase tracking-widest hover:bg-zinc-200 transition-all rounded-sm">
+          <Link href="/access" className="px-8 py-3 bg-white text-black text-[11px] font-black uppercase tracking-widest hover:bg-zinc-200 transition-all rounded-sm">
             Compare Access Tiers
           </Link>
         </div>

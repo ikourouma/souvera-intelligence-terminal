@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
@@ -9,26 +9,49 @@ import {
   ChevronDown, ArrowRight, Globe, TrendingUp,
   Building2, Map, Menu, X, Zap,
 } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
+import { AccountMenu } from './AccountMenu';
+import type { User } from '@supabase/supabase-js';
 
 const navigation = [
+  {
+    name: 'Platform',
+    icon: Zap,
+    sections: [
+      {
+        title: 'Core Infrastructure',
+        links: [
+          { name: 'Platform Overview', href: '/platform' },
+          { name: 'Intelligence Terminal', href: '/platform/terminal' },
+          { name: 'Signal Engine', href: '/platform/signal-engine' },
+        ],
+      },
+      {
+        title: 'Data & Integration',
+        links: [
+          { name: 'Data Foundation', href: '/platform/data-foundation' },
+          { name: 'API Access', href: '/platform/api' },
+        ],
+      },
+    ],
+  },
   {
     name: 'Intelligence',
     icon: Globe,
     sections: [
       {
-        title: 'Command Nodes',
+        title: 'Regional Coverage',
         links: [
-          { name: 'Africa Command Center', href: '/africa-command-center' },
-          { name: 'Caribbean Command Center', href: '/caribbean-command-center' },
-          { name: 'Intelligence Map Briefing', href: '/intelligence-map' },
+          { name: 'Intelligence Overview', href: '/intelligence' },
+          { name: 'Africa Intelligence', href: '/intelligence/africa' },
+          { name: 'Caribbean Intelligence', href: '/intelligence/caribbean' },
         ],
       },
       {
-        title: 'Access Terminal',
+        title: 'Analysis Tools',
         links: [
-          { name: '● Africa Dashboard', href: '/terminal/africa' },
-          { name: '● Caribbean Dashboard', href: '/terminal/caribbean' },
-          { name: 'Geospatial Terminal', href: '/terminal/africa/map' },
+          { name: 'Intelligence Map', href: '/intelligence/map' },
+          { name: 'Country Comparison', href: '/intelligence/compare' },
         ],
       },
     ],
@@ -38,63 +61,67 @@ const navigation = [
     icon: Building2,
     sections: [
       {
-        title: 'Institutional Briefings',
+        title: 'Core Infrastructure',
         links: [
-          { name: 'Sector Intelligence Overview', href: '/sector-intelligence' },
-          { name: 'Energy & Renewables', href: '/sector/energy-&-renewables' },
-          { name: 'Mining & Critical Minerals', href: '/sector/mining-&-critical-minerals' },
+          { name: 'Sector Overview', href: '/sectors' },
+          { name: 'Digital Infrastructure', href: '/sectors/digital-infrastructure' },
+          { name: 'Fintech & Digital Finance', href: '/sectors/fintech' },
         ],
       },
       {
-        title: 'Sector Dashboards',
+        title: 'Industry Sectors',
         links: [
-          { name: 'Fintech & Digital Finance', href: '/sector/fintech-&-digital-finance' },
-          { name: 'Tourism & Hospitality', href: '/sector/tourism-&-hospitality' },
-          { name: 'Logistics & Trade', href: '/sector/logistics-&-trade' },
+          { name: 'Mining & Critical Minerals', href: '/sectors/critical-minerals' },
+          { name: 'Energy & Renewables', href: '/sectors/energy' },
+          { name: 'Agriculture & Agribusiness', href: '/sectors/agriculture' },
+        ],
+      },
+      {
+        title: 'Services & Connectivity',
+        links: [
+          { name: 'Logistics & Trade', href: '/sectors/logistics' },
+          { name: 'Tourism & Hospitality', href: '/sectors/tourism-hospitality' },
         ],
       },
     ],
   },
   {
-    name: 'Market Intelligence',
+    name: 'Insights',
     icon: TrendingUp,
     sections: [
       {
-        title: 'Signal Analysis',
+        title: 'Research & Analysis',
         links: [
-          { name: 'Signal Engine Briefing', href: '/signal-engine' },
-          { name: 'Growth Market Rankings', href: '/terminal/africa#signals' },
-          { name: 'Risk Index monitoring', href: '/terminal/africa#risk' },
+          { name: 'Insights Overview', href: '/insights' },
+          { name: 'Strategic Briefings', href: '/insights/briefings' },
+          { name: 'Market Rankings', href: '/insights/rankings' },
         ],
       },
       {
-        title: 'Institutional Reports',
+        title: 'Methodology',
         links: [
-          { name: 'Country Intelligence Briefs', href: '/subscriptions' },
-          { name: 'Investor Memos', href: '/subscriptions' },
-          { name: 'FDI Inflow Rankings', href: '/terminal/africa/economies#fdi' },
+          { name: 'Data Methodology', href: '/insights/methodology' },
         ],
       },
     ],
   },
   {
     name: 'Access',
-    icon: Zap,
+    icon: Map,
     sections: [
       {
-        title: 'Gateway',
+        title: 'Get Started',
         links: [
-          { name: 'Subscription Plans', href: '/subscriptions' },
-          { name: 'API Documentation', href: '/api-documentation' },
-          { name: 'Enterprise Solutions', href: '/solutions' },
+          { name: 'Access Plans', href: '/access' },
+          { name: 'Request Access', href: '/access/request-access' },
+          { name: 'Request Demo', href: '/access/request-demo' },
         ],
       },
       {
-        title: 'Authentication',
+        title: 'Enterprise',
         links: [
-          { name: 'Sign In to Terminal', href: '/login' },
-          { name: 'Create Free Account', href: '/login' },
-          { name: 'Request Demo', href: '/contact' },
+          { name: 'Institutional Solutions', href: '/access/institutional' },
+          { name: 'Contact Sales', href: '/contact' },
         ],
       },
     ],
@@ -104,20 +131,19 @@ const navigation = [
     icon: Globe,
     sections: [
       {
-        title: 'Institutional',
+        title: 'Data & Compliance',
         links: [
-          { name: 'Data Sources & Methodology', href: '/Data-Sources-&-Methodology' },
-          { name: 'Institutional Signal Ledger', href: '/source-registry' },
-          { name: 'About Souvera', href: '/about' },
+          { name: 'Data Sources', href: '/resources/data-sources' },
+          { name: 'Source Registry', href: '/resources/source-registry' },
+          { name: 'Compliance', href: '/resources/compliance' },
         ],
       },
       {
-        title: 'Resources',
+        title: 'Support',
         links: [
-          { name: 'Source Registry', href: '/source-registry' },
-          { name: 'Methodology', href: '/Data-Sources-&-Methodology' },
-          { name: 'Legal Hub', href: '/legal' },
-          { name: 'Sitemap', href: '/sitemap' },
+          { name: 'FAQ', href: '/resources/faq' },
+          { name: 'About Souvera', href: '/about' },
+          { name: 'Legal', href: '/legal' },
         ],
       },
     ],
@@ -125,21 +151,116 @@ const navigation = [
 ];
 
 const mobileUtilityLinks = [
-  { name: 'Subscriptions', href: '/subscriptions' },
-  { name: 'Latest Insights', href: '/insights' },
+  { name: 'Access', href: '/access' },
+  { name: 'Insights', href: '/insights' },
   { name: 'Contact', href: '/contact' },
 ];
+
+// Helper to get display info from user
+function getUserDisplayInfo(user: User | null, fullName?: string | null) {
+  if (!user) return null;
+  
+  const email = user.email || '';
+  
+  // A. If full name exists, use it
+  if (fullName && fullName.trim()) {
+    const parts = fullName.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      const firstName = parts[0];
+      const lastInitial = parts[parts.length - 1].charAt(0);
+      const initials = firstName.charAt(0) + lastInitial;
+      return {
+        initials: initials.toUpperCase(),
+        displayName: `${firstName} ${lastInitial}.`,
+        fullName,
+      };
+    } else {
+      const name = parts[0];
+      return {
+        initials: name.substring(0, 2).toUpperCase(),
+        displayName: name,
+        fullName: name,
+      };
+    }
+  }
+  
+  // B. Derive from email local part
+  const localPart = email.split('@')[0] || 'account';
+  const friendlyName = localPart
+    .split(/[._-]/)
+    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+  
+  return {
+    initials: friendlyName.substring(0, 2).toUpperCase(),
+    displayName: friendlyName,
+    fullName: null,
+  };
+}
 
 export function SouveraMegaNav() {
   const pathname = usePathname();
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileAccordion, setMobileAccordion] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [userFullName, setUserFullName] = useState<string | null>(null);
+  const [userPlan, setUserPlan] = useState<string>('Explorer');
+  const [authLoading, setAuthLoading] = useState(true);
   const panelRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLElement>(null);
   const mobileOverlayRef = useRef<HTMLDivElement>(null);
 
   const { contextSafe } = useGSAP({ scope: containerRef });
+  const supabase = createClient();
+
+  // Check auth state and fetch user data
+  useEffect(() => {
+    // Get initial session
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setAuthLoading(false);
+      
+      // Fetch account info from /api/v1/me if authenticated
+      if (session?.user) {
+        try {
+          const response = await fetch('/api/v1/me');
+          
+          if (!response.ok) {
+            console.error('[SouveraMegaNav] Failed to fetch account info:', response.status);
+            return;
+          }
+
+          const data = await response.json();
+          
+          if (data.authenticated && data.access) {
+            // Set plan name from API
+            setUserPlan(data.access.planLabel.replace(' Plan', ''));
+            
+            // Set full name from profile
+            if (data.user?.fullName) {
+              setUserFullName(data.user.fullName);
+            }
+          }
+        } catch (error) {
+          console.error('[SouveraMegaNav] Error fetching account info:', error);
+        }
+      }
+    });
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      if (!session?.user) {
+        setUserFullName(null);
+        setUserPlan('Explorer');
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase]);
 
   // Reset menu state on route change
   React.useEffect(() => {
@@ -208,11 +329,11 @@ export function SouveraMegaNav() {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-8 h-full">
+          <nav className="hidden lg:flex items-center gap-8 h-full flex-1 min-w-0 justify-center">
             {navigation.map((item) => (
               <div
                 key={item.name}
-                className="h-full flex items-center cursor-pointer"
+                className="h-full flex items-center cursor-pointer shrink-0"
                 onMouseEnter={() => handleMouseEnter(item.name)}
               >
                 <span className={`text-[13px] font-medium transition-colors flex items-center gap-1 ${activeMenu === item.name ? 'text-souvera-blue' : 'text-zinc-400 hover:text-zinc-100'}`}>
@@ -224,23 +345,34 @@ export function SouveraMegaNav() {
           </nav>
 
           {/* Right CTAs */}
-          <div className="flex items-center gap-4 relative z-20">
+          <div className="flex items-center gap-4 relative z-20 shrink-0 ml-4">
             <Link
-              href="/terminal/africa"
+              href="/intelligence/map"
               className="hidden md:flex items-center gap-2 text-[13px] font-semibold text-zinc-300 hover:text-white transition-colors"
             >
               Access Terminal
             </Link>
-            <Link
-              href="/login"
-              className="hidden sm:flex items-center gap-2 text-[12px] font-bold tracking-widest uppercase px-5 py-2.5 transition-all"
-              style={{ background: '#2563EB', color: 'white' }}
-              onMouseEnter={e => (e.currentTarget.style.background = '#1d4ed8')}
-              onMouseLeave={e => (e.currentTarget.style.background = '#2563EB')}
-            >
-              <span>Sign In</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
+            
+            {/* Auth State: Show loading, account menu, or sign in */}
+            {authLoading ? (
+              <div className="hidden sm:block w-24 h-10 bg-zinc-800/50 animate-pulse rounded-sm" />
+            ) : user ? (
+              <div className="hidden sm:block">
+                <AccountMenu user={user} />
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                className="hidden sm:flex items-center gap-2 text-[12px] font-bold tracking-widest uppercase px-5 py-2.5 transition-all"
+                style={{ background: '#2563EB', color: 'white' }}
+                onMouseEnter={e => (e.currentTarget.style.background = '#1d4ed8')}
+                onMouseLeave={e => (e.currentTarget.style.background = '#2563EB')}
+              >
+                <span>Sign In</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            )}
+            
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
               className="lg:hidden w-10 h-10 flex items-center justify-center text-zinc-400 hover:text-white transition-colors z-[200]"
@@ -274,7 +406,7 @@ export function SouveraMegaNav() {
                       <h2 className="text-base font-bold text-white">{item.name}</h2>
                     </div>
                     <p className="text-[12px] leading-relaxed" style={{ color: '#9CA3AF' }}>
-                      Sovereign-grade intelligence across African and Caribbean markets. Powered by IMF, World Bank, and real-time data infrastructure.
+                      Sovereign-grade intelligence across African and Caribbean markets. Powered by IMF, World Bank, and source-attributed data infrastructure.
                     </p>
                   </div>
 
@@ -322,6 +454,31 @@ export function SouveraMegaNav() {
         </div>
 
         <div className="flex-1 overflow-y-auto px-6 py-6">
+          {/* User Info in Mobile (if authenticated) */}
+          {user && (() => {
+            const displayInfo = getUserDisplayInfo(user, userFullName);
+            const planLabel = userPlan ? `${userPlan} Plan` : 'Explorer Plan';
+            
+            return (
+              <div className="mb-6 pb-6 border-b border-zinc-800">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-bold">
+                    {displayInfo?.initials || 'AC'}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-white font-semibold">{displayInfo?.displayName || 'Account'}</p>
+                    <p className="text-xs text-zinc-400 truncate">{user.email}</p>
+                  </div>
+                </div>
+                <div className="ml-[52px]">
+                  <span className="inline-block text-xs px-2 py-0.5 rounded-sm bg-blue-500/10 text-blue-400 font-medium">
+                    {planLabel}
+                  </span>
+                </div>
+              </div>
+            );
+          })()}
+          
           <div className="space-y-1 mb-10">
             {navigation.map((item) => {
               const Icon = item.icon;
@@ -365,16 +522,32 @@ export function SouveraMegaNav() {
           </div>
 
           <div className="space-y-3">
-            <Link href="/terminal/africa" onClick={() => setMobileOpen(false)} className="sv-mobile-item flex items-center justify-center gap-2 w-full font-bold text-[12px] tracking-widest uppercase py-4 rounded-sm transition-all" style={{ background: '#2563EB', color: 'white' }}>
+            <Link href="/intelligence/map" onClick={() => setMobileOpen(false)} className="sv-mobile-item flex items-center justify-center gap-2 w-full font-bold text-[12px] tracking-widest uppercase py-4 rounded-sm transition-all" style={{ background: '#2563EB', color: 'white' }}>
               Access Terminal <ArrowRight className="w-4 h-4" />
             </Link>
-            <div className="grid grid-cols-3 gap-2 pt-2" style={{ borderTop: '1px solid #1F2A37' }}>
-              {mobileUtilityLinks.map((link) => (
-                <Link key={link.name} href={link.href} onClick={() => setMobileOpen(false)} className="sv-mobile-item text-[10px] font-bold tracking-widest uppercase text-center py-3 rounded-sm transition-colors" style={{ background: '#161D26', color: '#9CA3AF', border: '1px solid #1F2A37' }}>
-                  {link.name}
+            
+            {/* Auth-dependent actions */}
+            {user ? (
+              <div className="grid grid-cols-3 gap-2 pt-2" style={{ borderTop: '1px solid #1F2A37' }}>
+                <Link href="/profile" onClick={() => setMobileOpen(false)} className="sv-mobile-item text-[10px] font-bold tracking-widest uppercase text-center py-3 rounded-sm transition-colors" style={{ background: '#161D26', color: '#9CA3AF', border: '1px solid #1F2A37' }}>
+                  Profile
                 </Link>
-              ))}
-            </div>
+                <Link href="/access" onClick={() => setMobileOpen(false)} className="sv-mobile-item text-[10px] font-bold tracking-widest uppercase text-center py-3 rounded-sm transition-colors" style={{ background: '#161D26', color: '#9CA3AF', border: '1px solid #1F2A37' }}>
+                  Plans
+                </Link>
+                <button onClick={async () => { await supabase.auth.signOut(); setMobileOpen(false); window.location.href = '/'; }} className="sv-mobile-item text-[10px] font-bold tracking-widest uppercase text-center py-3 rounded-sm transition-colors" style={{ background: '#161D26', color: '#EF4444', border: '1px solid #1F2A37' }}>
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-3 gap-2 pt-2" style={{ borderTop: '1px solid #1F2A37' }}>
+                {mobileUtilityLinks.map((link) => (
+                  <Link key={link.name} href={link.href} onClick={() => setMobileOpen(false)} className="sv-mobile-item text-[10px] font-bold tracking-widest uppercase text-center py-3 rounded-sm transition-colors" style={{ background: '#161D26', color: '#9CA3AF', border: '1px solid #1F2A37' }}>
+                    {link.name}
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

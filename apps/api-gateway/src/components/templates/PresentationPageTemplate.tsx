@@ -50,11 +50,11 @@ export function PresentationPageTemplate({ content }: Props) {
               {content.title}
             </h1>
             <div className="flex flex-wrap gap-4 mt-12">
-               <Link href="/contact" className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-black text-[12px] tracking-widest uppercase transition-all rounded-sm flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4" /> Contact Strategic Team
+               <Link href="/access/request-access" className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-black text-[12px] tracking-widest uppercase transition-all rounded-sm flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4" /> Request Access
                </Link>
-               <Link href="/login" className="px-8 py-4 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-white font-black text-[12px] tracking-widest uppercase transition-all rounded-sm flex items-center gap-2">
-                  Access Command Center <ArrowRight className="w-4 h-4" />
+               <Link href="/contact" className="px-8 py-4 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-white font-black text-[12px] tracking-widest uppercase transition-all rounded-sm flex items-center gap-2">
+                  Contact Sales <ArrowRight className="w-4 h-4" />
                </Link>
             </div>
           </div>
@@ -148,11 +148,11 @@ export function PresentationPageTemplate({ content }: Props) {
 
            <div className="mt-24 p-12 bg-blue-600 rounded-sm flex flex-col md:flex-row items-center justify-between gap-8">
               <div className="text-left">
-                 <h3 className="text-3xl font-bold text-white mb-2" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>Ready to deploy?</h3>
-                 <p className="text-white/80">Initialize your institutional intelligence node today.</p>
+                 <h3 className="text-3xl font-bold text-white mb-2" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>Ready to access?</h3>
+                 <p className="text-white/80">Request access to Souvera Intelligence today.</p>
               </div>
-              <Link href="/login" className="px-10 py-5 bg-white text-blue-600 font-black text-[14px] tracking-widest uppercase rounded-sm hover:bg-zinc-100 transition-all shadow-xl">
-                 Create Free Account
+              <Link href="/access/request-access" className="px-10 py-5 bg-white text-blue-600 font-black text-[14px] tracking-widest uppercase rounded-sm hover:bg-zinc-100 transition-all shadow-xl">
+                 Request Access
               </Link>
            </div>
         </div>

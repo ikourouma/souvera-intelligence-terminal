@@ -3,59 +3,90 @@ import React from 'react';
 import { SouveraMegaNav } from '@/components/ui/SouveraMegaNav';
 import { SouveraFooter } from '@/components/ui/SouveraFooter';
 import Link from 'next/link';
-import { Map, Zap, Building2, TrendingUp, ShieldCheck, Info } from 'lucide-react';
+import { Map, Zap, Building2, TrendingUp, ShieldCheck, Info, Terminal, Database, Layers } from 'lucide-react';
 
 const SITEMAP_GROUPS = [
   {
-    title: 'Intelligence Command',
+    title: 'Platform',
+    icon: Terminal,
+    links: [
+      { name: 'Platform Overview', href: '/platform' },
+      { name: 'Intelligence Terminal', href: '/platform/terminal' },
+      { name: 'Signal Engine', href: '/platform/signal-engine' },
+      { name: 'Data Foundation', href: '/platform/data-foundation' },
+      { name: 'API Access', href: '/platform/api' },
+    ]
+  },
+  {
+    title: 'Intelligence',
     icon: Map,
     links: [
-      { name: 'Africa Command Center', href: '/africa-command-center' },
-      { name: 'Caribbean Command Center', href: '/caribbean-command-center' },
-      { name: 'Intelligence Map Briefing', href: '/intelligence-map' },
-      { name: 'Functional Africa Terminal', href: '/terminal/africa' },
-      { name: 'Functional Caribbean Terminal', href: '/terminal/caribbean' },
+      { name: 'Intelligence Overview', href: '/intelligence' },
+      { name: 'Africa Intelligence', href: '/intelligence/africa' },
+      { name: 'Caribbean Intelligence', href: '/intelligence/caribbean' },
+      { name: 'Intelligence Map', href: '/intelligence/map' },
+      { name: 'Country Comparison', href: '/intelligence/compare' },
     ]
   },
   {
-    title: 'Sector Intelligence',
+    title: 'Sectors',
     icon: Building2,
     links: [
-      { name: 'Sector Intelligence Overview', href: '/sector-intelligence' },
-      { name: 'Energy & Renewables', href: '/sector/energy-&-renewables' },
-      { name: 'Mining & Critical Minerals', href: '/sector/mining-&-critical-minerals' },
-      { name: 'Fintech & Digital Finance', href: '/sector/fintech-&-digital-finance' },
-      { name: 'Tourism & Hospitality', href: '/sector/tourism-&-hospitality' },
+      { name: 'Sector Intelligence Overview', href: '/sectors' },
+      { name: 'Fintech', href: '/sectors/fintech' },
+      { name: 'Critical Minerals', href: '/sectors/critical-minerals' },
+      { name: 'Energy', href: '/sectors/energy' },
+      { name: 'Agriculture', href: '/sectors/agriculture' },
+      { name: 'Logistics', href: '/sectors/logistics' },
     ]
   },
   {
-    title: 'Market Intelligence',
+    title: 'Insights',
     icon: TrendingUp,
     links: [
-      { name: 'Signal Engine Briefing', href: '/signal-engine' },
-      { name: 'Growth Market Rankings', href: '/terminal/africa#signals' },
-      { name: 'Risk Index Monitoring', href: '/terminal/africa#risk' },
-      { name: 'Subscription Plans', href: '/subscriptions' },
+      { name: 'Insights Overview', href: '/insights' },
+      { name: 'Executive Briefings', href: '/insights/briefings' },
+      { name: 'Market Rankings', href: '/insights/rankings' },
+      { name: 'Data Methodology', href: '/insights/methodology' },
     ]
   },
   {
-    title: 'Institutional',
+    title: 'Access',
+    icon: Layers,
+    links: [
+      { name: 'Access Plans', href: '/access' },
+      { name: 'Request Access', href: '/access/request-access' },
+      { name: 'Request Demo', href: '/access/request-demo' },
+      { name: 'Institutional Solutions', href: '/access/institutional' },
+    ]
+  },
+  {
+    title: 'Resources',
+    icon: Database,
+    links: [
+      { name: 'Resources Overview', href: '/resources' },
+      { name: 'Data Sources', href: '/resources/data-sources' },
+      { name: 'Source Registry', href: '/resources/source-registry' },
+      { name: 'Compliance', href: '/resources/compliance' },
+      { name: 'FAQ', href: '/resources/faq' },
+      { name: 'System Status', href: '/status' },
+    ]
+  },
+  {
+    title: 'Company',
     icon: Info,
     links: [
       { name: 'About Souvera', href: '/about' },
-      { name: 'Data Sources & Methodology', href: '/Data-Sources-&-Methodology' },
-      { name: 'Institutional Signal Ledger', href: '/source-registry' },
-      { name: 'API Documentation', href: '/api-documentation' },
+      { name: 'Contact', href: '/contact' },
     ]
   },
   {
-    title: 'Compliance Hub',
+    title: 'Legal',
     icon: ShieldCheck,
     links: [
-      { name: 'Privacy Policy', href: '/compliance/privacy-policy' },
-      { name: 'Terms of Service', href: '/compliance/terms-of-service' },
-      { name: 'Cookie Policy', href: '/compliance/cookie-policy' },
-      { name: 'Accessibility Statement', href: '/compliance/accessibility' },
+      { name: 'Legal Overview', href: '/legal' },
+      { name: 'Privacy Policy', href: '/legal/privacy' },
+      { name: 'Terms of Service', href: '/legal/terms' },
     ]
   }
 ];

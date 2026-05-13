@@ -113,8 +113,10 @@ const NAME_TO_ISO3: Record<string, string> = {
   "Congo, DR": "COD", "D.R. Congo": "COD",
   "Republic of the Congo": "COG", "Republic of Congo": "COG",
   "Congo": "COG", "Congo, Rep.": "COG", "Congo Republic": "COG",
-  "Gabon": "GAB", "Equatorial Guinea": "GNQ",
+  "Gabon": "GAB", "Equatorial Guinea": "GNQ", "Eq. Guinea": "GNQ",
+  "Guinea Ecuatorial": "GNQ", "Guinée équatoriale": "GNQ",
   "São Tomé and Príncipe": "STP", "Sao Tome and Principe": "STP",
+  "S. Tomé and Príncipe": "STP",
   "São Tomé e Príncipe": "STP", "Sao Tome e Principe": "STP",
   "Chad": "TCD", "Angola": "AGO",
   // Southern Africa
@@ -778,6 +780,13 @@ export function AfricaMap({ compact = false }: { compact?: boolean }) {
 
   // ── Country lookup from geo feature ──────────────────────────────────────
   const getCountryISO3 = useCallback((geo: GeoFeature): string | null => {
+    // Try direct ISO3 property (Natural Earth sources use iso_a3 / ISO_A3)
+    const directIso3 = geo.properties?.iso_a3 ?? geo.properties?.ISO_A3;
+    if (directIso3 && directIso3 !== '-99' && NAME_TO_ISO3[directIso3] === undefined) {
+      // iso_a3 IS the code; check it's a valid scope code directly
+      if (ISO3_REGION[directIso3]) return directIso3;
+    }
+    // Fall back to name lookup (holtzy world.geojson uses properties.name)
     const name = (geo.properties.name ?? geo.properties.NAME ?? "") as string;
     return NAME_TO_ISO3[name] ?? null;
   }, []);

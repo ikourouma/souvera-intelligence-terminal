@@ -100,12 +100,12 @@ const STAT_BADGES = [
   { value: "54",    label: "Nations"    },
   { value: "5",     label: "Regions"    },
   { value: "2026",  label: "IMF Data"   },
-  { value: "Live",  label: "Real-Time"  },
+  { value: "Curated",  label: "Source-Attributed"  },
 ];
 
 export function MapTeaser({
-  heading     = "54 African Nations. Live Economic Data.",
-  subtext     = "GDP, Foreign Direct Investment (FDI), sector intelligence, and AfDEC market assessments — across every African nation. Sourced from IMF 2026 projections and updated in real time.",
+  heading     = "54 African Nations. Curated Economic Data.",
+  subtext     = "GDP, Foreign Direct Investment (FDI), sector intelligence, and AfDEC market assessments — across every African nation. Sourced from IMF 2026 projections and curated from official sources.",
   ctaLabel    = "Open Intelligence Terminal",
   accentColor = "blue",
 }: MapTeaserProps) {
@@ -133,7 +133,7 @@ export function MapTeaser({
                     style={{ backgroundColor: ac.silhouette }} />
                 </span>
                 <span className="text-[10px] font-black uppercase tracking-[0.22em]">
-                  Africa Intelligence Terminal · Live
+                  Africa Intelligence Terminal · Source-Attributed
                 </span>
               </div>
 

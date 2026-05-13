@@ -33,7 +33,7 @@ const CORPORATE_SNAPSHOTS: Record<string, any> = {
       title: 'The Continental Pulse.',
       description: 'A high-fidelity intelligence node tracking 54 African nations across macroeconomic, fiscal, and sector-specific corridors.',
       points: [
-        'Real-time GDP & Fiscal health tracking',
+        'Curated GDP & Fiscal health tracking',
         'FDI Sentiment & Investment flow mapping',
         'Sovereign debt & policy shift signaling',
         'Cross-continental trade node visualization'
@@ -54,7 +54,7 @@ const CORPORATE_SNAPSHOTS: Record<string, any> = {
       impact: [
         { label: 'Markets Tracked', value: '54 Nations' },
         { label: 'Data Nodes', value: '1,200+' },
-        { label: 'Sync Frequency', value: 'Real-Time' },
+        { label: 'Sync Frequency', value: 'Source-Attributed' },
         { label: 'Accuracy Score', value: '99.8%' }
       ]
     },
@@ -311,7 +311,7 @@ const CORPORATE_SNAPSHOTS: Record<string, any> = {
       impact: [
         { label: 'Port Nodes', value: '24 Tier-1' },
         { label: 'Trade Volume', value: '$150B+' },
-        { label: 'Signal Sync', value: 'Real-Time' },
+        { label: 'Signal Sync', value: 'Source-Attributed' },
         { label: 'Reliability', value: 'Sovereign' }
       ]
     },

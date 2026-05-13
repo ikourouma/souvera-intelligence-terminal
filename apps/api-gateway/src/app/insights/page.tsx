@@ -1,6 +1,20 @@
+import type { Metadata } from 'next';
 import { SouveraMegaNav } from '@/components/ui/SouveraMegaNav';
 import { SouveraFooter } from '@/components/ui/SouveraFooter';
 import { Clock, TrendingUp, AlertTriangle, Globe } from 'lucide-react';
+
+export const metadata: Metadata = {
+  title: 'Insights | Souvera',
+  description: 'Strategic insights and market intelligence for African and Caribbean markets. Research briefings, market rankings, and economic analysis.',
+  openGraph: {
+    title: 'Insights | Souvera',
+    description: 'Strategic insights and market intelligence for African and Caribbean markets.',
+    url: 'https://souvera.vercel.app/insights',
+  },
+  alternates: {
+    canonical: 'https://souvera.vercel.app/insights',
+  },
+};
 
 export default function InsightsPage() {
   return (
@@ -13,7 +27,7 @@ export default function InsightsPage() {
           <div className="flex items-center gap-4">
             <h1 className="text-2xl font-bold tracking-tighter">Souvera Live Wire</h1>
             <span className="px-2 py-1 text-[10px] font-mono bg-souvera-blue/20 text-souvera-blue border border-souvera-blue/30 uppercase tracking-widest rounded-sm">
-              Real-Time Feed
+              Source-Attributed Feed
             </span>
           </div>
           <div className="flex items-center gap-3 text-xs font-mono text-zinc-500">
@@ -131,13 +145,13 @@ export default function InsightsPage() {
                  Geospatial Modules
                </h3>
                <div className="flex flex-col gap-3">
-                 <a href="/terminal/africa" className="group flex flex-col gap-1 p-3 bg-zinc-950 border border-zinc-800 hover:border-souvera-blue/50 transition-colors">
-                    <span className="text-sm font-bold group-hover:text-souvera-blue transition-colors">Africa Intelligence Map</span>
-                    <span className="text-[10px] text-zinc-500 font-mono">Live FDI & Signal Heatmap</span>
+                 <a href="/intelligence/africa" className="group flex flex-col gap-1 p-3 bg-zinc-950 border border-zinc-800 hover:border-souvera-blue/50 transition-colors">
+                    <span className="text-sm font-bold group-hover:text-souvera-blue transition-colors">Africa Intelligence</span>
+                    <span className="text-[10px] text-zinc-500 font-mono">Country Profiles & Analysis</span>
                  </a>
-                 <a href="/terminal/caribbean" className="group flex flex-col gap-1 p-3 bg-zinc-950 border border-zinc-800 hover:border-emerald-500/50 transition-colors">
-                    <span className="text-sm font-bold group-hover:text-emerald-400 transition-colors">Caribbean Map Engine</span>
-                    <span className="text-[10px] text-zinc-500 font-mono">Data Corridors & Hubs</span>
+                 <a href="/intelligence/caribbean" className="group flex flex-col gap-1 p-3 bg-zinc-950 border border-zinc-800 hover:border-emerald-500/50 transition-colors">
+                    <span className="text-sm font-bold group-hover:text-emerald-400 transition-colors">Caribbean Intelligence</span>
+                    <span className="text-[10px] text-zinc-500 font-mono">Regional Analysis & Data</span>
                  </a>
                </div>
             </div>

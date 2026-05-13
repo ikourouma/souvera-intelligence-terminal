@@ -7,7 +7,7 @@ import { TrendingUp, Globe2, Building2, ShieldCheck } from 'lucide-react';
 const marketingSlides = [
   {
     title: "Sovereign-grade intelligence for the African expansion.",
-    subtitle: "Direct access to real-time macroeconomic signals, infrastructure pipelines, and verified deal-flow across 54 African nations.",
+    subtitle: "Direct access to curated macroeconomic signals, infrastructure pipelines, and verified deal-flow across 54 African nations.",
     stat_1_val: "54",
     stat_1_label: "Sovereign Nodes",
     stat_2_val: "$1.9T",

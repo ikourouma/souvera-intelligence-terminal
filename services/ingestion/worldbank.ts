@@ -14,6 +14,7 @@ const INDICATORS = [
   { wbCode: 'NY.GDP.MKTP.CD', souveraKey: 'gdp_current_usd' },
   { wbCode: 'NY.GDP.MKTP.KD.ZG', souveraKey: 'gdp_growth_pct' },
   { wbCode: 'SP.POP.TOTL', souveraKey: 'population_total' },
+  { wbCode: 'BX.KLT.DINV.CD.WD', souveraKey: 'fdi_net_inflows_usd' },
 ] as const;
 
 const BASE_URL = DATA_SOURCE_URLS.worldBank;

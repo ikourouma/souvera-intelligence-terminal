@@ -8,9 +8,9 @@ import Link from 'next/link';
 // Fallback to hardcoded default when DB is unavailable.
 const FALLBACK_ANNOUNCEMENT = {
   label: 'Now Live',
-  message: 'Souvera Intelligence Terminal v2.0 — Africa & Caribbean command centers now available.',
+  message: 'Souvera Intelligence Terminal — Africa & Caribbean market intelligence now available.',
   cta: 'Explore Platform',
-  href: '/subscriptions',
+  href: '/platform',
 };
 
 type Announcement = typeof FALLBACK_ANNOUNCEMENT;

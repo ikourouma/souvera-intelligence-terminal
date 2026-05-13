@@ -24,7 +24,7 @@ const accentMap = {
 
 export function AfricaMapEmbed({
   heading = "Africa Intelligence Map",
-  subtext = "Real-time economic and market intelligence across all 54 African nations — powered by AfDEC's live data infrastructure.",
+  subtext = "Economic and market intelligence across all 54 African nations — powered by AfDEC's source-attributed data infrastructure.",
   accentColor = "blue",
 }: AfricaMapEmbedProps) {
   const ac = accentMap[accentColor];
@@ -42,7 +42,7 @@ export function AfricaMapEmbed({
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
               </span>
-              <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Live Intelligence</span>
+              <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Curated Intelligence</span>
               <div className="w-px h-4 bg-zinc-700" />
               <Globe className={`w-3.5 h-3.5 ${ac.text}`} />
               <span className={`text-[10px] font-black ${ac.text} uppercase tracking-widest`}>Africa Intelligence Terminal</span>
