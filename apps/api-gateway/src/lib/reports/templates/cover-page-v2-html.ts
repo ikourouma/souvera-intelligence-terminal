@@ -76,7 +76,7 @@ export function buildCoverPageModel(
   };
 }
 
-const COVER_CSS = `
+export const COVER_V2_CSS = `
 @page { size: A4; margin: 16mm; }
 
 :root{
@@ -120,7 +120,7 @@ html,body{ margin:0; padding:0; color:var(--ink); font-family: Inter, ui-sans-se
 .preparedBy{ color:var(--ink); font-weight:600; }
 `;
 
-export function renderCoverPageHtml(model: CoverPageModel): string {
+export function renderCoverPageSection(model: CoverPageModel): string {
   const c = model.country;
   const metaParts = [
     c.region ? `Region: ${escapeHtml(c.region)}` : null,
@@ -133,15 +133,7 @@ export function renderCoverPageHtml(model: CoverPageModel): string {
     .map((d) => `<li>${escapeHtml(d)}</li>`)
     .join('');
 
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <title>${escapeHtml(c.name)} — Country Report</title>
-  <style>${COVER_CSS}</style>
-</head>
-<body>
-<section class="page cover">
+  return `<section class="page cover">
   <div class="topbar">
     <div class="brand">SOUVERA INTELLIGENCE TERMINAL</div>
     <div class="classification">Confidential — Licensed subscriber use only</div>
@@ -191,7 +183,20 @@ export function renderCoverPageHtml(model: CoverPageModel): string {
     <div class="contact">souveraterminal.com • intelligence@souveraterminal.com</div>
     <div class="disclaimerShort">For informational purposes only. Verify material facts independently before decisions.</div>
   </div>
-</section>
+</section>`;
+}
+
+export function renderCoverPageHtml(model: CoverPageModel): string {
+  const c = model.country;
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>${escapeHtml(c.name)} — Country Report</title>
+  <style>${COVER_V2_CSS}</style>
+</head>
+<body>
+${renderCoverPageSection(model)}
 </body>
 </html>`;
 }

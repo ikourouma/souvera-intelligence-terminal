@@ -203,19 +203,36 @@ function checkNarrativeContradictions(
   return issues;
 }
 
-function checkPolicyVerification(canonical: CanonicalCountryPayload): PreflightIssue[] {
-  const issues: PreflightIssue[] = [];
+function checkPolicyVerification(
+  canonical: CanonicalCountryPayload
+): { errors: PreflightIssue[]; warnings: PreflightIssue[] } {
+  const errors: PreflightIssue[] = [];
+  const warnings: PreflightIssue[] = [];
 
   for (const p of canonical.policyRecords) {
-    if (p.framework === 'AGOA' && p.status !== 'unknown' && !p.authoritativeSourceUrl) {
-      issues.push({
+    if (p.status === 'needs_review' || p.status === 'conflict') {
+      warnings.push({
+        code: 'POLICY_NEEDS_REVIEW',
+        path: `policyRecords[${p.framework}]`,
+        message: `${p.framework}: ${p.statusLabel} — high-impact policy status not fully verified.`,
+      });
+    }
+    if (
+      p.framework === 'AGOA' &&
+      ['active', 'suspended'].includes(p.status) &&
+      !p.authoritativeSourceUrl
+    ) {
+      errors.push({
         code: 'POLICY_NO_SOURCE',
         path: `policyRecords[AGOA]`,
         message: 'AGOA status asserted without authoritative_source_url.',
       });
     }
-    if (p.status !== 'unknown' && !p.lastVerifiedAt) {
-      issues.push({
+    if (
+      ['active', 'suspended', 'graduated'].includes(p.status) &&
+      !p.lastVerifiedAt
+    ) {
+      errors.push({
         code: 'POLICY_UNVERIFIED_DATE',
         path: `policyRecords[${p.framework}]`,
         message: `${p.framework} status "${p.statusLabel}" lacks last_verified_at.`,
@@ -229,7 +246,7 @@ function checkPolicyVerification(canonical: CanonicalCountryPayload): PreflightI
   for (const m of unverified ?? []) {
     const reg = canonical.policyRecords.find((r) => r.framework === m.label);
     if (!reg || reg.status === 'unknown') {
-      issues.push({
+      errors.push({
         code: 'POLICY_UNVERIFIED_LABEL',
         path: `marketAccess[${m.label}]`,
         message: `Market access shows "${m.statusLabel}" but registry has no verified status for ${m.label}.`,
@@ -237,7 +254,7 @@ function checkPolicyVerification(canonical: CanonicalCountryPayload): PreflightI
     }
   }
 
-  return issues;
+  return { errors, warnings };
 }
 
 function checkSignalDrift(
@@ -264,13 +281,17 @@ export function preflightValidate(
 ): PreflightReport {
   const canon = canonical ?? canonicalizeCountryPayload(payload);
 
+  const policy = checkPolicyVerification(canon);
   const errors: PreflightIssue[] = [
     ...checkMetricConflicts(payload, canon),
     ...checkNarrativeContradictions(payload, canon),
-    ...checkPolicyVerification(canon),
+    ...policy.errors,
   ];
 
-  const warnings: PreflightIssue[] = [...checkSignalDrift(payload, canon)];
+  const warnings: PreflightIssue[] = [
+    ...checkSignalDrift(payload, canon),
+    ...policy.warnings,
+  ];
 
   if (!canon.asOf.macroYear) {
     errors.push({

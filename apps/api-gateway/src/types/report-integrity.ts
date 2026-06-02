@@ -11,7 +11,9 @@ export type PolicyFrameworkStatus =
   | 'graduated'
   | 'ineligible'
   | 'not_applicable'
-  | 'unknown';
+  | 'unknown'
+  | 'needs_review'
+  | 'conflict';
 
 export interface PolicyStatusRecord {
   framework: string;

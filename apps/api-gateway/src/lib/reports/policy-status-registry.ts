@@ -9,6 +9,9 @@ import { APPROVED_AFRICA_ISO3 } from '@/lib/market-coverage';
 import { isApprovedCaribbeanMarket } from '@/lib/market-coverage';
 import type { PolicyFrameworkStatus, PolicyStatusRecord } from '@/types/report-integrity';
 
+/** AGOA status requires USTR list reconciliation before institutional assertion. */
+const AGOA_NEEDS_REVIEW_ISO3 = new Set(['NGA']);
+
 const AFCFTA_SOURCE =
   'https://au.int/en/ti/cfta/about/about-the-afcfta';
 const ECOWAS_SOURCE = 'https://www.ecowas.int/';
@@ -52,12 +55,29 @@ function agoaStatusLabel(status: PolicyFrameworkStatus): string {
       return 'Ineligible';
     case 'not_applicable':
       return 'Not applicable';
+    case 'needs_review':
+      return 'Unverified (Needs review)';
+    case 'conflict':
+      return 'Conflict (Needs review)';
     default:
       return 'Unverified';
   }
 }
 
 function buildAgoaRecord(iso3: string): PolicyStatusRecord {
+  const upper = iso3.toUpperCase();
+  if (AGOA_NEEDS_REVIEW_ISO3.has(upper)) {
+    return {
+      framework: 'AGOA',
+      status: 'needs_review',
+      statusLabel: 'Unverified (Needs review)',
+      description:
+        'AGOA eligibility for Nigeria requires reconciliation against the current USTR beneficiary country list before this report asserts Suspended/Eligible status.',
+      authoritativeSourceUrl: AGOA_SOURCE_URL,
+      lastVerifiedAt: null,
+    };
+  }
+
   const record = getAgoaCountryRecord(iso3);
   if (!record?.agoa_source_url) {
     return {
@@ -158,7 +178,10 @@ export function getVerifiedMarketAccessForReport(iso3: string): Array<{
 }> {
   return getPolicyStatusRegistry(iso3).map((r) => ({
     label: r.framework,
-    statusLabel: r.status === 'unknown' ? 'Unverified' : r.statusLabel,
+    statusLabel:
+      r.status === 'unknown' || r.status === 'needs_review' || r.status === 'conflict'
+        ? r.statusLabel
+        : r.statusLabel,
     description: r.description,
   }));
 }

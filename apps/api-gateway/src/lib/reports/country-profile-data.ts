@@ -11,6 +11,8 @@ import { CARIBBEAN_WAVE2_TRADE } from '@/data/caribbean-wave2-trade';
 import { buildSignalScan } from '@/lib/intelligence/country-signal-scan';
 import { getVerifiedMarketAccessForReport } from './policy-status-registry';
 import { buildCountryProfileSections, type CountryProfileSections } from './country-profile-sections';
+import { hydrateCountryProfileNarratives } from './narrative-template';
+import { canonicalizeCountryPayload } from './canonicalize-country-payload';
 import type { EconomyYearPoint } from '@/lib/intelligence/country-economy-content';
 import { formatCurrency, formatPercent, formatNumber } from '@/lib/data/utils';
 
@@ -196,6 +198,11 @@ export async function fetchCountryProfileReportData(iso3: string): Promise<Count
     .limit(5);
 
   const topSector = sectorsRows?.[0]?.sector_label as string | undefined;
+  const economyYears = await fetchEconomyYears(supabase, country.id);
+  const macroAsOfYear = economyYears.length
+    ? Math.max(...economyYears.map((y) => y.year))
+    : null;
+
   const signalScan = buildSignalScan({
     iso3: iso3Upper,
     signalLevel: (signalRow?.signal_level as string) ?? 'stable',
@@ -205,6 +212,7 @@ export async function fetchCountryProfileReportData(iso3: string): Promise<Count
       inflation_consumer_prices_annual_pct: pro?.inflation_cpi_pct ?? undefined,
     },
     topSectorLabel: topSector,
+    macroAsOfYear,
   });
 
   const tradeByIso: Record<string, typeof NIGERIA_TRADE> = {
@@ -239,8 +247,6 @@ export async function fetchCountryProfileReportData(iso3: string): Promise<Count
     year: 'numeric',
   });
 
-  const economyYears = await fetchEconomyYears(supabase, country.id);
-
   const baseData: Omit<CountryProfileReportData, 'sections'> = {
     country: {
       name: country.name,
@@ -271,11 +277,36 @@ export async function fetchCountryProfileReportData(iso3: string): Promise<Count
     },
     tradeSummary,
     sources: 'World Bank, IMF, UN Comtrade, Souvera Curated Intelligence',
+    sourceMeta: {
+      defaultSource: 'World Bank, IMF, UN Comtrade, Souvera Curated Intelligence',
+      metrics: {
+        gdp_current_usd: {
+          source_name: 'World Bank / Souvera country_lite_v',
+          as_of: macroAsOfYear != null ? String(macroAsOfYear) : undefined,
+          retrieved_at: lite?.freshness_at ?? profile?.freshness_at ?? undefined,
+        },
+        gdp_growth_pct: {
+          source_name: 'World Bank / Souvera country_lite_v',
+          as_of: macroAsOfYear != null ? String(macroAsOfYear) : undefined,
+        },
+        fdi_net_inflows_usd: {
+          source_name: 'World Bank / Souvera country_professional_v',
+          as_of: macroAsOfYear != null ? String(macroAsOfYear) : undefined,
+        },
+        inflation_cpi_pct: {
+          source_name: 'World Bank / Souvera country_professional_v',
+          as_of: macroAsOfYear != null ? String(macroAsOfYear) : undefined,
+        },
+      },
+    },
   };
 
-  return {
+  const assembled: CountryProfileReportData = {
     ...baseData,
     economyYears,
     sections: buildCountryProfileSections(baseData as CountryProfileReportData, economyYears),
   };
+
+  const canonical = canonicalizeCountryPayload(assembled);
+  return hydrateCountryProfileNarratives(assembled, canonical);
 }
