@@ -18,9 +18,12 @@ import { processReportRequest } from './process-report-request';
 import {
   assertReportsV2Access,
   isCountryProfileReport,
+  isSectorDeepDiveReport,
+  isV2TemplateReport,
   parseTemplateVersion,
   type ReportTemplateVersion,
 } from './reports-v2-config';
+import { validateSectorDeepDiveRequest } from '@/lib/sectors/sector-taxonomy';
 import { isProofLayoutAllowed } from './reports-v2-config';
 import {
   buildPreflightFailedBody,
@@ -40,6 +43,8 @@ export type ReportGenerateResponseMode = 'json' | 'pdf';
 export interface ReportGenerateBody {
   reportType?: string;
   iso3?: string;
+  /** Required for Sector Deep-Dive — canonical taxonomy key (e.g. tourism-hospitality). */
+  sectorKey?: string;
   query?: string;
   templateVersion?: string;
   strict?: boolean;
@@ -91,6 +96,7 @@ export async function handleReportGenerate(
   const {
     reportType,
     iso3,
+    sectorKey,
     query,
     templateVersion: templateVersionRaw,
     strict: strictRaw,
@@ -100,6 +106,14 @@ export async function handleReportGenerate(
   if (!reportType || !iso3) {
     return NextResponse.json({ error: 'reportType and iso3 are required' }, { status: 400 });
   }
+
+  const sectorValidation = validateSectorDeepDiveRequest(reportType, sectorKey);
+  if (!sectorValidation.ok) {
+    return NextResponse.json({ error: sectorValidation.error }, { status: sectorValidation.status });
+  }
+  const resolvedSectorKey = isSectorDeepDiveReport(reportType)
+    ? sectorValidation.sectorKey
+    : undefined;
 
   const templateVersion = parseTemplateVersion(
     templateVersionRaw,
@@ -115,16 +129,18 @@ export async function handleReportGenerate(
     );
   }
 
-  if (templateVersion === 'v2' && !isCountryProfileReport(reportType)) {
+  if (templateVersion === 'v2' && !isV2TemplateReport(reportType)) {
     return NextResponse.json(
-      { error: 'templateVersion v2 is only supported for Country Profile reports' },
+      { error: 'templateVersion v2 is only supported for Country Profile and Sector Deep-Dive reports' },
       { status: 400 }
     );
   }
 
-  const v2Access = assertReportsV2Access({ templateVersion }, user.id);
-  if (!v2Access.allowed) {
-    return NextResponse.json({ error: v2Access.message }, { status: 403 });
+  if (templateVersion === 'v2' && isCountryProfileReport(reportType)) {
+    const v2Access = assertReportsV2Access({ templateVersion }, user.id);
+    if (!v2Access.allowed) {
+      return NextResponse.json({ error: v2Access.message }, { status: 403 });
+    }
   }
 
   const entitlementError = validateEntitlements(access, reportType, isAdmin);
@@ -157,6 +173,9 @@ export async function handleReportGenerate(
     .eq('iso3', iso3Upper)
     .maybeSingle();
 
+  const metadata: Record<string, string> = {};
+  if (resolvedSectorKey) metadata.sectorKey = resolvedSectorKey;
+
   const { data: row, error: insertError } = await service
     .from('souvera_report_requests')
     .insert({
@@ -165,6 +184,8 @@ export async function handleReportGenerate(
       iso3: iso3Upper,
       report_type: reportType,
       query_text: query ?? null,
+      sector_key: resolvedSectorKey ?? null,
+      metadata,
       status: 'queued',
     })
     .select('id')

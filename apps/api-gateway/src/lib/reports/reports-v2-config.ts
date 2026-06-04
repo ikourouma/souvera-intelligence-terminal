@@ -11,6 +11,7 @@ export interface ReportsV2RequestOptions {
 }
 
 const COUNTRY_PROFILE = 'Country Profile';
+const SECTOR_DEEP_DIVE = 'Sector Deep-Dive';
 
 export function parseTemplateVersion(
   value: unknown,
@@ -23,6 +24,14 @@ export function parseTemplateVersion(
 
 export function isCountryProfileReport(reportType: string): boolean {
   return reportType === COUNTRY_PROFILE;
+}
+
+export function isSectorDeepDiveReport(reportType: string): boolean {
+  return reportType === SECTOR_DEEP_DIVE;
+}
+
+export function isV2TemplateReport(reportType: string): boolean {
+  return isCountryProfileReport(reportType) || isSectorDeepDiveReport(reportType);
 }
 
 /** REPORTS_V2_ENABLED=true required; optional REPORTS_V2_ALLOWLIST_USER_IDS comma-separated. */

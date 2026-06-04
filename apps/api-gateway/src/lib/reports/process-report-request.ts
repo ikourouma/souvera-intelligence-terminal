@@ -9,7 +9,8 @@ import { renderReportPdfBytes } from './render-report';
 import { ensureReportsBucket } from './ensure-reports-bucket';
 import { logReportGeneration } from './reports-v2-api';
 import type { ReportTemplateVersion, ReportsV2RequestOptions } from './reports-v2-config';
-import { isCountryProfileReport } from './reports-v2-config';
+import { generateSectorDeepDiveV2 } from './generate-sector-deep-dive-v2';
+import { isCountryProfileReport, isSectorDeepDiveReport } from './reports-v2-config';
 import type { PreflightReport } from '@/types/report-integrity';
 
 function getServiceClient() {
@@ -107,10 +108,21 @@ export async function processReportRequest(
     let pdfBytes: Uint8Array;
     let preflight: PreflightReport | undefined;
 
-    const useV2 =
-      templateVersion === 'v2' && isCountryProfileReport(request.report_type as string);
+    const reportType = request.report_type as string;
+    const metadata = (request.metadata as Record<string, string> | null) ?? {};
+    const sectorKey =
+      metadata.sectorKey ??
+      (request.sector_key as string | null | undefined) ??
+      undefined;
 
-    if (useV2) {
+    const useCountryV2 = templateVersion === 'v2' && isCountryProfileReport(reportType);
+
+    if (isSectorDeepDiveReport(reportType)) {
+      if (!sectorKey) {
+        throw new Error('sectorKey missing on Sector Deep-Dive request (metadata.sectorKey)');
+      }
+      pdfBytes = await generateSectorDeepDiveV2(iso3, sectorKey);
+    } else if (useCountryV2) {
       const payload = await fetchCountryProfileReportData(iso3);
       if (summary) payload.summary = summary;
       if (opportunityThesis) payload.opportunityThesis = opportunityThesis;
@@ -157,7 +169,7 @@ export async function processReportRequest(
       pdfBytes = await renderReportPdfBytes({
         countryName: country?.name ?? iso3,
         iso3,
-        reportType: request.report_type as string,
+        reportType,
         generatedAt: new Date().toLocaleDateString('en-US', {
           month: 'short',
           day: 'numeric',
