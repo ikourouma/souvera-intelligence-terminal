@@ -23,7 +23,20 @@ ON CONFLICT (id) DO UPDATE SET
   name = EXCLUDED.name,
   rank = EXCLUDED.rank;
 
--- Step 3: Add super_admin specific entitlements
+-- Step 3: Add new entitlement keys to souvera_entitlements table
+INSERT INTO souvera_entitlements (key, label, description)
+VALUES 
+  ('super_admin_access', 'Super Admin Access', 'Full platform control and system access'),
+  ('user_management', 'User Management', 'Provision and manage user accounts'),
+  ('system_configuration', 'System Configuration', 'Modify platform settings and configuration'),
+  ('marketing_cms', 'Marketing CMS', 'Manage marketing site content and structure'),
+  ('billing_management', 'Billing Management', 'Manage billing and subscription operations'),
+  ('audit_logs', 'Audit Logs', 'View and export full system audit trail')
+ON CONFLICT (key) DO UPDATE SET
+  label = EXCLUDED.label,
+  description = EXCLUDED.description;
+
+-- Step 4: Add super_admin specific entitlements to plan
 INSERT INTO souvera_plan_entitlements (plan_id, entitlement_key)
 VALUES 
   ('super_admin', 'super_admin_access'),
@@ -34,20 +47,20 @@ VALUES
   ('super_admin', 'audit_logs')
 ON CONFLICT (plan_id, entitlement_key) DO NOTHING;
 
--- Step 4: Grant all user entitlements to super_admin
+-- Step 5: Grant all user entitlements to super_admin
 INSERT INTO souvera_plan_entitlements (plan_id, entitlement_key)
 SELECT 'super_admin', entitlement_key
 FROM souvera_plan_entitlements
 WHERE plan_id IN ('explorer', 'professional', 'business', 'investor', 'institutional', 'platform_admin')
 ON CONFLICT (plan_id, entitlement_key) DO NOTHING;
 
--- Step 5: Add investor plan if it doesn't exist
+-- Step 6: Add investor plan if it doesn't exist
 INSERT INTO souvera_plans (id, name, rank)
 VALUES ('investor', 'Investor', 4)
 ON CONFLICT (id) DO UPDATE SET 
   rank = EXCLUDED.rank;
 
--- Step 6: Ensure investor has all business entitlements
+-- Step 7: Ensure investor has all business entitlements
 INSERT INTO souvera_plan_entitlements (plan_id, entitlement_key)
 SELECT 'investor', entitlement_key
 FROM souvera_plan_entitlements
