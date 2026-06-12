@@ -17,12 +17,11 @@ BEGIN
 END$$;
 
 -- Step 2: Add super_admin plan
-INSERT INTO souvera_plans (id, name, rank, is_visible)
-VALUES ('super_admin', 'Super Admin', 100, false)
+INSERT INTO souvera_plans (id, name, rank)
+VALUES ('super_admin', 'Super Admin', 100)
 ON CONFLICT (id) DO UPDATE SET 
   name = EXCLUDED.name,
-  rank = EXCLUDED.rank,
-  is_visible = EXCLUDED.is_visible;
+  rank = EXCLUDED.rank;
 
 -- Step 3: Add super_admin specific entitlements
 INSERT INTO souvera_plan_entitlements (plan_id, entitlement_key)
@@ -43,8 +42,8 @@ WHERE plan_id IN ('explorer', 'professional', 'business', 'investor', 'instituti
 ON CONFLICT (plan_id, entitlement_key) DO NOTHING;
 
 -- Step 5: Add investor plan if it doesn't exist
-INSERT INTO souvera_plans (id, name, rank, is_visible)
-VALUES ('investor', 'Investor', 4, true)
+INSERT INTO souvera_plans (id, name, rank)
+VALUES ('investor', 'Investor', 4)
 ON CONFLICT (id) DO UPDATE SET 
   rank = EXCLUDED.rank;
 
