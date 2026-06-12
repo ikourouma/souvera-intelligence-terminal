@@ -1,12 +1,13 @@
 /**
  * =========================================================
  * SOUVERA INTELLIGENCE TERMINAL
- * Platform Admin Provisioning Script
+ * Super Admin (Platform Owner) Provisioning Script
  * Owner: Afronovation, Inc.
  * =========================================================
  *
- * This script provisions a dev/test-only platform admin user
- * for Phase 4B-V2-B manual workflow validation.
+ * This script provisions a dev/test-only super admin user
+ * with full platform control including marketing CMS,
+ * user management, billing, and system configuration.
  *
  * SECURITY NOTICE:
  * - This account is for LOCAL/DEV QA ONLY
@@ -16,11 +17,12 @@
  * - Uses SUPABASE_SERVICE_ROLE_KEY (server-side only)
  *
  * Usage:
- *   npx tsx scripts/seed-platform-admin.ts
+ *   npx tsx scripts/seed-super-admin.ts
  *
  * Prerequisites:
  *   1. Set NEXT_PUBLIC_SUPABASE_URL in .env.local
  *   2. Set SUPABASE_SERVICE_ROLE_KEY in .env.local
+ *   3. Run super admin migration: 20260612000000_add_super_admin_tier.sql
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
@@ -38,11 +40,11 @@ dotenv.config({ path: path.resolve(process.cwd(), 'apps/api-gateway/.env.local')
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-const ADMIN_EMAIL = 'admin@souveraterminal.com';
+const ADMIN_EMAIL = 'admin@afronovation.com';
 const ADMIN_PASSWORD = 'PEGWest@1235';
-const ADMIN_FULL_NAME = 'Dev Platform Admin';
-const ORGANIZATION_NAME = 'Admin Test Organization';
-const ORGANIZATION_SLUG = 'admin-test-org';
+const ADMIN_FULL_NAME = 'Platform Owner (Super Admin)';
+const ORGANIZATION_NAME = 'Afronovation Platform';
+const ORGANIZATION_SLUG = 'afronovation-platform';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Validation
@@ -129,8 +131,8 @@ async function ensureOrganization(supabase: SupabaseClient): Promise<string> {
   return newOrg.id;
 }
 
-async function provisionPlatformAdmin(supabase: SupabaseClient): Promise<void> {
-  console.log('Provisioning platform admin...');
+async function provisionSuperAdmin(supabase: SupabaseClient): Promise<void> {
+  console.log('Provisioning super admin (platform owner)...');
   console.log('───────────────────────────────────────────────────────────────');
 
   // Step 1: Check if user already exists
@@ -194,8 +196,8 @@ async function provisionPlatformAdmin(supabase: SupabaseClient): Promise<void> {
     });
   }
 
-  // Step 4: Assign platform_admin role in organization
-  console.log(`  Assigning platform_admin role...`);
+  // Step 4: Assign super_admin role in organization
+  console.log(`  Assigning super_admin role...`);
 
   const { error: memberError } = await supabase
     .from('souvera_organization_members')
@@ -203,7 +205,7 @@ async function provisionPlatformAdmin(supabase: SupabaseClient): Promise<void> {
       {
         organization_id: organizationId,
         user_id: userId,
-        role: 'platform_admin',
+        role: 'super_admin',
       },
       {
         onConflict: 'organization_id,user_id',
@@ -211,32 +213,32 @@ async function provisionPlatformAdmin(supabase: SupabaseClient): Promise<void> {
     );
 
   if (memberError) {
-    throw new Error(`Failed to assign platform_admin role: ${memberError.message}`);
+    throw new Error(`Failed to assign super_admin role: ${memberError.message}`);
   }
 
-  console.log(`  ✅ Platform admin role assigned`);
+  console.log(`  ✅ Super admin role assigned`);
 
-  // Step 5: Create platform_admin subscription for full UI access
-  console.log(`  Creating platform_admin subscription...`);
+  // Step 5: Create super_admin subscription for full UI access
+  console.log(`  Creating super_admin subscription...`);
 
-  // Deactivate any non-platform_admin subscriptions
+  // Deactivate any non-super_admin subscriptions
   const { error: deactivateError } = await supabase
     .from('souvera_subscriptions')
     .update({ status: 'canceled' })
     .eq('user_id', userId)
-    .neq('plan_id', 'platform_admin')
+    .neq('plan_id', 'super_admin')
     .in('status', ['trial', 'active']);
 
   if (deactivateError) {
     console.log(`  Warning: Could not deactivate old subscriptions: ${deactivateError.message}`);
   }
 
-  // Check if platform_admin subscription exists
+  // Check if super_admin subscription exists
   const { data: existingSub } = await supabase
     .from('souvera_subscriptions')
     .select('id, status')
     .eq('user_id', userId)
-    .eq('plan_id', 'platform_admin')
+    .eq('plan_id', 'super_admin')
     .single();
 
   if (existingSub) {
@@ -251,23 +253,23 @@ async function provisionPlatformAdmin(supabase: SupabaseClient): Promise<void> {
       .eq('id', existingSub.id);
 
     if (updateError) {
-      throw new Error(`Failed to update platform_admin subscription: ${updateError.message}`);
+      throw new Error(`Failed to update super_admin subscription: ${updateError.message}`);
     }
   } else {
-    // Create fresh platform_admin subscription
+    // Create fresh super_admin subscription
     const { error: subError } = await supabase.from('souvera_subscriptions').insert({
       user_id: userId,
-      plan_id: 'platform_admin',
+      plan_id: 'super_admin',
       status: 'active',
       starts_at: new Date().toISOString(),
     });
 
     if (subError) {
-      throw new Error(`Failed to create platform_admin subscription: ${subError.message}`);
+      throw new Error(`Failed to create super_admin subscription: ${subError.message}`);
     }
   }
 
-  console.log(`  ✅ Platform admin subscription created`);
+  console.log(`  ✅ Super admin subscription created`);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -277,7 +279,7 @@ async function provisionPlatformAdmin(supabase: SupabaseClient): Promise<void> {
 async function main(): Promise<void> {
   console.log('');
   console.log('═══════════════════════════════════════════════════════════════');
-  console.log(' SOUVERA PLATFORM ADMIN PROVISIONING');
+  console.log(' SOUVERA SUPER ADMIN (PLATFORM OWNER) PROVISIONING');
   console.log('═══════════════════════════════════════════════════════════════');
   console.log('');
 
@@ -289,9 +291,9 @@ async function main(): Promise<void> {
   console.log('✓ Supabase admin client initialized');
   console.log('');
 
-  // Provision platform admin
+  // Provision super admin
   try {
-    await provisionPlatformAdmin(supabase);
+    await provisionSuperAdmin(supabase);
   } catch (error) {
     console.error('');
     console.error('❌ Provisioning failed:', error);
@@ -301,14 +303,27 @@ async function main(): Promise<void> {
   // Print summary
   console.log('');
   console.log('═══════════════════════════════════════════════════════════════');
-  console.log(' PLATFORM ADMIN READY');
+  console.log(' SUPER ADMIN READY');
   console.log('═══════════════════════════════════════════════════════════════');
   console.log('');
-  console.log('  Email: admin@souveraterminal.com');
-  console.log('  Role: platform_admin');
-  console.log('  Subscription: platform_admin (full access)');
-  console.log('  Organization: Admin Test Organization');
+  console.log('  Email: admin@afronovation.com');
+  console.log('  Role: super_admin');
+  console.log('  Subscription: super_admin (full platform control)');
+  console.log('  Organization: Afronovation Platform');
   console.log('  Status: ✅ Ready for local QA');
+  console.log('');
+  console.log('═══════════════════════════════════════════════════════════════');
+  console.log(' ENTITLEMENTS');
+  console.log('═══════════════════════════════════════════════════════════════');
+  console.log('');
+  console.log('  ✓ All user-tier entitlements');
+  console.log('  ✓ All platform_admin entitlements');
+  console.log('  ✓ super_admin_access (full system control)');
+  console.log('  ✓ user_management (provision/manage users)');
+  console.log('  ✓ system_configuration (platform settings)');
+  console.log('  ✓ marketing_cms (manage marketing site)');
+  console.log('  ✓ billing_management (billing & subscriptions)');
+  console.log('  ✓ audit_logs (full audit trail)');
   console.log('');
   console.log('═══════════════════════════════════════════════════════════════');
   console.log(' SECURITY REMINDER');
@@ -317,23 +332,24 @@ async function main(): Promise<void> {
   console.log('  ⚠️  This credential is for LOCAL/DEV QA ONLY');
   console.log('  ⚠️  Do NOT use in production or staging');
   console.log('  ⚠️  Rotate or delete after remote QA if provisioned outside local dev');
+  console.log('  ⚠️  This account has COMPLETE PLATFORM CONTROL');
   console.log('');
   console.log('═══════════════════════════════════════════════════════════════');
   console.log(' NEXT STEPS');
   console.log('═══════════════════════════════════════════════════════════════');
   console.log('');
   console.log('1. Log in at http://localhost:3010/login');
-  console.log('2. Navigate to /admin/data/upload');
-  console.log('3. Run parse/validate API calls with this session');
+  console.log('2. Navigate to /super-admin (once implemented)');
+  console.log('3. Test user management, marketing CMS, billing controls');
   console.log('');
-  console.log('To verify admin role and subscription:');
+  console.log('To verify super admin role and subscription:');
   console.log('');
   console.log('  SELECT u.email, om.role, o.name as organization, s.plan_id, s.status');
   console.log('  FROM auth.users u');
   console.log('  LEFT JOIN souvera_organization_members om ON om.user_id = u.id');
   console.log('  LEFT JOIN souvera_organizations o ON o.id = om.organization_id');
   console.log('  LEFT JOIN souvera_subscriptions s ON s.user_id = u.id AND s.status = \'active\'');
-  console.log("  WHERE u.email = 'admin@souveraterminal.com';");
+  console.log("  WHERE u.email = 'admin@afronovation.com';");
   console.log('');
 }
 

@@ -16,7 +16,8 @@ export type AccessTier =
   | 'business'
   | 'investor'
   | 'institutional'
-  | 'platform_admin';
+  | 'platform_admin'
+  | 'super_admin';
 
 /**
  * All available entitlement keys
@@ -37,7 +38,13 @@ export type EntitlementKey =
   | 'forecast_metrics'
   | 'api_access'
   | 'export_access'
-  | 'admin_access';
+  | 'admin_access'
+  | 'super_admin_access'
+  | 'user_management'
+  | 'system_configuration'
+  | 'marketing_cms'
+  | 'billing_management'
+  | 'audit_logs';
 
 /**
  * Organization roles
@@ -48,7 +55,8 @@ export type OrgRole =
   | 'strategist'
   | 'executive'
   | 'org_admin'
-  | 'platform_admin';
+  | 'platform_admin'
+  | 'super_admin';
 
 /**
  * Resolved user access information
@@ -77,6 +85,7 @@ export const PLAN_RANKS: Record<AccessTier, number> = {
   investor: 4,
   institutional: 5,
   platform_admin: 99,
+  super_admin: 100,
 };
 
 /**
@@ -117,6 +126,7 @@ export const PLAN_ENTITLEMENTS: Record<AccessTier, EntitlementKey[]> = {
     'reports_preview',
     'trade_data',
     'risk_analysis',
+    'investment_thesis',
     'fx_metrics',
     'forecast_metrics',
   ],
@@ -169,6 +179,30 @@ export const PLAN_ENTITLEMENTS: Record<AccessTier, EntitlementKey[]> = {
     'admin_access',
     'fx_metrics',
     'forecast_metrics',
+  ],
+  super_admin: [
+    'country_identity',
+    'headline_macro',
+    'sector_teasers',
+    'news_teasers',
+    'compare_lite',
+    'full_macro',
+    'sector_rationale',
+    'reports_preview',
+    'trade_data',
+    'risk_analysis',
+    'investment_thesis',
+    'api_access',
+    'export_access',
+    'admin_access',
+    'fx_metrics',
+    'forecast_metrics',
+    'super_admin_access',
+    'user_management',
+    'system_configuration',
+    'marketing_cms',
+    'billing_management',
+    'audit_logs',
   ],
 };
 
