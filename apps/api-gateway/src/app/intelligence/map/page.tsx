@@ -52,7 +52,9 @@ export default function MapPage() {
       </section>
 
       {/* Enhanced Access Section */}
-      <AccessCTASection />
+      <Suspense fallback={<div className="py-12 lg:py-16 border-t border-zinc-800" />}>
+        <AccessCTASection />
+      </Suspense>
 
       <SouveraFooter />
     </main>
