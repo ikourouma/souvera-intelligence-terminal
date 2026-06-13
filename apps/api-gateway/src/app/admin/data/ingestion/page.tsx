@@ -5,7 +5,8 @@
 // ===========================================
 
 import { Metadata } from 'next';
-import { Upload, Play, Clock, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import Link from 'next/link';
+import { Upload, Clock, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Ingestion | Admin',
@@ -20,23 +21,26 @@ export default function IngestionPage() {
         <div>
           <h1 className="text-2xl font-bold text-white">Data Ingestion</h1>
           <p className="text-zinc-400 mt-1">
-            Monitor and trigger data ingestion runs
+            Monitor ingestion runs — upload data via the Upload Data page
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <button
-            className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-sm text-white transition-colors"
-          >
-            <Upload className="w-4 h-4" />
+        <Link
+          href="/admin/data/upload"
+          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-sm text-white font-medium transition-colors"
+        >
+          <Upload className="w-4 h-4" />
+          Go to Upload Data
+        </Link>
+      </div>
+
+      <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+        <p className="text-sm text-amber-200/90">
+          Automated ingestion triggers are not yet configured. Use{' '}
+          <Link href="/admin/data/upload" className="text-amber-400 hover:text-amber-300 underline">
             Upload Data
-          </button>
-          <button
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-sm text-white font-medium transition-colors"
-          >
-            <Play className="w-4 h-4" />
-            Trigger Ingestion
-          </button>
-        </div>
+          </Link>{' '}
+          to submit batches manually. Scheduled jobs require cron configuration (Phase 4B Sprint 3).
+        </p>
       </div>
 
       {/* Stats */}
@@ -96,7 +100,11 @@ export default function IngestionPage() {
           <Upload className="w-12 h-12 text-zinc-600 mx-auto" />
           <p className="text-zinc-400 mt-4">No ingestion runs yet</p>
           <p className="text-zinc-500 text-sm mt-1">
-            Upload data or trigger an ingestion to see run history
+            Upload data via{' '}
+            <Link href="/admin/data/upload" className="text-indigo-400 hover:text-indigo-300">
+              Upload Data
+            </Link>{' '}
+            to see run history
           </p>
         </div>
       </div>

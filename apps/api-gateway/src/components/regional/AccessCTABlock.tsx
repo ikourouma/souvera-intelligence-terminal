@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 import { ArrowRight, Shield, TrendingUp } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { createClient } from '@/lib/supabase/client';
 
 interface AccessCTABlockProps {
   region: 'africa' | 'caribbean';
@@ -14,6 +16,19 @@ export function AccessCTABlock({
   headline,
   subheadline,
 }: AccessCTABlockProps) {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function checkAuth() {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsAuthenticated(!!user);
+      setLoading(false);
+    }
+    checkAuth();
+  }, []);
+
   const defaultHeadline =
     region === 'africa'
       ? 'Access Africa Intelligence'
@@ -51,13 +66,25 @@ export function AccessCTABlock({
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link
-                href="/access/request-access"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-white text-zinc-900 rounded-sm font-bold hover:bg-zinc-100 transition-all shadow-lg"
-              >
-                Request Access
-                <ArrowRight className="w-5 h-5" />
-              </Link>
+              {loading ? (
+                <div className="h-14 bg-white/20 w-48 rounded-sm animate-pulse" />
+              ) : isAuthenticated ? (
+                <Link
+                  href="/access"
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-white text-zinc-900 rounded-sm font-bold hover:bg-zinc-100 transition-all shadow-lg"
+                >
+                  Upgrade Plan
+                  <ArrowRight className="w-5 h-5" />
+                </Link>
+              ) : (
+                <Link
+                  href="/access/request-access"
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-white text-zinc-900 rounded-sm font-bold hover:bg-zinc-100 transition-all shadow-lg"
+                >
+                  Request Access
+                  <ArrowRight className="w-5 h-5" />
+                </Link>
+              )}
               <Link
                 href="/pricing"
                 className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 text-white border border-white/20 rounded-sm font-semibold hover:bg-white/20 transition-all"

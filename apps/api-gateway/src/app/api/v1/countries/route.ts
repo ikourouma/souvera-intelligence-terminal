@@ -32,6 +32,9 @@ import {
   VALID_REGIONS,
   normalizeRegionFilter,
 } from '@/lib/market-coverage';
+import { tieredApiCacheControl } from '@/lib/api/tiered-cache';
+
+export const dynamic = 'force-dynamic';
 
 function getServiceClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -232,7 +235,8 @@ export async function GET(request: NextRequest) {
     }, {
       status: 200,
       headers: {
-        'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=1200',
+        'Cache-Control': tieredApiCacheControl(access.isAuthenticated),
+        Vary: 'Cookie',
       },
     });
   } catch (err) {

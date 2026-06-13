@@ -22,6 +22,16 @@ export interface PolicyStatusRecord {
   description: string;
   authoritativeSourceUrl: string | null;
   lastVerifiedAt: string | null;
+  /** Client PDF — e.g. USTR, AU (no URLs). */
+  sourceDisplayName?: string | null;
+  /** Client PDF — e.g. 2025 list, Jan 15, 2026. */
+  lastReviewedDisplay?: string | null;
+  /** Client PDF status column — never Verified/Unverified. */
+  clientStatusLabel?: string;
+  /** Evidence Vault artifact (internal). */
+  evidenceArtifactId?: string | null;
+  /** True when artifact status=ok and status is publishable. */
+  publishable?: boolean;
 }
 
 export interface CanonicalMetrics {
@@ -43,9 +53,25 @@ export interface AsOfStamps {
 export interface DataCoverage {
   hasMacroSeries: boolean;
   hasTradeSummary: boolean;
+  /** Platform freshness timestamp exists (not a markets feed). */
   hasMarketsAsOf: boolean;
+  /** Rates, curves, spreads, or market quotes feed — not yet wired for country reports. */
+  hasMarketsFeed: boolean;
+  hasFiscalSeries: boolean;
+  hasExternalSectorSeries: boolean;
+  hasPopulationInCanonical: boolean;
   hasVerifiedPolicy: boolean;
   macroYearCount: number;
+}
+
+export interface CoverageMapEntry {
+  domain: string;
+  label: string;
+  status: 'covered' | 'not_covered' | 'partial';
+  asOfYear?: number | null;
+  sourceKey?: string;
+  sourceUrl?: string;
+  note?: string;
 }
 
 export interface CanonicalCountryPayload {
@@ -53,6 +79,7 @@ export interface CanonicalCountryPayload {
   asOf: AsOfStamps;
   canonicalMetrics: CanonicalMetrics;
   dataCoverage: DataCoverage;
+  coverageMap: CoverageMapEntry[];
   confidence: 'high' | 'medium' | 'low';
   policyRecords: PolicyStatusRecord[];
   signalDrivers: string[];
@@ -81,7 +108,7 @@ export interface CoverPageModel {
   asOf: {
     macroYear: string;
     tradeYear: string;
-    marketsDate: string;
+    marketsCoverage: string;
     policyVerifiedAt: string;
   };
   signal: {

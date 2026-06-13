@@ -1,0 +1,271 @@
+/**
+ * Souvera Source Registry — code mirror of souvera_data_sources (institutional v2).
+ * DB seed: infra/supabase/seed-source-registry-expanded.sql
+ */
+
+export type SourceAuthModel = 'public' | 'api_key' | 'paid' | 'bearer_token' | 'review';
+export type SourceStatus = 'approved' | 'testing' | 'paused' | 'review';
+
+export interface SourceRegistryEntry {
+  sourceKey: string;
+  name: string;
+  domain: string;
+  providerUrl: string;
+  apiBaseUrl?: string;
+  docsUrl?: string;
+  authModel: SourceAuthModel;
+  refreshCadence: string;
+  legalStatus: string;
+  redistributionRule: string;
+  owner: string;
+  status: SourceStatus;
+  fallbackSources: string[];
+}
+
+export const SOURCE_REGISTRY: SourceRegistryEntry[] = [
+  {
+    sourceKey: 'world_bank',
+    name: 'World Bank Indicators API',
+    domain: 'macro',
+    providerUrl: 'https://www.worldbank.org',
+    apiBaseUrl: 'https://api.worldbank.org/v2',
+    docsUrl:
+      'https://datahelpdesk.worldbank.org/knowledgebase/articles/889392-about-the-indicators-api-documentation',
+    authModel: 'public',
+    refreshCadence: 'weekly',
+    legalStatus: 'approved',
+    redistributionRule: 'Attribution required; cache normalized metrics',
+    owner: 'World Bank',
+    status: 'approved',
+    fallbackSources: ['imf', 'oecd'],
+  },
+  {
+    sourceKey: 'imf',
+    name: 'International Monetary Fund Data API',
+    domain: 'forecast',
+    providerUrl: 'https://www.imf.org',
+    apiBaseUrl: 'https://api.imf.org',
+    docsUrl: 'https://data.imf.org/en/Resource-Pages/IMF-API',
+    authModel: 'public',
+    refreshCadence: 'monthly',
+    legalStatus: 'review',
+    redistributionRule: 'Mark forecast/estimate clearly',
+    owner: 'IMF',
+    status: 'approved',
+    fallbackSources: ['oecd'],
+  },
+  {
+    sourceKey: 'imf_dataservices',
+    name: 'IMF Data Services (SDMX JSON)',
+    domain: 'external_fiscal_monetary',
+    providerUrl: 'https://www.imf.org',
+    apiBaseUrl: 'https://dataservices.imf.org/REST/SDMX_JSON.svc/',
+    docsUrl: 'https://datahelp.imf.org/knowledgebase/articles/630877-data-services',
+    authModel: 'public',
+    refreshCadence: 'monthly',
+    legalStatus: 'review',
+    redistributionRule: 'Attribution required; confirm per dataset',
+    owner: 'IMF',
+    status: 'testing',
+    fallbackSources: ['world_bank'],
+  },
+  {
+    sourceKey: 'un_comtrade',
+    name: 'UN Comtrade API',
+    domain: 'trade',
+    providerUrl: 'https://comtradeplus.un.org',
+    apiBaseUrl: 'https://comtradeapi.un.org',
+    docsUrl: 'https://comtradeapi.un.org/docs',
+    authModel: 'api_key',
+    refreshCadence: 'monthly',
+    legalStatus: 'review',
+    redistributionRule: 'Store derived aggregates only',
+    owner: 'UN',
+    status: 'testing',
+    fallbackSources: ['world_bank'],
+  },
+  {
+    sourceKey: 'open_exchange_rates',
+    name: 'Open Exchange Rates API',
+    domain: 'fx',
+    providerUrl: 'https://openexchangerates.org',
+    apiBaseUrl: 'https://openexchangerates.org/api',
+    docsUrl: 'https://docs.openexchangerates.org',
+    authModel: 'api_key',
+    refreshCadence: 'hourly_cached',
+    legalStatus: 'review',
+    redistributionRule: 'Derived/aggregated display; respect plan limits',
+    owner: 'Open Exchange Rates',
+    status: 'approved',
+    fallbackSources: [],
+  },
+  {
+    sourceKey: 'rest_countries',
+    name: 'REST Countries API',
+    domain: 'metadata',
+    providerUrl: 'https://restcountries.com',
+    apiBaseUrl: 'https://restcountries.com/v3.1',
+    docsUrl: 'https://restcountries.com',
+    authModel: 'public',
+    refreshCadence: 'monthly',
+    legalStatus: 'approved',
+    redistributionRule: 'Metadata and display only',
+    owner: 'REST Countries',
+    status: 'approved',
+    fallbackSources: [],
+  },
+  {
+    sourceKey: 'gdelt',
+    name: 'GDELT Project API',
+    domain: 'news_signals',
+    providerUrl: 'https://www.gdeltproject.org',
+    apiBaseUrl: 'https://api.gdeltproject.org/api/v2',
+    docsUrl: 'https://www.gdeltproject.org/data.html',
+    authModel: 'public',
+    refreshCadence: 'hourly',
+    legalStatus: 'review',
+    redistributionRule: 'Signals only, not raw article redistribution',
+    owner: 'GDELT',
+    status: 'approved',
+    fallbackSources: [],
+  },
+  {
+    sourceKey: 'faostat',
+    name: 'FAOSTAT API',
+    domain: 'agriculture',
+    providerUrl: 'https://www.fao.org/faostat',
+    apiBaseUrl: 'https://fenixservices.fao.org/faostat/api/v1/en/',
+    docsUrl: 'https://fenixservices.fao.org/faostat/api/v1/en/',
+    authModel: 'public',
+    refreshCadence: 'monthly',
+    legalStatus: 'review',
+    redistributionRule: 'Attribution required',
+    owner: 'FAO',
+    status: 'testing',
+    fallbackSources: ['world_bank'],
+  },
+  {
+    sourceKey: 'world_bank_projects',
+    name: 'World Bank Projects & Operations API',
+    domain: 'projects',
+    providerUrl: 'https://www.worldbank.org',
+    apiBaseUrl: 'https://search.worldbank.org/api/v2/projects',
+    docsUrl: 'https://search.worldbank.org/api/v2/projects',
+    authModel: 'public',
+    refreshCadence: 'weekly',
+    legalStatus: 'approved',
+    redistributionRule: 'Project summaries with attribution',
+    owner: 'World Bank',
+    status: 'testing',
+    fallbackSources: [],
+  },
+  {
+    sourceKey: 'ofac_sanctions',
+    name: 'OFAC Sanctions Lists',
+    domain: 'compliance',
+    providerUrl: 'https://ofac.treasury.gov/sanctions-lists',
+    docsUrl: 'https://ofac.treasury.gov/specially-designated-nationals-list-data-formats',
+    authModel: 'public',
+    refreshCadence: 'daily',
+    legalStatus: 'review',
+    redistributionRule: 'Download and parse; optional in reports until wired',
+    owner: 'U.S. Treasury OFAC',
+    status: 'paused',
+    fallbackSources: [],
+  },
+  {
+    sourceKey: 'unsc_sanctions',
+    name: 'UN Security Council Consolidated Sanctions List',
+    domain: 'compliance',
+    providerUrl: 'https://www.un.org/securitycouncil/sanctions',
+    apiBaseUrl: 'https://scsanctions.un.org/resources/xml/en/consolidated.xml',
+    authModel: 'public',
+    refreshCadence: 'daily',
+    legalStatus: 'review',
+    redistributionRule: 'XML download; optional until wired',
+    owner: 'UN',
+    status: 'paused',
+    fallbackSources: [],
+  },
+  {
+    sourceKey: 'unctadstat',
+    name: 'UNCTADstat',
+    domain: 'trade_logistics',
+    providerUrl: 'https://unctadstat.unctad.org/EN/',
+    authModel: 'public',
+    refreshCadence: 'quarterly',
+    legalStatus: 'review',
+    redistributionRule: 'Bulk download may be required; status review',
+    owner: 'UNCTAD',
+    status: 'review',
+    fallbackSources: ['world_bank'],
+  },
+  {
+    sourceKey: 'imf_areaer',
+    name: 'IMF AREAER (FX regime / capital controls)',
+    domain: 'fx_regime',
+    providerUrl:
+      'https://www.imf.org/en/Publications/Annual-Report-on-Exchange-Arrangements-and-Exchange-Restrictions',
+    authModel: 'review',
+    refreshCadence: 'annual',
+    legalStatus: 'review',
+    redistributionRule: 'Document-based extraction; no standard API',
+    owner: 'IMF',
+    status: 'review',
+    fallbackSources: [],
+  },
+  // ── Trade Data Monitor (ITC) ─ Added per US Chamber / Dept of State request ─
+  {
+    sourceKey: 'itc_trade_data_monitor',
+    name: 'ITC Trade Data Monitor (TradeMap)',
+    domain: 'trade',
+    providerUrl: 'https://www.tradedatamonitor.com',
+    apiBaseUrl: 'https://api.trademap.org/CombinedCountryProductReporterAPI',
+    docsUrl: 'https://www.tradedatamonitor.com/services',
+    authModel: 'paid',
+    refreshCadence: 'monthly',
+    legalStatus: 'review',
+    redistributionRule:
+      'Aggregated derived indicators only; attribution "Source: ITC Trade Data Monitor" required. ' +
+      'No redistribution of raw bilateral series; cache normalised metrics per SDC.',
+    owner: 'International Trade Centre (ITC/WTO/UNCTAD)',
+    status: 'review',
+    fallbackSources: ['un_comtrade', 'unctadstat'],
+  },
+  // ── USTR (US Trade Representative) ────────────────────────────────────
+  {
+    sourceKey: 'ustr',
+    name: 'USTR Trade Policy & Data Portal',
+    domain: 'trade_policy',
+    providerUrl: 'https://ustr.gov',
+    docsUrl: 'https://ustr.gov/issue-areas/trade-development/preference-programs/agoa',
+    authModel: 'public',
+    refreshCadence: 'annual',
+    legalStatus: 'approved',
+    redistributionRule: 'U.S. Government public domain; attribution required for policy extracts',
+    owner: 'U.S. Trade Representative',
+    status: 'approved',
+    fallbackSources: [],
+  },
+  // ── BEA (U.S. Bureau of Economic Analysis) ────────────────────────────
+  {
+    sourceKey: 'bea_international_trade',
+    name: 'BEA International Trade in Goods & Services',
+    domain: 'trade',
+    providerUrl: 'https://www.bea.gov',
+    apiBaseUrl: 'https://apps.bea.gov/api/data',
+    docsUrl: 'https://apps.bea.gov/api/signup/',
+    authModel: 'api_key',
+    refreshCadence: 'monthly',
+    legalStatus: 'approved',
+    redistributionRule:
+      'U.S. Government public domain; cite as "Source: U.S. Bureau of Economic Analysis"',
+    owner: 'U.S. Bureau of Economic Analysis',
+    status: 'review',
+    fallbackSources: ['un_comtrade'],
+  },
+];
+
+export function getSourceByKey(key: string): SourceRegistryEntry | undefined {
+  return SOURCE_REGISTRY.find((s) => s.sourceKey === key);
+}

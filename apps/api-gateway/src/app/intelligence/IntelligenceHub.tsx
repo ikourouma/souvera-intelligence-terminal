@@ -1,9 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { Globe, Map, GitCompare, Landmark, Palmtree, TrendingUp, Database, Shield, ArrowRight, Users, Zap } from 'lucide-react';
+import { Map, GitCompare, Scale, Landmark, Palmtree, TrendingUp, Database, Shield, ArrowRight, Users, Zap } from 'lucide-react';
 import { TrustSourceLayer } from '@/components/regional/TrustSourceLayer';
 import { AccessCTABlock } from '@/components/regional/AccessCTABlock';
+import { IntelligenceMapPreview } from '@/components/intelligence/IntelligenceMapPreview';
+import { DATA_STATUS_LABELS } from '@/lib/map-constants';
 
 // Market coverage stats
 const COVERAGE_STATS = [
@@ -61,7 +63,14 @@ const INTELLIGENCE_TOOLS = [
     description: 'Compare markets side-by-side. GDP, growth rates, sector composition, and investment metrics across regions.',
     href: '/intelligence/compare',
     icon: GitCompare,
-    badge: 'Coming Soon',
+    badge: 'Interactive',
+  },
+  {
+    title: 'Trade Intelligence',
+    description: 'AGOA eligibility, AfCFTA status, and U.S. trade policy watchpoints for African and Caribbean markets.',
+    href: '/intelligence/trade',
+    icon: Scale,
+    badge: 'Interactive',
   },
 ];
 
@@ -240,7 +249,7 @@ export function IntelligenceHub() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {INTELLIGENCE_TOOLS.map((tool) => {
               const Icon = tool.icon;
               const isComingSoon = tool.badge === 'Coming Soon';
@@ -315,19 +324,7 @@ export function IntelligenceHub() {
               </Link>
             </div>
             <div className="relative">
-              <div className="p-8 bg-zinc-900 border border-zinc-800 rounded-sm">
-                <div className="aspect-video bg-zinc-800/50 rounded-sm flex items-center justify-center">
-                  <div className="text-center">
-                    <Globe className="w-16 h-16 text-blue-500/50 mx-auto mb-4" />
-                    <p className="text-zinc-500">Intelligence Map Preview</p>
-                    <p className="text-xs text-zinc-600 mt-2">74 Countries · 6 Sectors · Curated Preview Data</p>
-                  </div>
-                </div>
-                <div className="mt-4 flex items-center justify-between text-xs text-zinc-600">
-                  <span>Curated Preview Data</span>
-                  <span>Sources: World Bank, IMF</span>
-                </div>
-              </div>
+              <IntelligenceMapPreview />
             </div>
           </div>
         </div>
@@ -371,17 +368,21 @@ export function IntelligenceHub() {
             })}
           </div>
 
-          {/* Preview Data Notice */}
-          <div className="mt-8 p-6 bg-amber-500/5 border border-amber-500/20 rounded-sm">
+          {/* Live & Curated Data Notice */}
+          <div className="mt-8 p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-sm">
             <div className="flex items-start gap-4">
-              <Shield className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+              <Shield className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
               <div>
-                <h4 className="text-sm font-bold text-amber-400 mb-2">
-                  Preview Data Notice
+                <h4 className="text-sm font-bold text-emerald-400 mb-2">
+                  {DATA_STATUS_LABELS.previewData}
                 </h4>
-                <p className="text-sm text-amber-400/80 leading-relaxed">
-                  Data currently displayed is curated preview data sourced from official institutions. Automated data feeds are in development. All data is attributed to source and labeled appropriately.
+                <p className="text-sm text-emerald-400/80 leading-relaxed">
+                  Souvera combines live institutional feeds (World Bank, IMF, GDELT News Pulse) with
+                  editorially curated country profiles for pilot markets. Nigeria and Jamaica
+                  terminals are fully populated; regional coverage expands on a governed rollout
+                  schedule. Every metric is source-attributed and tier-gated.
                 </p>
+                <p className="text-xs text-emerald-400/60 mt-2">{DATA_STATUS_LABELS.pilotNote}</p>
               </div>
             </div>
           </div>

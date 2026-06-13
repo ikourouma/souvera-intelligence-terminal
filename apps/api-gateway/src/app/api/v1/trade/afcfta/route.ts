@@ -1,38 +1,98 @@
-// ===========================================
-// SOUVERA INTELLIGENCE TERMINAL
-// AfCFTA Status API
-// GET /api/v1/trade/afcfta - Get AfCFTA implementation status
-// Owner: Afronovation, Inc.
-// Access: Public (teaser) / Entitled (full)
-// ===========================================
-
+// AfCFTA Status API — Full 54 African country coverage
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 import { createServerClient } from '@/lib/supabase/server';
-import {
-  resolveUserAccess,
-  type UserAccess,
-} from '@souvera/entitlements';
+import { resolveUserAccess, type UserAccess } from '@souvera/entitlements';
 import { APPROVED_AFRICA_ISO3 } from '@/lib/market-coverage';
+import {
+  getAllAfCftaCountryData,
+  getAfCftaCountryData,
+  type AfCftaCountryData,
+} from '@/data/afcfta-full-coverage';
 
-function getServiceClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) {
-    throw new Error('Missing Supabase environment variables');
+interface AfCftaApiRow {
+  country_iso3: string;
+  country_name: string;
+  afcfta_status: string;
+  afcfta_signed_date?: string;
+  afcfta_ratified_date?: string;
+  afcfta_deposited_date?: string;
+  afcfta_trading_since?: string;
+  afcfta_tariff_offers_submitted?: boolean;
+  afcfta_services_offers_submitted?: boolean;
+  afcfta_notes?: string;
+  afcfta_source_url?: string;
+  afcfta_as_of_date?: string;
+  is_full_access: boolean;
+  upgrade_message?: string;
+  data_label?: string;
+  // Trade data (for full access)
+  intra_africa_exports_usd?: number;
+  intra_africa_imports_usd?: number;
+  top_export_partners?: Array<{ iso3: string; name: string; trade_value_usd: number; share_pct: number }>;
+  top_import_partners?: Array<{ iso3: string; name: string; trade_value_usd: number; share_pct: number }>;
+  top_export_products?: Array<{ hs_code: string; description: string; trade_value_usd: number; share_pct: number }>;
+  top_import_products?: Array<{ hs_code: string; description: string; trade_value_usd: number; share_pct: number }>;
+}
+
+function mapToApiRow(data: AfCftaCountryData, isFullAccess: boolean): AfCftaApiRow {
+  const row: AfCftaApiRow = {
+    country_iso3: data.iso3,
+    country_name: data.name,
+    afcfta_status: data.status,
+    afcfta_signed_date: data.signedDate,
+    afcfta_ratified_date: data.ratifiedDate,
+    afcfta_deposited_date: data.depositedDate,
+    afcfta_trading_since: data.tradingSince,
+    afcfta_tariff_offers_submitted: data.tariffOffersSubmitted,
+    afcfta_services_offers_submitted: data.servicesOffersSubmitted,
+    afcfta_notes: data.notes,
+    afcfta_source_url: data.sourceUrl,
+    afcfta_as_of_date: data.asOfDate,
+    is_full_access: isFullAccess,
+    data_label: 'Souvera Curated Intelligence',
+  };
+
+  if (!isFullAccess) {
+    row.upgrade_message = 'Upgrade to Business+ for full AfCFTA intelligence including trade data.';
+  } else {
+    // Include trade data for full access users
+    row.intra_africa_exports_usd = data.intraAfricaExportsUSD;
+    row.intra_africa_imports_usd = data.intraAfricaImportsUSD;
+    row.top_export_partners = data.topExportPartners?.map(p => ({
+      iso3: p.iso3,
+      name: p.name,
+      trade_value_usd: p.tradeValueUSD,
+      share_pct: p.shareOfTotal,
+    }));
+    row.top_import_partners = data.topImportPartners?.map(p => ({
+      iso3: p.iso3,
+      name: p.name,
+      trade_value_usd: p.tradeValueUSD,
+      share_pct: p.shareOfTotal,
+    }));
+    row.top_export_products = data.topExportProducts?.map(p => ({
+      hs_code: p.hsCode,
+      description: p.description,
+      trade_value_usd: p.tradeValueUSD,
+      share_pct: p.shareOfTotal,
+    }));
+    row.top_import_products = data.topImportProducts?.map(p => ({
+      hs_code: p.hsCode,
+      description: p.description,
+      trade_value_usd: p.tradeValueUSD,
+      share_pct: p.shareOfTotal,
+    }));
   }
-  return createClient(url, key, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
+
+  return row;
 }
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const iso3 = searchParams.get('iso3')?.toUpperCase();
-    const status = searchParams.get('status'); // Filter by AfCFTA status
-
-    // Resolve user access
+    const statusFilter = searchParams.get('status')?.toLowerCase();
+    
     let access: UserAccess;
     try {
       const authSupabase = await createServerClient();
@@ -51,123 +111,60 @@ export async function GET(request: NextRequest) {
       };
     }
 
-    const supabase = getServiceClient();
+    if (iso3 && !APPROVED_AFRICA_ISO3.includes(iso3 as typeof APPROVED_AFRICA_ISO3[number])) {
+      return NextResponse.json({ error: 'AfCFTA status is only available for African countries' }, { status: 400 });
+    }
+
     const isProfessionalPlus = access.planRank >= 2;
 
-    // Build query
-    let query = supabase
-      .from('souvera_trade_policy_statuses')
-      .select(`
-        id,
-        country_id,
-        afcfta_status,
-        afcfta_signed_date,
-        afcfta_ratified_date,
-        afcfta_deposited_date,
-        afcfta_trading_since,
-        afcfta_tariff_offers_submitted,
-        afcfta_services_offers_submitted,
-        afcfta_notes,
-        afcfta_source_url,
-        afcfta_as_of_date,
-        afcfta_last_reviewed_at,
-        country:souvera_countries!inner(
-          iso3,
-          name,
-          region
-        )
-      `)
-      .not('afcfta_status', 'is', null);
-
-    // Filter by status if provided
-    if (status) {
-      query = query.eq('afcfta_status', status);
-    }
-
-    // Filter by country if provided
+    // Get data — either single country or all
+    let data: AfCftaCountryData[];
     if (iso3) {
-      if (!APPROVED_AFRICA_ISO3.includes(iso3)) {
-        return NextResponse.json({
-          error: 'AfCFTA status is only available for African countries'
-        }, { status: 400 });
-      }
-      query = query.eq('country.iso3', iso3);
+      const single = getAfCftaCountryData(iso3);
+      data = single ? [single] : [];
+    } else {
+      data = getAllAfCftaCountryData();
     }
 
-    const { data: statuses, error } = await query;
-
-    if (error) {
-      console.error('Error fetching AfCFTA statuses:', error);
-      return NextResponse.json({ error: 'Failed to fetch AfCFTA statuses' }, { status: 500 });
+    // Apply status filter if provided
+    if (statusFilter) {
+      data = data.filter(d => d.status === statusFilter);
     }
 
-    // Apply entitlement-based filtering
-    const responseData = (statuses || []).map(item => {
-      const baseData = {
-        country_iso3: (item.country as any)?.iso3,
-        country_name: (item.country as any)?.name,
-        afcfta_status: item.afcfta_status,
-        // Always show source attribution
-        source_type: 'manual' as const,
-        data_label: 'Curated Preview Data',
-      };
+    // Map to API response format
+    const rows = data.map(d => mapToApiRow(d, isProfessionalPlus));
 
-      if (!isProfessionalPlus) {
-        // Explorer/Public: teaser only
-        return {
-          ...baseData,
-          is_full_access: false,
-          upgrade_message: 'Upgrade to Professional for full AfCFTA intelligence'
-        };
-      }
-
-      // Professional+: full data
-      return {
-        ...baseData,
-        afcfta_signed_date: item.afcfta_signed_date,
-        afcfta_ratified_date: item.afcfta_ratified_date,
-        afcfta_deposited_date: item.afcfta_deposited_date,
-        afcfta_trading_since: item.afcfta_trading_since,
-        afcfta_tariff_offers_submitted: item.afcfta_tariff_offers_submitted,
-        afcfta_services_offers_submitted: item.afcfta_services_offers_submitted,
-        afcfta_notes: item.afcfta_notes,
-        afcfta_source_url: item.afcfta_source_url,
-        afcfta_as_of_date: item.afcfta_as_of_date,
-        afcfta_last_reviewed_at: item.afcfta_last_reviewed_at,
-        is_full_access: true,
-      };
-    });
-
-    // Calculate summary stats
-    const signedCount = responseData.filter(s => s.afcfta_status === 'signed').length;
-    const ratifiedCount = responseData.filter(s => s.afcfta_status === 'ratified').length;
-    const depositedCount = responseData.filter(s => s.afcfta_status === 'deposited').length;
-    const tradingCount = responseData.filter(s => s.afcfta_status === 'trading').length;
-    const totalTracked = responseData.length;
+    // Calculate summary counts
+    const tradingCount = rows.filter(r => r.afcfta_status === 'trading').length;
+    const depositedCount = rows.filter(r => r.afcfta_status === 'deposited').length;
+    const ratifiedCount = rows.filter(r => r.afcfta_status === 'ratified').length;
+    const signedCount = rows.filter(r => r.afcfta_status === 'signed').length;
+    const notSignedCount = rows.filter(r => r.afcfta_status === 'not_signed').length;
 
     return NextResponse.json({
-      statuses: responseData,
+      statuses: rows,
       summary: {
-        total_tracked: totalTracked,
-        signed_count: signedCount,
-        ratified_count: ratifiedCount,
-        deposited_count: depositedCount,
+        total_tracked: rows.length,
         trading_count: tradingCount,
-        note: 'AfCFTA implementation status is based on official AU communications. Status may change as implementation progresses.',
+        deposited_count: depositedCount,
+        ratified_count: ratifiedCount,
+        signed_count: signedCount,
+        not_signed_count: notSignedCount,
+        note: `All 54 African Union member states. ${tradingCount} countries actively trading under AfCFTA protocols.`,
       },
       attribution: {
-        source_name: 'AfCFTA Secretariat / tralac',
-        source_type: 'manual',
-        data_label: 'Curated Preview Data',
+        source_name: 'AfCFTA Secretariat / AU Commission',
+        source_type: 'curated',
+        data_label: 'Souvera Curated Intelligence',
         confidence_level: 'high',
       },
       entitlement: {
         plan_id: access.planId,
         is_full_access: isProfessionalPlus,
-      }
+      },
     });
   } catch (err) {
-    console.error('Unexpected error in GET /api/v1/trade/afcfta:', err);
+    console.error('GET /api/v1/trade/afcfta:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

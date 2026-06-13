@@ -11,6 +11,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "paths": {
+      "@/*": ["../../apps/api-gateway/src/*"],
       "@souvera/config": ["../../packages/config/src"],
       "@souvera/types": ["../../packages/types/src"]
     }

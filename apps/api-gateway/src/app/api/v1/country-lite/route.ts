@@ -19,6 +19,9 @@ import {
   hasEntitlement,
   type UserAccess,
 } from '@souvera/entitlements';
+import { tieredApiCacheControl } from '@/lib/api/tiered-cache';
+
+export const dynamic = 'force-dynamic';
 
 function getServiceClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -88,19 +91,24 @@ export async function GET(request: NextRequest) {
     // - Professional+: up to 7 sectors (with rationale if entitled)
     const hasSectorRationale = hasEntitlement(access, 'sector_rationale');
     const sectorSelect = hasSectorRationale
-      ? 'sector_label, teaser_md, rationale_md, strength_score, growth_score'
-      : 'sector_label, teaser_md';
-    
-    // Determine sector limit based on access tier
-    // Public and Explorer get 1 sector; Professional+ get all 7 sectors
-    const sectorLimit = hasSectorRationale ? 7 : 1;
+      ? 'sector_label, teaser, narrative_short, strength_score, growth_score'
+      : 'sector_label, teaser';
 
-    const { data: sectorData } = await supabase
+    // Determine sector limit based on access tier
+    // Public and Explorer get 1 sector; Professional+ get up to 6 sectors
+    const sectorLimit = hasSectorRationale ? 6 : 1;
+
+    const { data: sectorData, error: sectorError } = await supabase
       .from('souvera_country_sectors')
       .select(sectorSelect)
       .eq('country_id', countryData.country_id)
+      .eq('row_status', 'active')
       .order('display_order', { ascending: true })
       .limit(sectorLimit);
+
+    if (sectorError) {
+      console.error('[API] country-lite sector fetch error:', sectorError.message);
+    }
 
     // 3. Build response per API Binding Map spec with entitlement-based filtering
     const response: Record<string, unknown> = {
@@ -138,9 +146,9 @@ export async function GET(request: NextRequest) {
       },
       sectors: (sectorData ?? []).map((s: Record<string, unknown>) => ({
         label: s.sector_label,
-        teaser: s.teaser_md ?? undefined,
+        teaser: (s.teaser as string | undefined) ?? undefined,
         ...(hasSectorRationale && {
-          rationale: s.rationale_md ?? undefined,
+          rationale: (s.narrative_short as string | undefined) ?? undefined,
           strengthScore: s.strength_score ?? undefined,
           growthScore: s.growth_score ?? undefined,
         }),
@@ -158,7 +166,9 @@ export async function GET(request: NextRequest) {
         },
       }),
       // Include thesis for business+ tiers
-      ...(hasEntitlement(access, 'forecast_metrics') && {
+      ...((hasEntitlement(access, 'investment_thesis') ||
+        hasEntitlement(access, 'risk_analysis') ||
+        hasEntitlement(access, 'forecast_metrics')) && {
         thesis: {
           opportunityThesis: countryData.opportunity_thesis_md ?? undefined,
           riskNarrative: countryData.risk_narrative_md ?? undefined,
@@ -171,6 +181,7 @@ export async function GET(request: NextRequest) {
         product: 'souvera',
         owner: 'Afronovation, Inc.',
         accessTier: access.planId,
+        planRank: access.planRank,
         authenticated: access.isAuthenticated,
         generatedAt: new Date().toISOString(),
         sources: [
@@ -183,7 +194,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(response, {
       status: 200,
       headers: {
-        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+        'Cache-Control': tieredApiCacheControl(access.isAuthenticated),
+        Vary: 'Cookie',
       },
     });
   } catch (err) {

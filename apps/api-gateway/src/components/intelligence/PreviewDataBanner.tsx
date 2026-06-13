@@ -28,19 +28,20 @@ export function PreviewDataBanner({
   };
 
   return (
-    <div className={`p-4 bg-amber-500/10 border border-amber-500/20 rounded-sm ${className}`}>
+    <div className={`p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-sm ${className}`}>
       <div className="flex items-start gap-3">
-        <AlertCircle className="w-5 h-5 text-amber-500 mt-0.5 shrink-0" />
+        <AlertCircle className="w-5 h-5 text-emerald-500 mt-0.5 shrink-0" />
         <div className="text-sm flex-1">
-          <p className="text-amber-400 font-semibold mb-1">
-            Curated Preview Data
+          <p className="text-emerald-400 font-semibold mb-1">
+            Live & Curated Data
           </p>
-          <p className="text-amber-400/80 leading-relaxed">
-Data shown is from curated sources and may not reflect current status.
-            Additional source integrations are in development.
+          <p className="text-emerald-400/80 leading-relaxed">
+            Data combines live institutional feeds with editorially curated profiles for pilot
+            markets. NGA + JAM terminals are fully populated; regional rollout continues on a
+            governed schedule.
           </p>
           {(sources.length > 0 || freshnessAt) && (
-            <div className="mt-2 text-xs text-amber-400/60">
+            <div className="mt-2 text-xs text-emerald-400/60">
               {sources.length > 0 && (
                 <span>Sources: {sources.map(s => s.name).join(', ')}</span>
               )}

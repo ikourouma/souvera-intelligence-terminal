@@ -116,6 +116,18 @@ h1, h2, h3, h4 {
  * CORE INSTITUTIONAL COMPONENTS
  * ================================================================ */
 
+/* Bloomberg-Grade Metric Colors (Visual Capitalist Strategic Color Use) */
+.text-emerald-400 { color: #34D399; }  /* Growth/Investment indicators */
+.text-amber-400 { color: #FBBF24; }    /* Risk/Warning indicators */
+.text-blue-400 { color: #60A5FA; }     /* Core economic metrics */
+.text-purple-400 { color: #C084FC; }   /* Demographic data */
+.text-cyan-400 { color: #22D3EE; }     /* Currency/Financial metrics */
+
+/* Metric card hover override for clickable cards */
+.metric-card-interactive:hover .metric-value {
+  color: #34D399 !important; /* Emerald on hover */
+}
+
 /* Terminal Card — standard container */
 .terminal-card {
   background-color: #161D26;
@@ -199,3 +211,18 @@ h1, h2, h3, h4 {
 ::-webkit-scrollbar-thumb { background: #1F2A37; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #2A3A4A; }
 
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  opacity: 0;
+  animation: fadeInUp 0.45s ease-out forwards;
+}

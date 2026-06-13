@@ -9,10 +9,8 @@ export const maxDuration = 120;
 /**
  * POST /api/v1/reports/generate
  *
- * Default templateVersion: v1 (JSON response with downloadUrl).
- * Pass templateVersion: "v2" for Country Profile with preflight + JSON (or use /api/v2/reports/generate for raw PDF).
- *
- * Body: { reportType, iso3, query?, templateVersion?, strict?, proofLayout? }
+ * Creates a new request row, renders via canonical template registry, returns JSON
+ * with downloadProxyUrl + reportFilename (download via /api/v1/reports/download/[requestId]).
  */
 export async function POST(request: NextRequest) {
   const supabase = await createServerClient();
@@ -27,8 +25,5 @@ export async function POST(request: NextRequest) {
   const access = await resolveUserAccess(supabase, user.id);
   const isAdmin = access.entitlements.includes('admin_access');
 
-  return handleReportGenerate(request, user, access, isAdmin, {
-    defaultTemplateVersion: 'v1',
-    responseMode: 'json',
-  });
+  return handleReportGenerate(request, user, access, isAdmin);
 }

@@ -44,11 +44,11 @@ export const SECTOR_TAXONOMY: SectorTaxonomyEntry[] = [
   },
   {
     sectorKey: 'manufacturing',
-    label: 'Manufacturing',
-    hubRoute: '/sectors/logistics',
+    label: 'Manufacturing & Textiles',
+    hubRoute: '/sectors/manufacturing-textiles',
     deepDiveSupported: true,
-    regionsApplicable: ['africa'],
-    dbSectorKeyAliases: ['manufacturing'],
+    regionsApplicable: ['africa', 'caribbean'],
+    dbSectorKeyAliases: ['manufacturing', 'manufacturing-textiles', 'manufacturing_textiles'],
   },
   {
     sectorKey: 'mining',
@@ -107,6 +107,8 @@ const KEY_ALIASES: Record<string, string> = {
   tourism_hospitality: 'tourism-hospitality',
   digital_infrastructure: 'digital-infrastructure',
   critical_minerals: 'critical-minerals',
+  manufacturing_textiles: 'manufacturing',
+  'manufacturing-textiles': 'manufacturing',
 };
 
 export function normalizeSectorKey(raw: string): string {

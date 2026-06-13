@@ -132,7 +132,7 @@ function wave1AfricaOverview(iso3: string, countryName: string, m: Metrics): Cou
 function nigeriaOverview(countryName: string, m: Metrics): CountryOverviewContent {
   return {
     snapshotTitle: "Africa's Largest Economy",
-    snapshotIntro: `${countryName} is West Africa's economic powerhouse and Africa's most populous nation, with a rapidly growing technology ecosystem. Post-2023 reforms have unlocked sustained economic momentum, positioning it as a premier investment destination on the continent.`,
+    snapshotIntro: `${countryName} is profiled with macro data as of {{MACRO_ASOF_YEAR}}: nominal GDP {{GDP_NOMINAL_USD}}, growth {{GDP_GROWTH}}, inflation {{INFLATION}}. Technology and agriculture lead the sector scorecard; post-2023 reforms remain a structural watchpoint per policy registry.`,
     snapshotMetrics: [
       { emoji: '💰', label: 'Economic Scale', value: m.gdp_current_usd ? `$${(m.gdp_current_usd / 1e9).toFixed(0)}B+` : 'Pending', sublabel: 'GDP ({{MACRO_ASOF_YEAR}})', narrative: "West Africa's largest economy, representing 24% of regional output" },
       { emoji: '👥', label: 'Population', value: m.population_total ? `${(m.population_total / 1e6).toFixed(1)}M` : '223M', sublabel: 'Population (latest)', narrative: "Africa's most populous nation with median age of 19.7 years" },
@@ -141,10 +141,10 @@ function nigeriaOverview(countryName: string, m: Metrics): CountryOverviewConten
     ],
     momentumIntro: `${countryName} entered sustained growth following 2023 currency reforms. Technology sector expansion and agricultural modernization are driving GDP acceleration, with inflation declining from peak levels.`,
     momentumMetrics: [
-      { emoji: '📈', label: 'GDP Growth', value: fmtPct(m.gdp_growth_annual_pct), sublabel: '(2025)', narrative: 'Highest since 2014, post-reform acceleration' },
-      { emoji: '💰', label: 'FDI Inflows', value: m.fdi_net_inflows_current_usd ? `$${(m.fdi_net_inflows_current_usd / 1e9).toFixed(1)}B` : '$5.1B', sublabel: '(2025)', narrative: 'Record levels, +75% since 2020' },
-      { emoji: '🚀', label: 'Tech Boom', value: '+15%', sublabel: 'YoY Growth', narrative: 'Now 18% of GDP, fintech-led expansion' },
-      { emoji: '📉', label: 'Inflation', value: fmtPct(m.inflation_consumer_prices_annual_pct), sublabel: '(2025)', narrative: 'Declining from 24.5% peak (2023)' },
+      { emoji: '📈', label: 'GDP Growth', value: fmtPct(m.gdp_growth_annual_pct), sublabel: '({{MACRO_ASOF_YEAR}})', narrative: 'Per structured macro series ({{MACRO_ASOF_YEAR}})' },
+      { emoji: '💰', label: 'FDI Inflows', value: m.fdi_net_inflows_current_usd ? `$${(m.fdi_net_inflows_current_usd / 1e9).toFixed(1)}B` : 'Not covered', sublabel: '({{MACRO_ASOF_YEAR}})', narrative: 'FDI {{FDI}} per canonical series' },
+      { emoji: '🚀', label: 'Tech sector', value: 'Scorecard', sublabel: 'Sector tab', narrative: 'Sector strength from Souvera scorecard — not a macro series' },
+      { emoji: '📉', label: 'Inflation', value: fmtPct(m.inflation_consumer_prices_annual_pct), sublabel: '({{MACRO_ASOF_YEAR}})', narrative: 'Inflation trajectory per structured series (2023 reform cycle referenced in Economy tab)' },
     ],
     momentumFooterSources: 'World Bank, IMF, CBN',
     whyNowLead: 'Critical 24-36 month investment window — three converging factors:',
@@ -153,15 +153,14 @@ function nigeriaOverview(countryName: string, m: Metrics): CountryOverviewConten
       { emoji: '🏛️', title: '2. Policy Stability', body: "The Tinubu administration's economic reforms—currency unification, fuel subsidy removal, and tax reforms—have passed the volatility phase. Markets have adjusted, and policy continuity through 2027 is highly probable." },
       { emoji: '👥', title: '3. Demographic Dividend', body: "Nigeria's youth bulge (median age 19.7 years) is maturing into a tech-savvy consumer class. Mobile internet penetration exceeds 75%, and digital payment adoption is accelerating at 35% annually." },
     ],
-    whyNowCallout: "Investment Window: Institutional investors who enter now—while inflation is declining and FDI is ramping—stand to capture outsized returns as the market matures within 24-36 months.",
+    whyNowCallout: 'Timing and entry strategy are summarized in the Opportunity and Risk sections; verify macro and policy stamps before deployment decisions.',
     marketAccessItems: [
       {
         emoji: '🇺🇸',
         tone: 'amber',
-        title: 'AGOA: U.S. Market Access (Needs review)',
-        paragraphs: [`${countryName} AGOA eligibility must be confirmed against the current USTR beneficiary country list before asserting Suspended/Eligible status in institutional reports.`],
-        bullets: ['Verify against USTR AGOA beneficiary list before trade planning', 'Bilateral U.S. trade continues under standard terms where AGOA does not apply', 'Restoration scenarios require legislative and USTR review'],
-        footnote: 'Status: Unverified (Needs review) · See PolicyStatusRegistry',
+        title: 'AGOA: U.S. Market Access',
+        paragraphs: [`${countryName} AGOA status is sourced from the Evidence Vault — see Trade tab for legislative watchpoints and restoration timeline.`],
+        footnote: 'Status: Under review · Source: Evidence Vault',
       },
       {
         emoji: '🌍',

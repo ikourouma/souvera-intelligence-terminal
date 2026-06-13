@@ -1,13 +1,14 @@
 import type { Metadata } from 'next';
-import { ComingSoonPage } from '@/components/templates/ComingSoonPage';
+import { Banknote } from 'lucide-react';
+import { SectorOverviewPage } from '@/components/sectors/SectorOverviewPage';
+import { FINTECH_SECTOR } from '@/data/sectors/sector-overviews';
 
 export const metadata: Metadata = {
   title: 'Fintech & Digital Finance | Souvera',
-  description: 'Intelligence on African fintech markets including mobile money, B2B payments, digital banking, and regulatory developments.',
-  keywords: ['Africa fintech', 'mobile money', 'digital banking Africa', 'African payments'],
+  description: FINTECH_SECTOR.description,
   openGraph: {
     title: 'Fintech & Digital Finance | Souvera',
-    description: 'Intelligence on African fintech markets including mobile money, B2B payments, and digital banking.',
+    description: FINTECH_SECTOR.subtitle,
     url: 'https://souvera.vercel.app/sectors/fintech',
   },
   alternates: {
@@ -16,14 +17,5 @@ export const metadata: Metadata = {
 };
 
 export default function FintechPage() {
-  return (
-    <ComingSoonPage
-      title="Fintech & Digital Finance"
-      tagline="Sector Intelligence"
-      description="Deep-dive intelligence on African fintech markets is in development. Request early access to receive updates when sector reports are available."
-      iconName="banknote"
-      expectedRelease="Q2 2026"
-      backLink={{ label: 'Back to Sectors', href: '/sectors' }}
-    />
-  );
+  return <SectorOverviewPage content={FINTECH_SECTOR} icon={Banknote} accentColor="blue" />;
 }

@@ -3,17 +3,28 @@
  */
 
 import { buildCoverPageModel, renderCoverPageSection } from './cover-page-v2-html';
-import { COVER_V2_CSS } from './cover-page-v2-html';
 import {
+  buildClientPolicyTableRows,
+  buildDataCoverageLimitationsHtml,
+  buildRiskHeatmapRows,
   escapeHtml,
   fmtPct,
   fmtUsd,
+  formatMetricSourceName,
   paragraphsHtml,
   priorMacroYear,
-  REPORT_V2_BODY_CSS,
+  renderCoverageCard,
+  renderMethodologyProvidersHtml,
+  REPORT_V2_PRINT_CSS,
   tableHtml,
+  truncateAtSentence,
   type CountryProfileV2Model,
 } from './report-v2-shared';
+import { neutralizeClientNumericClaims } from '../narrative-client-safe';
+import {
+  COUNTRY_PROFILE_TEMPLATE_ID,
+  renderReportTemplateStampFooter,
+} from '../report-template-stamp';
 
 function renderDashboard(model: CountryProfileV2Model): string {
   const { payload, canonical } = model;
@@ -24,14 +35,8 @@ function renderDashboard(model: CountryProfileV2Model): string {
   const intro = [
     `${payload.country.name} is profiled with macro data as-of ${macroYear ?? 'Not covered'} and platform refresh ${payload.freshnessAt ? 'on file' : 'pending'}.`,
     `Canonical GDP growth is ${fmtPct(cm.gdpGrowthPct)} with nominal GDP ${fmtUsd(cm.gdpCurrentUsd)}; inflation ${fmtPct(cm.inflationCpiPct)}; FDI ${fmtUsd(cm.fdiNetInflowsUsd)}.`,
-    'Figures below are drawn from structured series and verified policy registry — not headline display strings.',
+    'Figures below are drawn from structured series and the policy registry — not headline display strings.',
   ];
-
-  const metricSource = (id: string) => {
-    const m = payload.sourceMeta?.metrics?.[id];
-    if (!m?.source_name) return 'Source: Not provided';
-    return m.source_url ? `${m.source_name}` : m.source_name;
-  };
 
   const macroRows: string[][] = [
     [
@@ -39,41 +44,44 @@ function renderDashboard(model: CountryProfileV2Model): string {
       fmtUsd(cm.gdpCurrentUsd),
       prior?.gdp_current_usd != null ? fmtUsd(prior.gdp_current_usd) : '—',
       macroYear != null ? String(macroYear) : 'Not covered',
-      metricSource('gdp_current_usd'),
+      formatMetricSourceName(payload, 'gdp_current_usd'),
     ],
     [
       'GDP growth',
       fmtPct(cm.gdpGrowthPct),
       prior?.gdp_growth_pct != null ? fmtPct(prior.gdp_growth_pct) : '—',
       macroYear != null ? String(macroYear) : 'Not covered',
-      metricSource('gdp_growth_pct'),
+      formatMetricSourceName(payload, 'gdp_growth_pct'),
     ],
     [
       'Inflation (CPI)',
       fmtPct(cm.inflationCpiPct),
       prior?.inflation_cpi_pct != null ? fmtPct(prior.inflation_cpi_pct) : '—',
       macroYear != null ? String(macroYear) : 'Not covered',
-      metricSource('inflation_cpi_pct'),
+      formatMetricSourceName(payload, 'inflation_cpi_pct'),
     ],
     [
       'FDI net inflows',
       fmtUsd(cm.fdiNetInflowsUsd),
       prior?.fdi_net_inflows_usd != null ? fmtUsd(prior.fdi_net_inflows_usd) : '—',
       macroYear != null ? String(macroYear) : 'Not covered',
-      metricSource('fdi_net_inflows_usd'),
+      formatMetricSourceName(payload, 'fdi_net_inflows_usd'),
     ],
     [
       'FX (local/USD)',
       cm.fxToUsd != null ? cm.fxToUsd.toFixed(2) : '—',
       prior?.fx_to_usd != null ? prior.fx_to_usd.toFixed(2) : '—',
       macroYear != null ? String(macroYear) : 'Not covered',
-      'Source: multiple (see Appendix)',
+      formatMetricSourceName(payload, 'fx_to_usd'),
     ],
   ];
 
-  const marketsPanel = payload.markets?.asOfDate
-    ? `<div class="card"><div class="cardTitle">Markets data as-of</div><div class="cardValue">${escapeHtml(payload.markets.asOfDate)}</div></div>`
-    : `<div class="box-warn"><strong>Markets:</strong> Not covered in this report edition.</div>`;
+  const marketsPanel = canonical.dataCoverage.hasMarketsFeed
+    ? `<div class="card"><div class="cardTitle">Markets feed</div><div class="cardValue">On file</div></div>`
+    : renderCoverageCard(
+        'Markets Coverage',
+        'Platform refresh timestamp is not a markets feed. Rates, curves, and spreads are not included in this edition.'
+      );
 
   const trade = payload.tradeSummary;
   const tradePanel = trade
@@ -85,11 +93,7 @@ function renderDashboard(model: CountryProfileV2Model): string {
       ${trade.topPartners?.length ? tableHtml(['Partner', 'Share %'], trade.topPartners.map((p) => [p.country, p.sharePct != null ? `${p.sharePct}%` : '—'])) : ''}`
     : `<div class="box-warn"><strong>Trade summary:</strong> Not provided.</div>`;
 
-  const policyRows = canonical.policyRecords.map((p) => [
-    p.framework,
-    p.statusLabel,
-    p.lastVerifiedAt ?? 'Unverified',
-  ]);
+  const policyRows = buildClientPolicyTableRows(payload.country.iso3);
 
   const sectorRows = payload.sectors.slice(0, 5).map((s) => [
     s.label,
@@ -98,12 +102,28 @@ function renderDashboard(model: CountryProfileV2Model): string {
     s.attractiveness != null ? String(s.attractiveness) : '—',
   ]);
 
-  const riskHeat = [
-    ['Macro', canonical.confidence === 'low' ? 'Elevated' : 'Moderate'],
-    ['Fiscal', 'Moderate'],
-    ['Political', payload.sections.political.items[0]?.severity ?? 'Moderate'],
-    ['Operational', 'Moderate'],
-  ];
+  const riskHeat = buildRiskHeatmapRows(model);
+
+  const externalRows: string[][] = [];
+  const macroRow =
+    macroYear != null ? payload.economyYears.find((y) => y.year === macroYear) : undefined;
+  if (macroRow && canonical.dataCoverage.hasExternalSectorSeries) {
+    if (macroRow.current_account_pct_gdp != null) {
+      externalRows.push(['Current account (% GDP)', fmtPct(macroRow.current_account_pct_gdp)]);
+    }
+    if (macroRow.reserves_total_usd != null) {
+      externalRows.push(['Total reserves', fmtUsd(macroRow.reserves_total_usd)]);
+    }
+    if (macroRow.reserves_months_imports != null) {
+      externalRows.push(['Reserves (months imports)', String(macroRow.reserves_months_imports.toFixed(1))]);
+    }
+    if (macroRow.remittances_received_usd != null) {
+      externalRows.push(['Remittances received', fmtUsd(macroRow.remittances_received_usd)]);
+    }
+  }
+  const externalBlock = canonical.dataCoverage.hasExternalSectorSeries && externalRows.length
+    ? `<h2>External Sector</h2>${tableHtml(['Indicator', 'Latest'], externalRows)}<p class="muted">Source: World Bank WDI (${macroYear ?? 'n/a'})</p>`
+    : `<h2>External Sector</h2>${renderCoverageCard('External Sector', 'Current account, reserves, and remittances series not yet populated for this country.')}`;
 
   return `<section class="page">
     <h1>Dashboard</h1>
@@ -115,7 +135,8 @@ function renderDashboard(model: CountryProfileV2Model): string {
       <div><h3>Trade</h3>${tradePanel}</div>
     </div>
     <h2>Market Access (Registry)</h2>
-    ${tableHtml(['Framework', 'Status', 'Last verified'], policyRows)}
+    ${tableHtml(['Framework', 'Status', 'Source', 'Last reviewed'], policyRows)}
+    ${externalBlock}
     <h2>Risk Heatmap</h2>
     ${tableHtml(['Domain', 'Level'], riskHeat)}
     <h2>Sector Leaderboard</h2>
@@ -137,14 +158,16 @@ function renderExecutiveSummary(model: CountryProfileV2Model): string {
   if (prior?.gdp_current_usd && canonical.canonicalMetrics.gdpCurrentUsd) {
     const pct =
       ((canonical.canonicalMetrics.gdpCurrentUsd - prior.gdp_current_usd) / prior.gdp_current_usd) * 100;
-    deltas.push(`Nominal GDP scale ${pct >= 0 ? '+' : ''}${pct.toFixed(0)}% (${prior.year}→${macroYear}) in USD terms.`);
+    deltas.push(
+      `Nominal GDP scale ${pct >= 0 ? '+' : ''}${pct.toFixed(0)}% (${prior.year}→${macroYear}) in USD terms (USD values reflect FX/base effects).`
+    );
   }
   if (!deltas.length) deltas.push('Prior-year structured deltas unavailable — single-year macro snapshot only.');
 
   const intro = [
     s.opportunity.lead,
     s.risk.lead,
-    'This executive summary uses canonical macro stamps and registry-verified policy statuses; unresolved items are labeled Unverified/Needs review.',
+    'This executive summary uses canonical macro stamps and the institutional policy registry; items without structured backing render as Not covered.',
   ];
 
   return `<section class="page">
@@ -153,14 +176,14 @@ function renderExecutiveSummary(model: CountryProfileV2Model): string {
     <h2>Base / Upside / Downside</h2>
     <div class="grid3">
       <div class="card"><div class="cardTitle">Base case</div><ul class="compact">
-        <li>${escapeHtml(s.opportunity.lead.slice(0, 160))}</li>
+        <li>${escapeHtml(truncateAtSentence(s.opportunity.lead, 280))}</li>
         <li>GDP growth ${fmtPct(canonical.canonicalMetrics.gdpGrowthPct)} (${macroYear ?? 'n/a'})</li>
         <li>Signal: ${escapeHtml(payload.signalScan.badge)}</li>
       </ul></div>
       <div class="card"><div class="cardTitle">Upside</div><ul class="compact">
         <li>FDI acceleration above ${fmtUsd(canonical.canonicalMetrics.fdiNetInflowsUsd)}</li>
         <li>Sector leaders maintain attractiveness scores &gt;80</li>
-        <li>Policy frameworks verified with USTR/AU sources</li>
+        <li>Policy frameworks align with USTR/AU/ECOWAS registry entries where listed</li>
       </ul></div>
       <div class="card"><div class="cardTitle">Downside</div><ul class="compact">
         <li>Inflation re-acceleration above ${fmtPct(canonical.canonicalMetrics.inflationCpiPct)}</li>
@@ -261,7 +284,7 @@ function renderSectors(model: CountryProfileV2Model): string {
     s.strength != null ? String(s.strength) : '—',
     s.growth != null ? String(s.growth) : '—',
     s.attractiveness != null ? String(s.attractiveness) : '—',
-    (s.teaser ?? '').slice(0, 80),
+    neutralizeClientNumericClaims(s.teaser ?? '').slice(0, 80),
   ]);
   return renderSectionPage(
     'Sectors & Scorecards',
@@ -276,7 +299,7 @@ function renderOpportunity(model: CountryProfileV2Model): string {
   const pillars = o.pillars
     .map(
       (p) => `<div class="card" style="margin-top:8px">
-        <strong>${escapeHtml(p.title)}</strong> — ${escapeHtml(p.subtitle ?? '')}
+        <strong>${escapeHtml(neutralizeClientNumericClaims(p.title))}</strong> — ${escapeHtml(neutralizeClientNumericClaims(p.subtitle ?? ''))}
         <p class="prose">${escapeHtml(p.narrative)}</p>
       </div>`
     )
@@ -319,27 +342,48 @@ function renderAppendix(model: CountryProfileV2Model): string {
     .slice(0, 12)
     .map((t) => `<tr><td><strong>${escapeHtml(t.term)}</strong></td><td>${escapeHtml(t.definition)}</td></tr>`)
     .join('');
-  const policyEvidence = model.canonical.policyRecords
+  const policyEvidence = buildClientPolicyTableRows(model.payload.country.iso3)
     .map(
-      (p) =>
-        `<li>${escapeHtml(p.framework)}: ${escapeHtml(p.statusLabel)} — ${p.authoritativeSourceUrl ? escapeHtml(p.authoritativeSourceUrl) : 'No URL'} (${p.lastVerifiedAt ?? 'Unverified'})</li>`
+      (row) =>
+        `<li>${escapeHtml(row[0])}: ${escapeHtml(row[1])} — Source: ${escapeHtml(row[2])} · Last reviewed: ${escapeHtml(row[3])}</li>`
     )
     .join('');
+
+  const copyWarnings = (model.preflightWarnings ?? []).filter((w) =>
+    w.code.startsWith('COPY_')
+  );
+  const copyWarningsBlock =
+    copyWarnings.length > 0
+      ? `<h1>Appendix: Copy warnings</h1>
+    <p class="prose muted">Editorial lint (non-blocking) — review before external distribution.</p>
+    <ul class="compact">${copyWarnings
+      .map(
+        (w) =>
+          `<li><strong>${escapeHtml(w.code)}</strong> (${escapeHtml(w.path)}): ${escapeHtml(w.message)}</li>`
+      )
+      .join('')}</ul>`
+      : '';
 
   return `<section class="page">
     <h1>Appendix: Methodology</h1>
     ${paragraphsHtml([
       'Scorecards rank Strength (position), Growth (trajectory), and Attractiveness (investment appeal) on 0–100 scales versus regional peers.',
       'Signal scan combines macro momentum, FDI, inflation, and sector leadership with explicit confidence tiers.',
-      'Data quality: fields without structured backing render as Not covered/Unverified; preflight blocks contradictory narratives.',
+      'Data quality: fields without structured backing render as Not covered; preflight blocks contradictory narratives and unresolved template tokens.',
     ])}
+    <h2>Data &amp; Methodology — providers</h2>
+    ${renderMethodologyProvidersHtml()}
     <h1>Appendix: Glossary</h1>
     <p class="prose">${escapeHtml(g.intro)}</p>
     <table class="data-table"><tbody>${terms}</tbody></table>
     <h1>Appendix: Sources &amp; Disclosures</h1>
     <p class="prose">${escapeHtml(model.payload.sources)}</p>
+    <h2>Market-access registry (summary)</h2>
     <ul class="compact">${policyEvidence}</ul>
+    <h1>Appendix: Data coverage &amp; limitations</h1>
+    ${buildDataCoverageLimitationsHtml(model.canonical)}
     <p class="muted">For informational purposes only. Verify material facts independently before investment decisions.</p>
+    ${copyWarningsBlock}
   </section>`;
 }
 
@@ -367,10 +411,11 @@ export function renderCountryProfileV2Html(model: CountryProfileV2Model): string
 <head>
   <meta charset="utf-8" />
   <title>${escapeHtml(name)} — Country Profile (Institutional)</title>
-  <style>${COVER_V2_CSS}${REPORT_V2_BODY_CSS}</style>
+  <style>${REPORT_V2_PRINT_CSS}</style>
 </head>
 <body>
 ${sections}
+${renderReportTemplateStampFooter(COUNTRY_PROFILE_TEMPLATE_ID)}
 </body>
 </html>`;
 }

@@ -1,13 +1,15 @@
 import type { Metadata } from 'next';
-import { ComingSoonPage } from '@/components/templates/ComingSoonPage';
+import { Wheat } from 'lucide-react';
+import { SectorOverviewPage } from '@/components/sectors/SectorOverviewPage';
+import { AGRICULTURE_SECTOR } from '@/data/sectors/sector-overviews';
 
 export const metadata: Metadata = {
   title: 'Agriculture & Agribusiness | Souvera',
-  description: 'Intelligence on African agriculture including cocoa, coffee, cashew, agritech platforms, and AfCFTA trade corridors.',
-  keywords: ['Africa agriculture', 'African agribusiness', 'cocoa Africa', 'coffee Africa', 'agritech'],
+  description: AGRICULTURE_SECTOR.description,
+  keywords: ['Africa agriculture', 'agribusiness', 'AfCFTA food trade', 'agritech Africa'],
   openGraph: {
     title: 'Agriculture & Agribusiness | Souvera',
-    description: 'Intelligence on African agriculture including cocoa, coffee, cashew, and agritech platforms.',
+    description: AGRICULTURE_SECTOR.subtitle,
     url: 'https://souvera.vercel.app/sectors/agriculture',
   },
   alternates: {
@@ -16,14 +18,5 @@ export const metadata: Metadata = {
 };
 
 export default function AgriculturePage() {
-  return (
-    <ComingSoonPage
-      title="Agriculture & Agribusiness"
-      tagline="Sector Intelligence"
-      description="Deep-dive intelligence on agriculture and agribusiness is in development. Request early access to receive updates when sector reports are available."
-      iconName="wheat"
-      expectedRelease="Q2 2026"
-      backLink={{ label: 'Back to Sectors', href: '/sectors' }}
-    />
-  );
+  return <SectorOverviewPage content={AGRICULTURE_SECTOR} icon={Wheat} accentColor="green" />;
 }

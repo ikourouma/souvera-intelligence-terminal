@@ -168,14 +168,14 @@ function nigeriaRisk(countryName: string): CountryRiskContent {
       'MIGA/DFC political risk insurance available for qualifying projects',
       'Phased deployment validates unit economics before scale-up',
     ],
-    riskAdjustedNarrative: "Nigeria's risk-adjusted returns remain compelling for investors with 5-7 year horizons and operational flexibility. The combination of $575B economy scale, structural reforms, and proven risk mitigation frameworks creates an attractive risk-reward profile for patient capital.",
+    riskAdjustedNarrative: "Nigeria's risk-adjusted returns remain compelling for investors with 5-7 year horizons and operational flexibility. The combination of {{GDP_NOMINAL_USD}} economy scale ({{MACRO_ASOF_YEAR}}), structural reforms, and proven risk mitigation frameworks creates an attractive risk-reward profile for patient capital.",
     riskAdjustedStats: [
       { value: 'Manageable', label: 'Risk Level', sublabel: 'With proper mitigation', accentClass: 'text-emerald-400' },
       { value: '5-7 Years', label: 'Investment Horizon', sublabel: 'Patient capital rewarded', accentClass: 'text-blue-400' },
       { value: 'Compelling', label: 'Risk-Adjusted Returns', sublabel: 'Above emerging market avg', accentClass: 'text-emerald-400' },
     ],
     returnsBullets: [
-      '$575B economy scale supports diversified entry strategies',
+      '{{GDP_NOMINAL_USD}} economy scale ({{MACRO_ASOF_YEAR}}) supports diversified entry strategies',
       'Structural reforms improving macro stability post-2023',
       'Risk-reward profile favors 5-7 year patient capital',
     ],

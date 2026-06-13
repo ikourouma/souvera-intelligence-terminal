@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { SouveraMegaNav } from '@/components/ui/SouveraMegaNav';
 import { SouveraFooter } from '@/components/ui/SouveraFooter';
 import { ArrowRight, CheckCircle2, Building2, Loader2, AlertCircle } from 'lucide-react';
@@ -18,7 +19,18 @@ const ORGANIZATION_TYPES = [
 
 type FormStatus = 'idle' | 'loading' | 'success' | 'error';
 
-export default function RequestAccessPage() {
+const PLAN_MESSAGES: Record<string, string> = {
+  professional: 'I would like to request access to the Professional plan.',
+  business: 'I would like to upgrade to the Business plan for full intelligence reports (Investment Memos, Trade Profiles, Sector Deep-Dives, and AI custom reports).',
+  explorer: 'I would like to request access to the Explorer (free) plan.',
+};
+
+function RequestAccessForm() {
+  const searchParams = useSearchParams();
+  const plan = searchParams.get('plan');
+  const source = searchParams.get('source');
+  const intent = searchParams.get('intent');
+
   const [status, setStatus] = useState<FormStatus>('idle');
   const [errorMessage, setErrorMessage] = useState('');
   const [formData, setFormData] = useState({
@@ -30,6 +42,16 @@ export default function RequestAccessPage() {
     role: '',
     message: '',
   });
+
+  useEffect(() => {
+    if (!plan) return;
+    const prefill = PLAN_MESSAGES[plan] ?? `I am interested in the ${plan} plan.`;
+    const withSource = source ? `${prefill} (from ${source.replace(/-/g, ' ')}).` : prefill;
+    setFormData((prev) => ({
+      ...prev,
+      message: prev.message || withSource,
+    }));
+  }, [plan, source]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,7 +71,8 @@ export default function RequestAccessPage() {
           organization_type: formData.organizationType,
           role: formData.role,
           message: formData.message,
-          source_page: '/access/request-access',
+          source_page: `/access/request-access${plan ? `?plan=${plan}` : ''}${source ? `&source=${source}` : ''}`,
+          metadata: { plan, source, intent },
         }),
       });
 
@@ -338,5 +361,13 @@ export default function RequestAccessPage() {
 
       <SouveraFooter />
     </main>
+  );
+}
+
+export default function RequestAccessPage() {
+  return (
+    <Suspense fallback={null}>
+      <RequestAccessForm />
+    </Suspense>
   );
 }

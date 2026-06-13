@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
+import { Scale, ArrowRight } from 'lucide-react';
 import { SouveraMegaNav } from '@/components/ui/SouveraMegaNav';
 import { SouveraFooter } from '@/components/ui/SouveraFooter';
 import { RegionalHeroCommand } from '@/components/regional/RegionalHeroCommand';
@@ -96,6 +98,34 @@ export default function AfricaPage() {
         region="africa"
         title="Data Sources & Credibility"
       />
+
+      {/* AGOA Trade Policy CTA */}
+      <section className="py-16 border-b border-zinc-800 bg-zinc-900/30">
+        <div className="max-w-[1600px] mx-auto px-6 lg:px-12">
+          <div className="max-w-3xl">
+            <div className="text-[10px] font-bold tracking-[0.2em] uppercase text-blue-500 mb-4">
+              Trade & Policy
+            </div>
+            <h2
+              className="text-3xl md:text-4xl font-bold tracking-tight mb-4"
+              style={{ fontFamily: 'Space Grotesk, sans-serif' }}
+            >
+              AGOA Legislative Tracker
+            </h2>
+            <p className="text-lg text-zinc-400 leading-relaxed mb-8">
+              Monitor AGOA eligibility, reauthorization milestones, and U.S. legislative watchpoints across sub-Saharan African markets. Reauthorization extended through December 31, 2026.
+            </p>
+            <Link
+              href="/intelligence/trade/agoa"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-sm font-semibold transition-colors"
+            >
+              <Scale className="w-5 h-5" />
+              Open AGOA Tracker
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
 
       {/* Access CTA */}
       <AccessCTABlock

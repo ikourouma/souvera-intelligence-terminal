@@ -9,6 +9,9 @@ import {
   ArrowLeft, LogOut, Shield, CreditCard
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { comparePlansHref } from '@/lib/intelligence/routing';
+import { SouveraMegaNav } from '@/components/ui/SouveraMegaNav';
+import { SouveraFooter } from '@/components/ui/SouveraFooter';
 
 type FormStatus = 'idle' | 'loading' | 'success' | 'error';
 
@@ -197,7 +200,9 @@ export default function ProfilePage() {
     : 'Explorer';
 
   return (
-    <main className="min-h-screen bg-zinc-950 py-12 px-4">
+    <main className="min-h-screen bg-zinc-950">
+      <SouveraMegaNav />
+      <div className="py-12 px-4 pt-24">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -220,7 +225,7 @@ export default function ProfilePage() {
         <h1 className="text-3xl font-bold text-white mb-8">Account Settings</h1>
 
         {/* Subscription Info */}
-        <div className="bg-zinc-900/50 border border-zinc-800 rounded-sm p-6 mb-8">
+        <div id="subscription" className="bg-zinc-900/50 border border-zinc-800 rounded-sm p-6 mb-8 scroll-mt-24">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 bg-blue-500/10 rounded-sm">
               <CreditCard className="w-5 h-5 text-blue-400" />
@@ -238,10 +243,10 @@ export default function ProfilePage() {
               </p>
             </div>
             <Link
-              href="/access"
+              href={comparePlansHref('profile')}
               className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-medium rounded-sm transition-colors"
             >
-              Manage Plan
+              Compare Plans
             </Link>
           </div>
         </div>
@@ -453,6 +458,8 @@ export default function ProfilePage() {
           </form>
         </div>
       </div>
+      </div>
+      <SouveraFooter />
     </main>
   );
 }

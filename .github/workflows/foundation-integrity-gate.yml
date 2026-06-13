@@ -1,0 +1,69 @@
+name: Foundation integrity gate
+
+# Closes Phase 0F — runs on every PR + push to protected branches
+# Gate 1 (0F.3): Static placeholder scan — no DB needed, always runs
+# Gate 2 (0F.1): Preflight + hydration tests — requires Supabase secrets
+# Gate 3 (0F.2): Cross-surface policy consistency — requires Supabase secrets
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+
+jobs:
+  # ── Gate 1: Static analysis (no secrets, always fast) ─────────────────────
+  static-integrity:
+    name: Static integrity checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: apps/api-gateway
+
+      - name: "0F.3 — Placeholder leak scan"
+        run: npx tsx scripts/ci-placeholder-scan.ts
+        working-directory: apps/api-gateway
+
+  # ── Gate 2: Live preflight + hydration (requires Supabase) ────────────────
+  live-preflight:
+    name: Live preflight (12 rollout markets)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Only run when Supabase secrets are available (skip on fork PRs)
+    if: ${{ vars.SUPABASE_AVAILABLE == 'true' || github.event_name == 'push' }}
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: apps/api-gateway
+
+      - name: "0F.1 — Phase 0A hydration test (NGA smoke)"
+        run: npx tsx scripts/test-phase-0a-hydration.ts
+        working-directory: apps/api-gateway
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+      - name: "0F.2 — Policy consistency check (pilot triad)"
+        run: npx tsx scripts/test-pilot-triad-parity.ts
+        working-directory: apps/api-gateway
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

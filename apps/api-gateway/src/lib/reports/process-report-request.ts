@@ -3,14 +3,15 @@
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { fetchCountryProfileReportData } from './country-profile-data';
-import { generateCountryProfileFullV2 } from './generate-country-profile-v2';
-import { renderReportPdfBytes } from './render-report';
 import { ensureReportsBucket } from './ensure-reports-bucket';
-import { logReportGeneration } from './reports-v2-api';
-import type { ReportTemplateVersion, ReportsV2RequestOptions } from './reports-v2-config';
-import { generateSectorDeepDiveV2 } from './generate-sector-deep-dive-v2';
-import { isCountryProfileReport, isSectorDeepDiveReport } from './reports-v2-config';
+import { formatPreflightErrorsMessage, logReportGeneration } from './reports-v2-api';
+import { formatReportDownloadFilename } from './format-report-download-filename';
+import { buildReportDownloadProxyUrl } from './report-download';
+import {
+  generateReportFromTemplate,
+  resolveTemplateIdFromRequestRow,
+  type TemplateId,
+} from './template-registry';
 import type { PreflightReport } from '@/types/report-integrity';
 
 function getServiceClient() {
@@ -20,15 +21,26 @@ function getServiceClient() {
   return createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } });
 }
 
-export interface ReportProcessOptions extends ReportsV2RequestOptions {
+export interface ReportProcessOptions {
   correlationId?: string;
+  templateId?: TemplateId;
+  strict?: boolean;
+  proofLayout?: boolean;
+  /**
+   * When true, a row already marked completed returns cached signed URL (idempotent retry).
+   * Default false — user-initiated flows always create a new request id and render fresh.
+   */
+  allowCachedCompleted?: boolean;
 }
 
 export type ReportProcessResult =
   | {
       status: 'completed';
       downloadUrl: string;
-      templateVersion: ReportTemplateVersion;
+      downloadProxyUrl: string;
+      downloadFilename: string;
+      templateId: TemplateId;
+      generatorUsed: string;
       pdfBytes: Uint8Array;
       preflight?: PreflightReport;
     }
@@ -37,20 +49,37 @@ export type ReportProcessResult =
       preflight: PreflightReport;
       iso3: string;
       generatedAt: string;
-      templateVersion: 'v2';
+      templateId: TemplateId;
     }
   | {
       status: 'failed';
       errorMessage: string;
-      templateVersion: ReportTemplateVersion;
+      templateId: TemplateId;
     };
+
+async function patchCompletedRow(
+  supabase: SupabaseClient,
+  requestId: string,
+  patch: Record<string, unknown>
+) {
+  const { error } = await supabase
+    .from('souvera_report_requests')
+    .update(patch)
+    .eq('id', requestId);
+  if (error?.message?.match(/template_id|report_filename|generator_used|generated_at_utc/)) {
+    const { template_id, report_filename, generator_used, generated_at_utc, ...legacy } = patch;
+    await supabase.from('souvera_report_requests').update(legacy).eq('id', requestId);
+  } else if (error) {
+    throw new Error(`Failed to update report request: ${error.message}`);
+  }
+}
 
 export async function processReportRequest(
   requestId: string,
   options: ReportProcessOptions = {}
 ): Promise<ReportProcessResult> {
-  const templateVersion = options.templateVersion ?? 'v1';
   const strict = options.strict !== false;
+  const allowCachedCompleted = options.allowCachedCompleted === true;
   const correlationId = options.correlationId ?? requestId;
   const supabase = getServiceClient();
 
@@ -64,11 +93,25 @@ export async function processReportRequest(
     throw new Error(fetchError?.message ?? 'Report request not found');
   }
 
-  if (request.status === 'completed' && request.download_url) {
+  const templateId =
+    options.templateId ?? resolveTemplateIdFromRequestRow(request);
+
+  if (
+    allowCachedCompleted &&
+    request.status === 'completed' &&
+    request.download_url &&
+    request.file_path
+  ) {
+    const reportFilename =
+      (request.report_filename as string) ??
+      `${requestId}.pdf`;
     return {
       status: 'completed',
       downloadUrl: request.download_url,
-      templateVersion,
+      downloadProxyUrl: buildReportDownloadProxyUrl(requestId),
+      downloadFilename: reportFilename,
+      templateId,
+      generatorUsed: (request.generator_used as string) ?? 'cached',
       pdfBytes: new Uint8Array(0),
     };
   }
@@ -78,7 +121,8 @@ export async function processReportRequest(
     .update({ status: 'processing' })
     .eq('id', requestId);
 
-  const generatedAt = new Date().toISOString();
+  const generatedAtUtc = new Date();
+  const generatedAtIso = generatedAtUtc.toISOString();
   const iso3 = (request.iso3 as string).toUpperCase();
 
   try {
@@ -104,84 +148,65 @@ export async function processReportRequest(
       riskNarrative = profile?.risk_narrative_md ?? undefined;
     }
 
-    const renderStart = Date.now();
-    let pdfBytes: Uint8Array;
-    let preflight: PreflightReport | undefined;
-
-    const reportType = request.report_type as string;
     const metadata = (request.metadata as Record<string, string> | null) ?? {};
     const sectorKey =
       metadata.sectorKey ??
       (request.sector_key as string | null | undefined) ??
       undefined;
 
-    const useCountryV2 = templateVersion === 'v2' && isCountryProfileReport(reportType);
+    const reportFilename = formatReportDownloadFilename({
+      countryName: country?.name ?? iso3,
+      iso3,
+      templateId,
+      sectorKey,
+      generatedAtUtc: generatedAtIso,
+    });
 
-    if (isSectorDeepDiveReport(reportType)) {
-      if (!sectorKey) {
-        throw new Error('sectorKey missing on Sector Deep-Dive request (metadata.sectorKey)');
-      }
-      pdfBytes = await generateSectorDeepDiveV2(iso3, sectorKey);
-    } else if (useCountryV2) {
-      const payload = await fetchCountryProfileReportData(iso3);
-      if (summary) payload.summary = summary;
-      if (opportunityThesis) payload.opportunityThesis = opportunityThesis;
-      if (riskNarrative) payload.riskNarrative = riskNarrative;
+    const renderStart = Date.now();
+    const genResult = await generateReportFromTemplate(templateId, {
+      iso3,
+      sectorKey,
+      query: request.query_text ?? undefined,
+      summary,
+      opportunityThesis,
+      riskNarrative,
+      countryName: country?.name ?? iso3,
+      strict,
+      proofLayout: options.proofLayout,
+    });
 
-      const v2Result = await generateCountryProfileFullV2(payload, {
-        strict,
-        proofLayout: options.proofLayout,
-      });
-
-      preflight = v2Result.preflight;
-
-      if (!v2Result.ok) {
-        logReportGeneration({
-          correlationId,
-          iso3,
-          templateVersion: 'v2',
-          strict,
-          preflightErrors: v2Result.preflight.errors.length,
-          preflightWarnings: v2Result.preflight.warnings.length,
-          outcome: 'preflight_failed',
-        });
-
-        await supabase
-          .from('souvera_report_requests')
-          .update({
-            status: 'failed',
-            error_message: 'PREFLIGHT_FAILED',
-            completed_at: new Date().toISOString(),
-          })
-          .eq('id', requestId);
-
-        return {
-          status: 'preflight_failed',
-          preflight: v2Result.preflight,
-          iso3,
-          generatedAt,
-          templateVersion: 'v2',
-        };
-      }
-
-      pdfBytes = v2Result.pdf;
-    } else {
-      pdfBytes = await renderReportPdfBytes({
-        countryName: country?.name ?? iso3,
+    if (!genResult.ok) {
+      logReportGeneration({
+        correlationId,
         iso3,
-        reportType,
-        generatedAt: new Date().toLocaleDateString('en-US', {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric',
-        }),
-        summary,
-        opportunityThesis,
-        riskNarrative,
-        query: request.query_text ?? undefined,
+        templateId,
+        strict,
+        preflightErrors: genResult.preflight.errors.length,
+        preflightWarnings: genResult.preflight.warnings.length,
+        outcome: 'preflight_failed',
       });
+
+      const preflightDetail = formatPreflightErrorsMessage(genResult.preflight).slice(0, 480);
+
+      await patchCompletedRow(supabase, requestId, {
+        status: 'failed',
+        error_message: preflightDetail,
+        template_id: templateId,
+        generator_used: genResult.generatorUsed,
+        generated_at_utc: generatedAtIso,
+        completed_at: generatedAtIso,
+      });
+
+      return {
+        status: 'preflight_failed',
+        preflight: genResult.preflight,
+        iso3,
+        generatedAt: generatedAtIso,
+        templateId,
+      };
     }
 
+    const pdfBytes = genResult.pdf;
     const renderMs = Date.now() - renderStart;
 
     await ensureReportsBucket(supabase);
@@ -203,34 +228,38 @@ export async function processReportRequest(
       throw new Error(signError?.message ?? 'Failed to create download URL');
     }
 
-    await supabase
-      .from('souvera_report_requests')
-      .update({
-        status: 'completed',
-        file_path: storagePath,
-        download_url: signed.signedUrl,
-        completed_at: new Date().toISOString(),
-      })
-      .eq('id', requestId);
+    await patchCompletedRow(supabase, requestId, {
+      status: 'completed',
+      file_path: storagePath,
+      download_url: signed.signedUrl,
+      template_id: templateId,
+      report_filename: reportFilename,
+      generator_used: genResult.generatorUsed,
+      generated_at_utc: generatedAtIso,
+      completed_at: generatedAtIso,
+    });
 
     logReportGeneration({
       correlationId,
       iso3,
-      templateVersion,
+      templateId,
       strict,
-      preflightErrors: preflight?.errors.length ?? 0,
-      preflightWarnings: preflight?.warnings.length ?? 0,
+      preflightErrors: genResult.preflight?.errors.length ?? 0,
+      preflightWarnings: genResult.preflight?.warnings.length ?? 0,
       renderMs,
       pdfBytes: pdfBytes.length,
-      outcome: templateVersion === 'v2' ? 'pdf' : 'v1_json',
+      outcome: 'pdf',
     });
 
     return {
       status: 'completed',
       downloadUrl: signed.signedUrl,
-      templateVersion,
+      downloadProxyUrl: buildReportDownloadProxyUrl(requestId),
+      downloadFilename: reportFilename,
+      templateId,
+      generatorUsed: genResult.generatorUsed,
       pdfBytes,
-      preflight,
+      preflight: genResult.preflight,
     };
   } catch (err) {
     const message = err instanceof Error ? err.message : 'PDF generation failed';
@@ -242,14 +271,14 @@ export async function processReportRequest(
     logReportGeneration({
       correlationId,
       iso3,
-      templateVersion,
+      templateId,
       strict,
       preflightErrors: 0,
       preflightWarnings: 0,
       outcome: 'failed',
     });
 
-    return { status: 'failed', errorMessage: message, templateVersion };
+    return { status: 'failed', errorMessage: message, templateId };
   }
 }
 

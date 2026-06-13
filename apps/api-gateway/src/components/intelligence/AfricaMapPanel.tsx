@@ -55,6 +55,7 @@ interface TooltipData {
   populationTotal?: number;
   capital?: string;
   subregion?: string;
+  ustrCountryPageUrl?: string;
 }
 
 export function AfricaMapPanel({
@@ -67,8 +68,18 @@ export function AfricaMapPanel({
   const [tooltipPosition, setTooltipPosition] = useState<{ x: number; y: number } | null>(null);
   const [geoUrl, setGeoUrl] = useState<string>(GEO_URLS.primary);
   const [geoError, setGeoError] = useState(false);
+  const [ustrPageByIso3, setUstrPageByIso3] = useState<Record<string, string>>({});
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    fetch('/api/v1/external-references?region=africa')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: { ustrCountryPages?: Record<string, string> } | null) => {
+        if (data?.ustrCountryPages) setUstrPageByIso3(data.ustrCountryPages);
+      })
+      .catch(() => {});
+  }, []);
 
   // Build country lookup map
   const countryMap = useCallback(() => {
@@ -211,9 +222,10 @@ export function AfricaMapPanel({
       populationTotal: countryData?.populationTotal,
       capital: countryData?.capital,
       subregion: countryData?.subregion,
+      ustrCountryPageUrl: ustrPageByIso3[iso3],
     });
     setTooltipPosition({ x: evt.clientX, y: evt.clientY });
-  }, [getCountryISO3, isInScope, countryMap]);
+  }, [getCountryISO3, isInScope, countryMap, ustrPageByIso3]);
 
   const handleMouseLeave = useCallback(() => {
     setTooltip(null);

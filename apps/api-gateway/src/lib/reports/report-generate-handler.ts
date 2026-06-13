@@ -1,5 +1,5 @@
 /**
- * Shared report generation handler for v1 (JSON) and v2 (PDF) API routes.
+ * Shared report generation handler — unified request + proxy download flow.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -15,21 +15,23 @@ import {
   formatReportQuotaSummary,
 } from './quota';
 import { processReportRequest } from './process-report-request';
+import { assertCountryProfileTemplateAccess, isProofLayoutAllowed } from './reports-v2-config';
+import { isCountryProfileV1RollbackEnabled } from './_archived/country-profile-v1';
 import {
-  assertReportsV2Access,
-  isCountryProfileReport,
-  isSectorDeepDiveReport,
-  isV2TemplateReport,
-  parseTemplateVersion,
-  type ReportTemplateVersion,
-} from './reports-v2-config';
+  isCountryProfileTemplate,
+  isTemplateId,
+  resolveTemplateId,
+  resolveTemplateIdFromRequestRow,
+  type TemplateId,
+} from './template-registry';
 import { validateSectorDeepDiveRequest } from '@/lib/sectors/sector-taxonomy';
-import { isProofLayoutAllowed } from './reports-v2-config';
+import { buildPreflightFailedBody, resolveCorrelationId } from './reports-v2-api';
 import {
-  buildPreflightFailedBody,
-  buildV2PdfResponseHeaders,
-  resolveCorrelationId,
-} from './reports-v2-api';
+  isReportGenerationPaused,
+  REPORTS_PAUSED_USER_MESSAGE,
+} from './report-generation-availability';
+import { formatReportDownloadFilename } from './format-report-download-filename';
+import { buildReportDownloadProxyUrl } from './report-download';
 
 const BUSINESS_REPORT_TYPES = new Set([
   'Investment Memo',
@@ -38,15 +40,14 @@ const BUSINESS_REPORT_TYPES = new Set([
   'AI Custom Report',
 ]);
 
-export type ReportGenerateResponseMode = 'json' | 'pdf';
+export type ReportGenerateResponseMode = 'json';
 
 export interface ReportGenerateBody {
+  templateId?: string;
   reportType?: string;
   iso3?: string;
-  /** Required for Sector Deep-Dive — canonical taxonomy key (e.g. tourism-hospitality). */
   sectorKey?: string;
   query?: string;
-  templateVersion?: string;
   strict?: boolean;
   proofLayout?: boolean;
 }
@@ -81,44 +82,60 @@ function validateEntitlements(
   return null;
 }
 
+/**
+ * Each Generate call inserts a new request row (new UUID → new storage path → fresh render).
+ */
 export async function handleReportGenerate(
   request: NextRequest,
   user: User,
   access: UserAccess,
-  isAdmin: boolean,
-  options: {
-    defaultTemplateVersion: ReportTemplateVersion;
-    responseMode: ReportGenerateResponseMode;
-  }
+  isAdmin: boolean
 ): Promise<NextResponse> {
   const correlationId = resolveCorrelationId(request);
+
+  if (isReportGenerationPaused()) {
+    return NextResponse.json(
+      {
+        error: 'REPORTS_PAUSED',
+        message: REPORTS_PAUSED_USER_MESSAGE,
+        status: 'paused',
+      },
+      { status: 503, headers: { 'X-Request-Id': correlationId } }
+    );
+  }
+
   const body = (await request.json().catch(() => ({}))) as ReportGenerateBody;
   const {
-    reportType,
+    templateId: templateIdRaw,
+    reportType: reportTypeRaw,
     iso3,
     sectorKey,
     query,
-    templateVersion: templateVersionRaw,
     strict: strictRaw,
     proofLayout: proofLayoutRaw,
   } = body;
 
-  if (!reportType || !iso3) {
-    return NextResponse.json({ error: 'reportType and iso3 are required' }, { status: 400 });
+  const resolved = resolveTemplateId({
+    templateId: templateIdRaw,
+    reportType: reportTypeRaw,
+  });
+  if ('error' in resolved) {
+    return NextResponse.json({ error: resolved.error }, { status: resolved.status });
+  }
+
+  const { templateId, reportType } = resolved;
+
+  if (!iso3) {
+    return NextResponse.json({ error: 'iso3 is required' }, { status: 400 });
   }
 
   const sectorValidation = validateSectorDeepDiveRequest(reportType, sectorKey);
   if (!sectorValidation.ok) {
     return NextResponse.json({ error: sectorValidation.error }, { status: sectorValidation.status });
   }
-  const resolvedSectorKey = isSectorDeepDiveReport(reportType)
-    ? sectorValidation.sectorKey
-    : undefined;
+  const resolvedSectorKey =
+    templateId === 'sector_deep_dive_template' ? sectorValidation.sectorKey : undefined;
 
-  const templateVersion = parseTemplateVersion(
-    templateVersionRaw,
-    options.defaultTemplateVersion
-  );
   const strict = strictRaw !== false;
   const proofLayout = proofLayoutRaw === true;
 
@@ -129,17 +146,10 @@ export async function handleReportGenerate(
     );
   }
 
-  if (templateVersion === 'v2' && !isV2TemplateReport(reportType)) {
-    return NextResponse.json(
-      { error: 'templateVersion v2 is only supported for Country Profile and Sector Deep-Dive reports' },
-      { status: 400 }
-    );
-  }
-
-  if (templateVersion === 'v2' && isCountryProfileReport(reportType)) {
-    const v2Access = assertReportsV2Access({ templateVersion }, user.id);
-    if (!v2Access.allowed) {
-      return NextResponse.json({ error: v2Access.message }, { status: 403 });
+  if (isCountryProfileTemplate(templateId) && !isCountryProfileV1RollbackEnabled()) {
+    const profileAccess = assertCountryProfileTemplateAccess(user.id);
+    if (!profileAccess.allowed) {
+      return NextResponse.json({ error: profileAccess.message }, { status: 403 });
     }
   }
 
@@ -157,7 +167,6 @@ export async function handleReportGenerate(
   }
 
   const iso3Upper = iso3.toUpperCase();
-  const generatedAt = new Date().toISOString();
   const service = getServiceClient();
 
   if (!service) {
@@ -169,27 +178,45 @@ export async function handleReportGenerate(
 
   const { data: country } = await service
     .from('souvera_countries')
-    .select('id')
+    .select('id, name')
     .eq('iso3', iso3Upper)
     .maybeSingle();
 
-  const metadata: Record<string, string> = {};
+  const metadata: Record<string, string> = { templateId };
   if (resolvedSectorKey) metadata.sectorKey = resolvedSectorKey;
 
-  const { data: row, error: insertError } = await service
+  const insertBase = {
+    user_id: user.id,
+    country_id: country?.id ?? null,
+    iso3: iso3Upper,
+    report_type: reportType,
+    query_text: query ?? null,
+    sector_key: resolvedSectorKey ?? null,
+    metadata,
+    status: 'queued' as const,
+  };
+
+  let row: { id: string } | null = null;
+  let insertError: { message: string } | null = null;
+
+  const withTemplateCols = await service
     .from('souvera_report_requests')
-    .insert({
-      user_id: user.id,
-      country_id: country?.id ?? null,
-      iso3: iso3Upper,
-      report_type: reportType,
-      query_text: query ?? null,
-      sector_key: resolvedSectorKey ?? null,
-      metadata,
-      status: 'queued',
-    })
+    .insert({ ...insertBase, template_id: templateId })
     .select('id')
     .single();
+
+  if (withTemplateCols.error?.message?.includes('template_id')) {
+    const legacy = await service
+      .from('souvera_report_requests')
+      .insert(insertBase)
+      .select('id')
+      .single();
+    row = legacy.data;
+    insertError = legacy.error;
+  } else {
+    row = withTemplateCols.data;
+    insertError = withTemplateCols.error;
+  }
 
   if (insertError || !row) {
     return NextResponse.json(
@@ -201,10 +228,11 @@ export async function handleReportGenerate(
   const requestId = row.id as string;
 
   const result = await processReportRequest(requestId, {
-    templateVersion,
+    templateId,
     strict,
     proofLayout,
     correlationId,
+    allowCachedCompleted: false,
   });
 
   if (result.status === 'preflight_failed') {
@@ -223,8 +251,8 @@ export async function handleReportGenerate(
         error: result.errorMessage,
         message: `${reportType} could not be generated: ${result.errorMessage}`,
         reportType,
+        templateId,
         iso3: iso3Upper,
-        templateVersion,
         quota,
       },
       { status: 500, headers: { 'X-Request-Id': correlationId } }
@@ -232,16 +260,6 @@ export async function handleReportGenerate(
   }
 
   await recordReportUsage(service, user.id, reportType);
-
-  if (
-    options.responseMode === 'pdf' &&
-    templateVersion === 'v2' &&
-    result.preflight
-  ) {
-    const headers = buildV2PdfResponseHeaders(result.preflight.canonical, result.preflight);
-    headers['X-Request-Id'] = correlationId;
-    return new NextResponse(Buffer.from(result.pdfBytes), { status: 200, headers });
-  }
 
   const quota = await getReportQuotaStatus(supabaseForQuota, access, isAdmin);
   const quotaSummary = formatReportQuotaSummary(quota, reportType);
@@ -260,11 +278,14 @@ export async function handleReportGenerate(
       status: 'completed',
       requestId,
       downloadUrl: result.downloadUrl,
+      downloadProxyUrl: result.downloadProxyUrl,
+      downloadFilename: result.downloadFilename,
+      templateId,
+      generatorUsed: result.generatorUsed,
       message: `${reportType} for ${iso3Upper} is ready. Download from Report History below.${quotaSummary ? ` ${quotaSummary}` : ''}`,
       reportType,
       iso3: iso3Upper,
       query: query ?? null,
-      templateVersion,
       preflight: preflightApi,
       quota,
     },
@@ -272,7 +293,8 @@ export async function handleReportGenerate(
       status: 200,
       headers: {
         'X-Request-Id': correlationId,
-        'X-Souvera-Template-Version': templateVersion,
+        'X-Souvera-Template-Id': templateId,
+        'X-Souvera-Generator': result.generatorUsed,
         ...(result.preflight
           ? {
               'X-Souvera-Preflight-Warnings': String(result.preflight.warnings.length),
@@ -284,4 +306,28 @@ export async function handleReportGenerate(
       },
     }
   );
+}
+
+export function buildDownloadFilenameForRow(row: {
+  iso3: string;
+  template_id?: string | null;
+  report_type?: string | null;
+  sector_key?: string | null;
+  report_filename?: string | null;
+  created_at?: string;
+  generated_at_utc?: string | null;
+  country_name?: string;
+}): string {
+  if (row.report_filename) return row.report_filename;
+  const templateId = resolveTemplateIdFromRequestRow(row);
+  if (!isTemplateId(templateId)) {
+    return `${row.iso3.toLowerCase()}_report.pdf`;
+  }
+  return formatReportDownloadFilename({
+    countryName: row.country_name ?? row.iso3,
+    iso3: row.iso3,
+    templateId,
+    sectorKey: row.sector_key ?? undefined,
+    generatedAtUtc: row.generated_at_utc ?? row.created_at ?? new Date().toISOString(),
+  });
 }

@@ -1,6 +1,6 @@
 # Souvera Intelligence Terminal — Project Backlog
 **Owner:** Afronovation, Inc.  
-**Last Updated:** April 29, 2026
+**Last Updated:** May 31, 2026
 
 ---
 
@@ -143,6 +143,146 @@ When implementing in Phase 4:
 - [Decision Log: Defer Schema Changes](../operations/decision-log.md)
 - [Market Coverage Constants](../../apps/api-gateway/src/lib/market-coverage.ts)
 - [Phase 4 Roadmap](./phase-roadmap.md)
+
+---
+
+## Trade Policy Intelligence
+
+### TRADE-TPI-01: Tier 1 Navigation Integration (Demo-Critical)
+**Priority:** Critical  
+**Phase:** Sprint H — Pre-demo  
+**Status:** Approved  
+**Date Added:** May 31, 2026  
+**Related:** `docs/execution/navigation-integration-tiers-1-5.md`
+
+Wire `/intelligence/trade` and `/intelligence/trade/agoa` into mega nav, footer, IntelligenceHub, sitemap. Add platform chrome + SSR auth bootstrap.
+
+---
+
+### TRADE-TPI-02: AGOA Reauthorization UX
+**Priority:** Critical  
+**Phase:** Sprint H / Tier 2-A  
+**Status:** Approved  
+**Date Added:** May 31, 2026  
+**Related:** `docs/execution/trade-policy-intelligence-demo-plan.md`
+
+Reauth countdown banner, watchpoint filter, affected-country event highlighting, demo narrative for NGA/KEN.
+
+---
+
+### TRADE-01: Product-Level Trade Matrix (HS4)
+**Priority:** High  
+**Phase:** Sprint I  
+**Status:** Proposed  
+**Date Added:** May 31, 2026
+
+Top 10 import/export products by HS chapter for pilot triad; structured `TradeProductMatrix` schema.
+
+---
+
+### TRADE-02: Comtrade Automated Ingestion
+**Priority:** Medium  
+**Phase:** Phase 4  
+**Status:** Proposed  
+**Date Added:** May 31, 2026
+
+Automated UN Comtrade/WITS ingestion with UNCTAD FDI cross-reference.
+
+---
+
+### TRADE-03: Import Breakdown by Sector (Phase 1)
+**Priority:** High  
+**Phase:** Sprint H-B  
+**Status:** Approved  
+**Date Added:** May 31, 2026
+
+Add `importComposition[]` to 12 trade files + UI + PNG export.
+
+---
+
+### TRADE-04: Market Access Registry
+**Priority:** High  
+**Phase:** Sprint H-B  
+**Status:** Approved  
+**Date Added:** May 31, 2026
+
+Single ISO3 → frameworks registry; fix Caribbean sidebar bleed; bloc-specific trade copy.
+
+---
+
+### TRADE-05: AfCFTA Preview MVP
+**Priority:** High  
+**Phase:** Tier 2-B  
+**Status:** Approved  
+**Date Added:** May 31, 2026
+
+12-country ratification/trading status; Preview badge on trade hub.
+
+---
+
+## Navigation & Platform
+
+### NAV-01: Legacy Route 301 Redirects
+**Priority:** Medium  
+**Phase:** Sprint H-E / Tier 4  
+**Status:** Approved  
+**Date Added:** May 31, 2026  
+**Related:** `docs/execution/navigation-integration-tiers-1-5.md`
+
+Redirect `/methodology`, `/faqs`, `/intelligence-map`, `/terminal/*`, etc. to canonical paths.
+
+---
+
+### ENT-01: Unauthenticated Country Inline Teaser
+**Priority:** Low  
+**Phase:** Future  
+**Status:** Proposed  
+**Date Added:** May 31, 2026
+
+Optional compare-style teaser on `/country/[iso3]` instead of hard redirect; defer unless product requests.
+
+---
+
+## Admin Platform
+
+### ADMIN-SEC-01: Harden Admin Auth
+**Priority:** Critical  
+**Phase:** Pre-launch  
+**Status:** Approved  
+**Date Added:** May 31, 2026  
+**Related:** `docs/execution/admin-platform-assessment-plan.md`
+
+Remove MVP "any authenticated user" fallback; require `platform_admin` / `org_admin`; centralize verifyAdmin across all admin API routes.
+
+---
+
+### ADMIN-TPI-01: Trade Policy Admin Module
+**Priority:** High  
+**Phase:** Tier 2 / Sprint H  
+**Status:** Approved  
+**Date Added:** May 31, 2026
+
+Admin UI for AGOA country status + legislative events CRUD; publish workflow without code deploy.
+
+---
+
+### ADMIN-NEWS-01: Extend News Pulse Filters
+**Priority:** High  
+**Phase:** Sprint H-E  
+**Status:** Approved  
+**Date Added:** May 31, 2026
+
+Extend `newsPulseFilterConfig` from NGA/JAM only to all 12 rollout ISO3s.
+
+---
+
+### ADMIN-ING-01: Wire Ingestion Admin Page
+**Priority:** Medium  
+**Phase:** Post-demo  
+**Status:** Proposed  
+**Date Added:** May 31, 2026
+
+Wire `/admin/data/ingestion` to batches API or redirect to Upload; remove dead buttons.
 
 ---
 

@@ -1,7 +1,10 @@
 import type { Metadata } from 'next';
 import { SouveraMegaNav } from '@/components/ui/SouveraMegaNav';
 import { SouveraFooter } from '@/components/ui/SouveraFooter';
-import { Clock, TrendingUp, AlertTriangle, Globe } from 'lucide-react';
+import { Clock, AlertTriangle, Globe } from 'lucide-react';
+import { InsightsLiveWire } from '@/components/insights/InsightsLiveWire';
+import { fetchLiveWireArticles } from '@/lib/curated-news/public';
+import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Insights | Souvera',
@@ -16,7 +19,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default function InsightsPage() {
+export const dynamic = 'force-dynamic';
+
+export default async function InsightsPage() {
+  const liveWireArticles = await fetchLiveWireArticles({ limit: 12 });
+
   return (
     <main className="min-h-screen bg-[#0B0F14] text-white font-sans">
       <SouveraMegaNav />
@@ -48,22 +55,26 @@ export default function InsightsPage() {
                 Macro Alerts
               </div>
               <div className="p-3 flex flex-col gap-3">
-                {[
-                  { type: 'risk', title: 'FX Volatility in West Africa', time: '12m ago' },
-                  { type: 'info', title: 'AfCFTA Tariffs Updated', time: '34m ago' },
-                  { type: 'growth', title: 'Kenya Tech FDI Surge', time: '1h ago' }
-                ].map((alert, i) => (
-                  <div key={i} className="flex gap-3 pb-3 border-b border-zinc-800/50 last:border-0 last:pb-0">
-                    <AlertTriangle className={`w-3 h-3 shrink-0 mt-0.5 ${
-                      alert.type === 'risk' ? 'text-red-500' : 
-                      alert.type === 'growth' ? 'text-emerald-500' : 'text-blue-400'
-                    }`} />
+                {liveWireArticles.slice(0, 3).map((article) => (
+                  <Link
+                    key={article.slug}
+                    href={`/insights/news/${article.slug}`}
+                    className="flex gap-3 pb-3 border-b border-zinc-800/50 last:border-0 last:pb-0 hover:opacity-90"
+                  >
+                    <AlertTriangle className="w-3 h-3 shrink-0 mt-0.5 text-blue-400" />
                     <div className="flex flex-col gap-1">
-                      <span className="text-xs font-medium leading-snug">{alert.title}</span>
-                      <span className="text-[10px] text-zinc-500 font-mono">{alert.time}</span>
+                      <span className="text-xs font-medium leading-snug line-clamp-2">
+                        {article.title}
+                      </span>
+                      <span className="text-[10px] text-zinc-500 font-mono">
+                        {article.themes[0] ?? 'News'}
+                      </span>
                     </div>
-                  </div>
+                  </Link>
                 ))}
+                {liveWireArticles.length === 0 && (
+                  <p className="text-xs text-zinc-600">No alerts published.</p>
+                )}
               </div>
             </div>
 
@@ -92,50 +103,7 @@ export default function InsightsPage() {
             </div>
           </div>
           
-          {/* Col 2: The Core News Feed (wide center) */}
-          <div className="lg:col-span-6 border-x border-zinc-800/50 px-0 lg:px-6">
-             <div className="flex flex-col gap-0 divide-y divide-zinc-800/50">
-               {/* Highlight Story */}
-               <div className="py-4 first:pt-0">
-                 <div className="flex items-center justify-between mb-2">
-                    <span className="px-2 py-0.5 text-[9px] font-bold tracking-widest uppercase bg-zinc-800 text-souvera-blue w-fit">Deep Dive</span>
-                    <span className="text-[10px] text-zinc-500 font-mono">14:02 GMT</span>
-                 </div>
-                 <h2 className="text-xl md:text-2xl font-bold tracking-tighter mb-2 hover:text-souvera-blue transition-colors cursor-pointer">
-                   The Caribbean-Africa Digital Infrastructure Bridge Reaches Financial Close
-                 </h2>
-                 <p className="text-sm text-zinc-400 leading-relaxed mb-3">
-                   A historic $1.2B syndicated facility has matched Sovereign wealth from the MENA region with Caribbean structural developers to lay a new sub-sea fiber corridor linking Kingston to Dakar.
-                 </p>
-                 <div className="flex items-center gap-4 text-xs font-mono text-zinc-500 uppercase">
-                   <span className="flex items-center gap-1"><TrendingUp className="w-3 h-3 text-emerald-500"/> Infrastructure</span>
-                   <span className="flex items-center gap-1"><Globe className="w-3 h-3"/> Cross-Region</span>
-                 </div>
-               </div>
-
-               {/* Standard Feed */}
-               {[
-                 { time: '13:45', tag: 'Aero', title: 'Ethiopian Airlines secures $500M financing for facility expansions in West Africa hub.' },
-                 { time: '13:12', tag: 'Policy', title: 'SADC ministers draft coordinated transition metals export framework.' },
-                 { time: '12:55', tag: 'Energy', title: 'Namibia Green Hydrogen Phase 1 construction accelerates past milestone.' },
-                 { time: '12:04', tag: 'AgTech', title: 'Cocoa yield forecasting models adjusted upward by 4% in Côte d\'Ivoire.' },
-                 { time: '11:30', tag: 'FinTech', title: 'Pan-African settlement system adds 3 new Caribbean central bank nodes.' }
-               ].map((feed, i) => (
-                 <div key={i} className="py-4 hover:bg-zinc-900/20 transition-colors -mx-4 px-4 cursor-pointer">
-                    <div className="flex items-baseline gap-3 mb-1">
-                      <span className="text-[10px] font-mono text-zinc-500 shrink-0 w-10">{feed.time}</span>
-                      <span className="text-[9px] uppercase tracking-widest font-bold text-zinc-400 bg-zinc-800 px-1.5 py-0.5 rounded-sm">{feed.tag}</span>
-                    </div>
-                    <h3 className="text-md pl-14 font-medium text-zinc-200 group-hover:text-white leading-snug">
-                      {feed.title}
-                    </h3>
-                 </div>
-               ))}
-             </div>
-             <button className="w-full py-3 mt-6 border border-zinc-800 hover:bg-zinc-900 hover:border-zinc-700 transition-colors text-xs font-bold uppercase tracking-widest text-zinc-400">
-               Load More Signals
-             </button>
-          </div>
+          <InsightsLiveWire articles={liveWireArticles} />
 
           {/* Col 3: Research & Intelligence (right) */}
           <div className="lg:col-span-3 flex flex-col gap-6">
@@ -145,6 +113,10 @@ export default function InsightsPage() {
                  Geospatial Modules
                </h3>
                <div className="flex flex-col gap-3">
+                 <a href="/insights/news" className="group flex flex-col gap-1 p-3 bg-zinc-950 border border-zinc-800 hover:border-amber-500/50 transition-colors">
+                    <span className="text-sm font-bold group-hover:text-amber-400 transition-colors">Souvera News</span>
+                    <span className="text-[10px] text-zinc-500 font-mono">Curated editorial · Source-attributed</span>
+                 </a>
                  <a href="/intelligence/africa" className="group flex flex-col gap-1 p-3 bg-zinc-950 border border-zinc-800 hover:border-souvera-blue/50 transition-colors">
                     <span className="text-sm font-bold group-hover:text-souvera-blue transition-colors">Africa Intelligence</span>
                     <span className="text-[10px] text-zinc-500 font-mono">Country Profiles & Analysis</span>

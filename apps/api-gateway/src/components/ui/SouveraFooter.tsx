@@ -1,42 +1,13 @@
 import React from 'react';
 import Link from 'next/link';
 import { ArrowUpRight } from 'lucide-react';
+import { FOOTER_LINK_GROUPS } from '@/lib/site-navigation';
 
 const footerLinks = {
-  platform: [
-    { name: 'Platform Overview', href: '/platform' },
-    { name: 'Intelligence Terminal', href: '/platform/terminal' },
-    { name: 'Signal Engine', href: '/platform/signal-engine' },
-    { name: 'Data Foundation', href: '/platform/data-foundation' },
-    { name: 'API Access', href: '/platform/api' },
-  ],
-  intelligence: [
-    { name: 'Africa Intelligence', href: '/intelligence/africa' },
-    { name: 'Caribbean Intelligence', href: '/intelligence/caribbean' },
-    { name: 'Intelligence Map', href: '/intelligence/map' },
-    { name: 'Country Comparison', href: '/intelligence/compare' },
-    { name: 'Sector Analysis', href: '/sectors' },
-  ],
-  access: [
-    { name: 'Request Access', href: '/access/request-access', highlight: true },
-    { name: 'Access Plans', href: '/access' },
-    { name: 'Institutional Solutions', href: '/access/institutional' },
-    { name: 'Request Demo', href: '/access/request-demo' },
-    { name: 'Contact Sales', href: '/contact' },
-  ],
-  company: [
-    { name: 'About Souvera', href: '/about' },
-    { name: 'Afronovation, Inc.', href: 'https://www.afronovation.com' },
-    { name: 'System Status', href: '/status' },
-    { name: 'Contact', href: '/contact' },
-  ],
-  legal: [
-    { name: 'Privacy Policy', href: '/legal/privacy' },
-    { name: 'Terms of Service', href: '/legal/terms' },
-    { name: 'Cookie Policy', href: '/legal/cookies' },
-    { name: 'Compliance', href: '/resources/compliance' },
-    { name: 'Data Sources', href: '/resources/data-sources' },
-  ],
+  ...FOOTER_LINK_GROUPS,
+  access: FOOTER_LINK_GROUPS.access.map((link) =>
+    link.href === '/access/request-access' ? { ...link, highlight: true as const } : link
+  ),
 };
 
 export function SouveraFooter() {
@@ -45,7 +16,7 @@ export function SouveraFooter() {
       <div className="max-w-[1600px] mx-auto px-6 lg:px-12">
 
         {/* Main grid: Brand(2) + 4 link columns */}
-        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-y-12 gap-x-8 xl:gap-x-10 mb-16">
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-7 gap-y-12 gap-x-8 xl:gap-x-10 mb-16">
 
           {/* Brand Identity — spans 2 cols */}
           <div className="col-span-2">
@@ -89,6 +60,20 @@ export function SouveraFooter() {
             <h4 className="section-label mb-4">Intelligence</h4>
             <ul className="space-y-2.5">
               {footerLinks.intelligence.map((link) => (
+                <li key={link.name}>
+                  <Link href={link.href} className="text-[13px] transition-colors hover:text-souvera-blue" style={{ color: '#6B7280' }}>
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Insights */}
+          <div>
+            <h4 className="section-label mb-4">Insights</h4>
+            <ul className="space-y-2.5">
+              {footerLinks.insights.map((link) => (
                 <li key={link.name}>
                   <Link href={link.href} className="text-[13px] transition-colors hover:text-souvera-blue" style={{ color: '#6B7280' }}>
                     {link.name}

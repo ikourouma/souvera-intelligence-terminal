@@ -45,7 +45,8 @@ const SITEMAP_GROUPS = [
     icon: TrendingUp,
     links: [
       { name: 'Insights Overview', href: '/insights' },
-      { name: 'Executive Briefings', href: '/insights/briefings' },
+      { name: 'Souvera News', href: '/insights/news' },
+      { name: 'Strategic Briefings', href: '/insights/briefings' },
       { name: 'Market Rankings', href: '/insights/rankings' },
       { name: 'Data Methodology', href: '/insights/methodology' },
     ]

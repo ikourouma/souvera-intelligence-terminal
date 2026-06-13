@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Nigeria — v2 Preview (Cover + Dashboard + Exec Summary)</title>
+  <style>
+
+@page { size: A4; margin: 18mm 14mm 24mm 14mm; }
+
+:root{
+  --ink:#111827; --muted:#6b7280; --line:#e5e7eb; --accent:#0f766e;
+  --bgpanel:#f9fafb; --warn:#b45309;
+}
+
+html,body{ margin:0; padding:0; color:var(--ink);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+*{ box-sizing:border-box; }
+.page{ page-break-after: always; padding: 0; min-height: 980px; }
+.page:last-child{ page-break-after: auto; }
+
+.cover{ min-height: 960px; display:flex; flex-direction:column; padding: 4mm 0 0 0; }
+.topbar{ display:flex; justify-content:space-between; align-items:center; padding-bottom:10px; border-bottom:1px solid var(--line); }
+.brand{ font-weight:700; letter-spacing:.04em; font-size:12px; }
+.classification{ font-size:11px; color:var(--muted); }
+.titleBlock{ padding:22px 0 14px 0; }
+.countryName{ margin:0; font-size:40px; line-height:1.05; letter-spacing:-0.02em; }
+.reportType{ margin-top:6px; font-size:14px; color:var(--muted); font-weight:600; }
+.metaLine{ margin-top:8px; font-size:12px; color:var(--muted); }
+.panelRow{ display:grid; grid-template-columns: 1.25fr .75fr; gap:12px; margin-top:14px; }
+.panel{ background:var(--bgpanel); border:1px solid var(--line); border-radius:10px; padding:14px; }
+.panelTitle{ font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:10px; }
+.kv{ display:grid; grid-template-columns: 160px 1fr; gap:6px 10px; font-size:12px; font-variant-numeric: tabular-nums; }
+.k{ color:var(--muted); }
+.v{ font-weight:600; }
+.panelNote{ margin-top:10px; font-size:11px; color:var(--muted); line-height:1.35; }
+.signal .badge{ display:inline-block; background:rgba(15,118,110,.10); color:var(--accent); border:1px solid rgba(15,118,110,.25); padding:6px 10px; border-radius:999px; font-weight:700; font-size:12px; margin-bottom:8px; }
+.signal .confidence{ font-size:12px; margin-bottom:8px; }
+.drivers{ margin:0; padding-left:16px; font-size:12px; color:var(--ink); }
+.drivers li{ margin:6px 0; }
+.stance{ margin-top:14px; border:1px solid var(--line); border-radius:10px; padding:14px; }
+.stanceTitle{ font-weight:700; font-size:13px; margin-bottom:8px; }
+.stanceBullets{ margin:0; padding-left:16px; font-size:12px; }
+.stanceBullets li{ margin:6px 0; }
+.coverFooter{ margin-top:auto; padding-top:14px; border-top:1px solid var(--line); font-size:11px; color:var(--muted); display:flex; flex-direction:column; gap:4px; }
+.preparedBy{ color:var(--ink); font-weight:600; }
+
+h1{ font-size:22px; margin:0 0 8px; letter-spacing:-0.02em; }
+h2{ font-size:15px; margin:16px 0 8px; color:var(--ink); }
+h3{ font-size:13px; margin:12px 0 6px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; }
+.prose{ font-size:11.5px; line-height:1.45; margin:0 0 8px; color:var(--ink); }
+.muted{ color:var(--muted); font-size:11px; }
+.lead{ font-size:12px; font-weight:600; margin-bottom:10px; }
+
+.grid2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; }
+.grid3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:10px; }
+.card{ background:var(--bgpanel); border:1px solid var(--line); border-radius:8px; padding:10px; break-inside:avoid; }
+.cardTitle{ font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:6px; }
+.cardValue{ font-size:16px; font-weight:700; }
+.cardNote{ font-size:10px; color:var(--muted); margin-top:4px; line-height:1.35; }
+
+.not-covered{ border:1px dashed var(--muted); background:#f9fafb; border-radius:8px; padding:12px; break-inside:avoid; }
+.not-covered-title{ font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin-bottom:6px; }
+.not-covered-value{ font-size:14px; font-weight:700; color:var(--ink); margin-bottom:4px; }
+.not-covered-note{ font-size:10px; color:var(--muted); line-height:1.4; }
+
+.data-table{ width:100%; border-collapse:collapse; font-size:11px; margin-top:8px; break-inside:avoid; }
+.data-table th,.data-table td{ border:1px solid var(--line); padding:6px 8px; text-align:left; vertical-align:top; }
+.data-table th{ background:var(--bgpanel); font-weight:600; }
+.data-table td.num{ text-align:right; }
+.data-table .not-covered-cell{ color:var(--muted); font-style:italic; }
+
+.box-warn{ border:1px dashed var(--warn); background:#fffbeb; padding:10px; border-radius:8px; font-size:11px; margin-top:8px; break-inside:avoid; }
+.badge{ display:inline-block; background:rgba(15,118,110,.10); color:var(--accent); border:1px solid rgba(15,118,110,.25);
+  padding:4px 8px; border-radius:999px; font-weight:700; font-size:11px; }
+ul.compact{ margin:6px 0; padding-left:16px; font-size:11px; }
+ul.compact li{ margin:4px 0; }
+
+body.preview-body { background: #e5e7eb; padding: 24px; }
+body.preview-body .page { background: #fff; max-width: 210mm; margin: 0 auto 24px; padding: 16mm; box-shadow: 0 4px 24px rgba(0,0,0,.12); }
+  </style>
+</head>
+<body class="preview-body">
+  <div class="preflight-box" style="max-width:210mm;margin:0 auto 16px;padding:14px;border:1px solid #e5e7eb;border-radius:10px;background:#fff;font:12px/1.45 system-ui,sans-serif">
+    <div style="font-weight:700;margin-bottom:8px">Preflight Issues — <span style="color:#0f766e">PASSED</span> (0 errors, 5 warnings)</div>
+    <p class="muted">No preflight errors.</p>
+    <h3 style="margin:8px 0 4px;font-size:12px;color:#6b7280">Warnings (5)</h3><ul class="compact"><li><strong>NARRATIVE_UNSOURCED_NUMERIC</strong> · <code>sectors[1].teaser</code><br/>USD claim ($90B) is not backed by canonical metrics, economyYears, tradeSummary, or a cited estimate.<br/><span class="muted"> cashew, sesame, and cassava. $90B sector employing 35% of the workfor</span></li><li><strong>NARRATIVE_UNSOURCED_NUMERIC</strong> · <code>sectors[3].teaser</code><br/>USD claim ($50B) is not backed by canonical metrics, economyYears, tradeSummary, or a cited estimate.<br/><span class="muted">manufacturing sector produces $50B+ in annual output across cement, st</span></li><li><strong>NARRATIVE_UNSOURCED_NUMERIC</strong> · <code>sections.opportunity.pillars[1].subtitle</code><br/>USD claim ($10B) is not backed by canonical metrics, economyYears, tradeSummary, or a cited estimate.<br/><span class="muted">$10B Import Substitution Play</span></li><li><strong>NARRATIVE_UNSOURCED_NUMERIC</strong> · <code>sections.opportunity.pillars[1].narrative</code><br/>USD claim ($10b) is not backed by canonical metrics, economyYears, tradeSummary, or a cited estimate.<br/><span class="muted">cultural producer but imports $10 billion in processed food annually. </span></li><li><strong>POLICY_NEEDS_REVIEW</strong> · <code>policyRecords[AGOA]</code><br/>AGOA: Unverified (Needs review) — high-impact policy status not fully verified.</li></ul>
+  </div>
+  <section class="page cover">
+  <div class="topbar">
+    <div class="brand">SOUVERA INTELLIGENCE TERMINAL</div>
+    <div class="classification">Confidential — Licensed subscriber use only</div>
+  </div>
+
+  <div class="titleBlock">
+    <h1 class="countryName">Nigeria</h1>
+    <div class="reportType">Country Report (Institutional)</div>
+    <div class="metaLine">Region: Africa • Capital: Abuja • Currency: NGN • ISO: NGA / NG</div>
+  </div>
+
+  <div class="panelRow">
+    <div class="panel">
+      <div class="panelTitle">Freshness &amp; Verification</div>
+      <div class="kv">
+        <div class="k">Report generated</div><div class="v">June 3, 2026</div>
+        <div class="k">Platform refresh</div><div class="v">Jun 3, 2026</div>
+        <div class="k">Macro data as-of</div><div class="v">2024</div>
+        <div class="k">Trade data as-of</div><div class="v">2024</div>
+        <div class="k">Markets coverage</div><div class="v">Not covered</div>
+        <div class="k">Policy last verified</div><div class="v">Jan 15, 2026</div>
+      </div>
+      <div class="panelNote">
+        Values shown in this report are sourced and time-stamped. Platform refresh is not a markets feed. Fields without structured backing are labeled Not covered or Unverified.
+      </div>
+    </div>
+
+    <div class="panel signal">
+      <div class="panelTitle">Souvera Signal Scan</div>
+      <div class="badge">Emerging · Reform momentum</div>
+      <div class="confidence">Confidence: <strong>High</strong></div>
+      <ul class="drivers"><li>FDI net inflows $4.5B (2024)</li><li>GDP growth 3.3% (2024)</li><li>Inflation 18.8% (2024)</li></ul>
+    </div>
+  </div>
+
+  <div class="stance">
+    <div class="stanceTitle">At-a-glance (12 months)</div>
+    <ul class="stanceBullets">
+      <li><strong>Base case:</strong> Nigeria represents a major economy at a structural inflection point, offering multi-sector investment opportunities across technology, agriculture, infrastructure, and financial services.</li>
+      <li><strong>Top risks:</strong> Nigeria's investment landscape requires a balanced assessment of macro, political, and operational risks. Risks are real but manageable through strategic partnerships and phased capital deployment.</li>
+      <li><strong>Watchpoints (90d):</strong> Governance &amp; Stability</li>
+    </ul>
+  </div>
+
+  <div class="coverFooter">
+    <div class="preparedBy">Prepared by: Souvera Intelligence Terminal — Research Division</div>
+    <div class="contact">souveraterminal.com • intelligence@souveraterminal.com</div>
+    <div class="disclaimerShort">For informational purposes only. Verify material facts independently before decisions.</div>
+  </div>
+</section>
+  <section class="page">
+    <h1>Dashboard</h1>
+    <p class="prose">Nigeria is profiled with macro data as-of 2024 and platform refresh on file.</p><p class="prose">Canonical GDP growth is 3.3% with nominal GDP $477.4B; inflation 18.8%; FDI $4.5B.</p><p class="prose">Figures below are drawn from structured series and verified policy registry — not headline display strings.</p>
+    <h2>Macro Snapshot</h2>
+    <table class="data-table"><thead><tr><th>Indicator</th><th>Latest</th><th>Prior</th><th>As-of</th><th>Source</th></tr></thead><tbody><tr><td>GDP (nominal USD)</td><td>$477.4B</td><td>$252.3B</td><td>2024</td><td>World Bank Indicators API · URL: https://api.worldbank.org/v2/country/NG/indicator/NY.GDP.MKTP.CD?format=json&amp;per_page=20000&amp;date=2018:2025</td></tr><tr><td>GDP growth</td><td>3.3%</td><td>4.1%</td><td>2024</td><td>World Bank Indicators API · URL: https://api.worldbank.org/v2/country/NG/indicator/NY.GDP.MKTP.KD.ZG?format=json&amp;per_page=20000&amp;date=2018:2025</td></tr><tr><td>Inflation (CPI)</td><td>18.8%</td><td>33.2%</td><td>2024</td><td>World Bank Indicators API · URL: https://api.worldbank.org/v2/country/NG/indicator/FP.CPI.TOTL.ZG?format=json&amp;per_page=20000&amp;date=2018:2025</td></tr><tr><td>FDI net inflows</td><td>$4.5B</td><td>$1.1B</td><td>2024</td><td>World Bank Indicators API · URL: https://api.worldbank.org/v2/country/NG/indicator/BX.KLT.DINV.CD.WD?format=json&amp;per_page=20000&amp;date=2018:2025</td></tr><tr><td>FX (local/USD)</td><td>1547.50</td><td>—</td><td>2024</td><td>World Bank / Souvera country_professional_v · URL: Not provided</td></tr></tbody></table>
+    <div class="grid2" style="margin-top:12px">
+      <div><div class="not-covered">
+    <div class="not-covered-title">Markets Coverage</div>
+    <div class="not-covered-value">Not covered</div>
+    <div class="not-covered-note">Platform refresh timestamp is not a markets feed. Rates, curves, and spreads are not included in this edition.</div>
+  </div></div>
+      <div><h3>Trade</h3><div class="grid2">
+        <div class="card"><div class="cardTitle">Exports</div><div class="cardValue">$38.2B</div></div>
+        <div class="card"><div class="cardTitle">Imports</div><div class="cardValue">$24.5B</div></div>
+      </div>
+      <p class="muted">Trade as-of: 2024</p>
+      <table class="data-table"><thead><tr><th>Partner</th><th>Share %</th></tr></thead><tbody><tr><td>China</td><td>34%</td></tr><tr><td>United States</td><td>13%</td></tr><tr><td>European Union</td><td>18%</td></tr></tbody></table></div>
+    </div>
+    <h2>Market Access (Registry)</h2>
+    <table class="data-table"><thead><tr><th>Framework</th><th>Status</th><th>Last verified</th></tr></thead><tbody><tr><td>AGOA</td><td>Unverified (Needs review)</td><td>Unverified</td></tr><tr><td>AfCFTA</td><td>Active</td><td>2026-01-15</td></tr><tr><td>ECOWAS</td><td>Member</td><td>2026-01-15</td></tr></tbody></table>
+    <h2>External Sector</h2><div class="not-covered">
+    <div class="not-covered-title">External Sector</div>
+    <div class="not-covered-value">Not covered</div>
+    <div class="not-covered-note">Current account, reserves, and remittances series not yet populated for this country.</div>
+  </div>
+    <h2>Risk Heatmap</h2>
+    <table class="data-table"><thead><tr><th>Domain</th><th>Level</th></tr></thead><tbody><tr><td>Macro</td><td>Moderate</td></tr><tr><td>Fiscal</td><td>Not covered</td></tr><tr><td>External</td><td>Not covered</td></tr><tr><td>Political</td><td>MODERATE</td></tr><tr><td>Operational</td><td>Moderate</td></tr></tbody></table>
+    <h2>Sector Leaderboard</h2>
+    <table class="data-table"><thead><tr><th>Sector</th><th>Strength</th><th>Growth</th><th>Attractiveness</th></tr></thead><tbody><tr><td>Technology &amp; Software</td><td>82</td><td>88</td><td>91</td></tr><tr><td>Agriculture &amp; Food Processing</td><td>74</td><td>68</td><td>79</td></tr><tr><td>Energy &amp; Power</td><td>76</td><td>72</td><td>85</td></tr><tr><td>Manufacturing &amp; Textiles</td><td>68</td><td>64</td><td>73</td></tr><tr><td>Mining &amp; Natural Resources</td><td>58</td><td>76</td><td>88</td></tr></tbody></table>
+  </section>
+  <section class="page">
+    <h1>Executive Summary</h1>
+    <p class="prose">Nigeria represents a major economy at a structural inflection point, offering multi-sector investment opportunities across technology, agriculture, infrastructure, and financial services.</p><p class="prose">Nigeria's investment landscape requires a balanced assessment of macro, political, and operational risks. Risks are real but manageable through strategic partnerships and phased capital deployment.</p><p class="prose">This executive summary uses canonical macro stamps and registry-verified policy statuses; unresolved items are labeled Unverified/Needs review.</p>
+    <h2>Base / Upside / Downside</h2>
+    <div class="grid3">
+      <div class="card"><div class="cardTitle">Base case</div><ul class="compact">
+        <li>Nigeria represents a major economy at a structural inflection point, offering multi-sector investment opportunities across technology, agriculture, infrastructure, and financial services.</li>
+        <li>GDP growth 3.3% (2024)</li>
+        <li>Signal: Emerging · Reform momentum</li>
+      </ul></div>
+      <div class="card"><div class="cardTitle">Upside</div><ul class="compact">
+        <li>FDI acceleration above $4.5B</li>
+        <li>Sector leaders maintain attractiveness scores &gt;80</li>
+        <li>Policy frameworks verified with USTR/AU sources</li>
+      </ul></div>
+      <div class="card"><div class="cardTitle">Downside</div><ul class="compact">
+        <li>Inflation re-acceleration above 18.8%</li>
+        <li>FX volatility beyond structured series</li>
+        <li>Political/security shocks (see Risk)</li>
+      </ul></div>
+    </div>
+    <h2>What changed since last structured year</h2>
+    <ul class="compact"><li>GDP growth moved -0.8 pp (2023→2024).</li><li>Nominal GDP scale +89% (2023→2024) in USD terms.</li></ul>
+    <h2>Key watchpoints (30–90d)</h2>
+    <ul class="compact">
+      <li>Currency Volatility</li>
+      <li>Governance &amp; Stability</li>
+      <li>Policy registry refresh (AGOA/AfCFTA/ECOWAS)</li>
+    </ul>
+  </section>
+</body>
+</html>

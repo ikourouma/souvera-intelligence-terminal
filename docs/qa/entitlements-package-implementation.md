@@ -175,7 +175,7 @@ PUBLIC_ACCESS: UserAccess = {
 | trade_data | | | | ✓ | ✓ | ✓ | ✓ |
 | risk_analysis | | | | ✓ | ✓ | ✓ | ✓ |
 | forecast_metrics | | | | ✓ | ✓ | ✓ | ✓ |
-| investment_thesis | | | | | ✓ | ✓ | ✓ |
+| investment_thesis | | | | ✓ | ✓ | ✓ | ✓ |
 | api_access | | | | | | ✓ | ✓ |
 | export_access | | | | | | ✓ | ✓ |
 | admin_access | | | | | | | ✓ |

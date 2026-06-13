@@ -85,11 +85,17 @@ function gdpGrowthClause(iso3: string, pct: number): string {
   return 'growth moderating';
 }
 
-function buildMetricBullets(iso3: string, metrics: CountryMetrics, topSectorLabel?: string | null): string[] {
+function buildMetricBullets(
+  iso3: string,
+  metrics: CountryMetrics,
+  topSectorLabel?: string | null,
+  macroAsOfYear?: number | null
+): string[] {
   const bullets: string[] = [];
+  const yearLabel = macroAsOfYear != null ? String(macroAsOfYear) : 'latest';
 
   if (metrics.fdi_net_inflows_current_usd != null && metrics.fdi_net_inflows_current_usd > 0) {
-    bullets.push(`FDI inflows ${fmtUsdBillions(metrics.fdi_net_inflows_current_usd)} (2025)`);
+    bullets.push(`FDI inflows ${fmtUsdBillions(metrics.fdi_net_inflows_current_usd)} (${yearLabel})`);
   }
 
   if (topSectorLabel) {
@@ -124,7 +130,7 @@ export function buildSignalScan(input: SignalScanInput): SignalScan {
     iso3,
     input.metrics,
     input.topSectorLabel,
-    input.macroAsOfYear
+    input.macroAsOfYear ?? null
   );
 
   const bullets: [string, string] = [

@@ -20,6 +20,7 @@
   "devDependencies": {
     "@supabase/supabase-js": "^2.104.1",
     "dotenv": "^17.4.2",
+    "pdf-parse": "^1.1.1",
     "postgres": "^3.4.9",
     "tsx": "^4.21.0",
     "turbo": "^2.5.0",

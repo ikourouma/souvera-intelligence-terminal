@@ -9,10 +9,8 @@ export const maxDuration = 120;
 /**
  * POST /api/v2/reports/generate
  *
- * Country Profile v2 — returns application/pdf on success, 422 JSON on preflight failure.
- * Requires REPORTS_V2_ENABLED=true.
- *
- * Body: { reportType: "Country Profile", iso3, query?, strict?, proofLayout? }
+ * Same flow as v1: new request row → template registry → JSON with downloadProxyUrl.
+ * Raw inline PDF deprecated; use download proxy for correct filenames.
  */
 export async function POST(request: NextRequest) {
   const supabase = await createServerClient();
@@ -27,8 +25,5 @@ export async function POST(request: NextRequest) {
   const access = await resolveUserAccess(supabase, user.id);
   const isAdmin = access.entitlements.includes('admin_access');
 
-  return handleReportGenerate(request, user, access, isAdmin, {
-    defaultTemplateVersion: 'v2',
-    responseMode: 'pdf',
-  });
+  return handleReportGenerate(request, user, access, isAdmin);
 }

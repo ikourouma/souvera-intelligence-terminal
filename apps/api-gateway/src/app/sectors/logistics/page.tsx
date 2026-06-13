@@ -1,13 +1,15 @@
 import type { Metadata } from 'next';
-import { ComingSoonPage } from '@/components/templates/ComingSoonPage';
+import { Truck } from 'lucide-react';
+import { SectorOverviewPage } from '@/components/sectors/SectorOverviewPage';
+import { LOGISTICS_SECTOR } from '@/data/sectors/sector-overviews';
 
 export const metadata: Metadata = {
   title: 'Logistics & Trade | Souvera',
-  description: 'Intelligence on African and Caribbean logistics including port infrastructure, trade corridors, supply chain networks, and regional integration.',
+  description: LOGISTICS_SECTOR.description,
   keywords: ['Africa logistics', 'Africa trade', 'AfCFTA', 'Africa ports', 'supply chain Africa'],
   openGraph: {
     title: 'Logistics & Trade | Souvera',
-    description: 'Intelligence on African and Caribbean logistics including port infrastructure and trade corridors.',
+    description: LOGISTICS_SECTOR.subtitle,
     url: 'https://souvera.vercel.app/sectors/logistics',
   },
   alternates: {
@@ -16,14 +18,5 @@ export const metadata: Metadata = {
 };
 
 export default function LogisticsPage() {
-  return (
-    <ComingSoonPage
-      title="Logistics & Trade"
-      tagline="Sector Intelligence"
-      description="Deep-dive intelligence on logistics and trade is in development. Request early access to receive updates when sector reports are available."
-      iconName="truck"
-      expectedRelease="Q2 2026"
-      backLink={{ label: 'Back to Sectors', href: '/sectors' }}
-    />
-  );
+  return <SectorOverviewPage content={LOGISTICS_SECTOR} icon={Truck} accentColor="purple" />;
 }

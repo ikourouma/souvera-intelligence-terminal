@@ -27,6 +27,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: '/intelligence/caribbean', priority: 0.8, changeFrequency: 'monthly' as const },
     { path: '/intelligence/map', priority: 0.7, changeFrequency: 'monthly' as const },
     { path: '/intelligence/compare', priority: 0.7, changeFrequency: 'monthly' as const },
+    { path: '/intelligence/trade', priority: 0.7, changeFrequency: 'monthly' as const },
+    { path: '/intelligence/trade/agoa', priority: 0.7, changeFrequency: 'weekly' as const },
+    { path: '/intelligence/trade/afcfta', priority: 0.6, changeFrequency: 'monthly' as const },
 
     // Sectors sub-pages
     { path: '/sectors/fintech', priority: 0.7, changeFrequency: 'monthly' as const },
@@ -36,6 +39,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: '/sectors/logistics', priority: 0.7, changeFrequency: 'monthly' as const },
 
     // Insights sub-pages
+    { path: '/insights/news', priority: 0.8, changeFrequency: 'weekly' as const },
     { path: '/insights/briefings', priority: 0.7, changeFrequency: 'weekly' as const },
     { path: '/insights/rankings', priority: 0.7, changeFrequency: 'monthly' as const },
     { path: '/insights/methodology', priority: 0.8, changeFrequency: 'monthly' as const },

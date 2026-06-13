@@ -3,16 +3,18 @@
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { NIGERIA_TRADE } from '@/data/nigeria-trade';
-import { JAMAICA_TRADE } from '@/data/jamaica-trade';
-import { KENYA_TRADE } from '@/data/kenya-trade';
-import { WAVE1_AFRICA_TRADE } from '@/data/wave1-africa-trade';
-import { CARIBBEAN_WAVE2_TRADE } from '@/data/caribbean-wave2-trade';
 import { buildSignalScan } from '@/lib/intelligence/country-signal-scan';
-import { getVerifiedMarketAccessForReport } from './policy-status-registry';
+import {
+  getVerifiedMarketAccessForReportAsync,
+  primePolicyStatusCache,
+  resolvePolicyStatusRegistry,
+} from './policy-status-registry';
 import { buildCountryProfileSections, type CountryProfileSections } from './country-profile-sections';
 import { hydrateCountryProfileNarratives } from './narrative-template';
 import { canonicalizeCountryPayload } from './canonicalize-country-payload';
+import { buildTop20SourceMeta } from './source-meta-top20';
+import { TOP20_INDICATORS } from '@/lib/indicators/top20';
+import { buildEconomyYearsFromObservations } from '@/lib/intelligence/build-economy-years';
 import type { EconomyYearPoint } from '@/lib/intelligence/country-economy-content';
 import { formatCurrency, formatPercent, formatNumber } from '@/lib/data/utils';
 
@@ -42,13 +44,29 @@ export interface CountryProfileReportData {
   }>;
   marketAccess: Array<{ label: string; statusLabel: string; description: string }>;
   tradeSummary?: {
+    asOfYear?: number;
     exportsUsd?: string;
     importsUsd?: string;
     topPartners: Array<{ country: string; sharePct?: number }>;
   };
   sources: string;
+  sourceMeta?: {
+    defaultSource?: string;
+    metrics?: Record<
+      string,
+      {
+        source_name?: string;
+        source_url?: string;
+        as_of?: string;
+        retrieved_at?: string;
+      }
+    >;
+  };
+  markets?: { asOfDate?: string };
   sections: CountryProfileSections;
   economyYears: EconomyYearPoint[];
+  /** Resolved from Evidence Vault when available. */
+  policyRecords?: import('@/types/report-integrity').PolicyStatusRecord[];
 }
 
 function getServiceClient(): SupabaseClient {
@@ -56,26 +74,6 @@ function getServiceClient(): SupabaseClient {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) throw new Error('Missing Supabase environment variables');
   return createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } });
-}
-
-function buildExecutiveSummaryFallback(
-  countryName: string,
-  signalScan: CountryProfileReportData['signalScan'],
-  metrics: CountryProfileReportData['metrics'],
-  topSector?: string
-): string {
-  const growth = metrics.find((m) => m.label === 'GDP growth')?.value;
-  const parts = [
-    `${countryName} is profiled in Souvera's institutional intelligence coverage.`,
-    signalScan.bullets[0],
-    signalScan.bullets[1],
-  ];
-  if (growth) parts.push(`GDP growth is tracking at ${growth}.`);
-  if (topSector) parts.push(`${topSector} leads the sector scorecard by attractiveness.`);
-  parts.push(
-    'This document synthesizes macro indicators, sector positioning, market-access frameworks, and bilateral trade data for professional due diligence.'
-  );
-  return parts.join(' ');
 }
 
 function truncateMd(md: string | undefined, maxLen: number): string | undefined {
@@ -94,6 +92,7 @@ async function fetchEconomyYears(
     .select(`
       period_date,
       value_numeric,
+      value_text,
       indicator_id,
       souvera_indicators (key)
     `)
@@ -105,26 +104,9 @@ async function fetchEconomyYears(
 
   if (!observations?.length) return [];
 
-  const yearMap = new Map<number, EconomyYearPoint>();
-  const keyMap: Record<string, keyof EconomyYearPoint> = {
-    gdp_current_usd: 'gdp_current_usd',
-    gdp_growth_pct: 'gdp_growth_pct',
-    fdi_net_inflows_usd: 'fdi_net_inflows_usd',
-    inflation_cpi_pct: 'inflation_cpi_pct',
-    fx_to_usd: 'fx_to_usd',
-  };
-
-  for (const obs of observations) {
-    const year = new Date(obs.period_date as string).getFullYear();
-    const indicatorKey = (obs.souvera_indicators as { key?: string })?.key;
-    if (!yearMap.has(year)) yearMap.set(year, { year });
-    const row = yearMap.get(year)!;
-    if (indicatorKey && keyMap[indicatorKey]) {
-      (row as Record<string, number>)[keyMap[indicatorKey]] = obs.value_numeric as number;
-    }
-  }
-
-  return Array.from(yearMap.values()).sort((a, b) => a.year - b.year);
+  return buildEconomyYearsFromObservations(
+    observations as Parameters<typeof buildEconomyYearsFromObservations>[0]
+  );
 }
 
 export async function fetchCountryProfileReportData(iso3: string): Promise<CountryProfileReportData> {
@@ -136,6 +118,8 @@ export async function fetchCountryProfileReportData(iso3: string): Promise<Count
     .select('id, iso2, iso3, name, region, capital, currency_code')
     .eq('iso3', iso3Upper)
     .maybeSingle();
+
+  const countryIso2 = country?.iso2;
 
   if (!country) {
     throw new Error(`Country not found: ${iso3Upper}`);
@@ -161,10 +145,17 @@ export async function fetchCountryProfileReportData(iso3: string): Promise<Count
   if (lite?.gdp_growth_pct != null) {
     metrics.push({ label: 'GDP growth', value: formatPercent(lite.gdp_growth_pct) });
   }
-  if (lite?.population_total != null) {
+  const economyYears = await fetchEconomyYears(supabase, country!.id);
+  const macroAsOfYear = economyYears.length
+    ? Math.max(...economyYears.map((y) => y.year))
+    : null;
+  const macroRow = macroAsOfYear != null ? economyYears.find((y) => y.year === macroAsOfYear) : undefined;
+  const populationVal = macroRow?.population_total ?? lite?.population_total;
+
+  if (populationVal != null) {
     metrics.push({
       label: 'Population',
-      value: formatNumber(lite.population_total, { compact: true }),
+      value: formatNumber(populationVal, { compact: true }),
     });
   }
   if (pro?.fdi_net_inflows_usd != null) {
@@ -198,10 +189,6 @@ export async function fetchCountryProfileReportData(iso3: string): Promise<Count
     .limit(5);
 
   const topSector = sectorsRows?.[0]?.sector_label as string | undefined;
-  const economyYears = await fetchEconomyYears(supabase, country.id);
-  const macroAsOfYear = economyYears.length
-    ? Math.max(...economyYears.map((y) => y.year))
-    : null;
 
   const signalScan = buildSignalScan({
     iso3: iso3Upper,
@@ -215,28 +202,30 @@ export async function fetchCountryProfileReportData(iso3: string): Promise<Count
     macroAsOfYear,
   });
 
-  const tradeByIso: Record<string, typeof NIGERIA_TRADE> = {
-    NGA: NIGERIA_TRADE,
-    JAM: JAMAICA_TRADE,
-    KEN: KENYA_TRADE,
-    ...WAVE1_AFRICA_TRADE,
-    ...CARIBBEAN_WAVE2_TRADE,
-  };
-  const trade = tradeByIso[iso3Upper];
+  const { data: snapshotRow } = await supabase
+    .from('souvera_country_trade_snapshots')
+    .select('year, top_trade_partners, top_exports, top_imports, trade_summary_md')
+    .eq('country_id', country.id)
+    .order('year', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
   let tradeSummary: CountryProfileReportData['tradeSummary'];
-  if (trade && !('pending' in trade && trade.pending)) {
-    const partners = (trade.topPartners ?? []).slice(0, 3).map((p) => ({
-      country: p.country,
-      sharePct: p.sharePct,
+  if (snapshotRow) {
+    // Parse JSON meta prefix for aggregate totals (see static-trade-migration)
+    let agg: Record<string, number | null> = {};
+    const summaryMd = (snapshotRow.trade_summary_md as string) ?? '';
+    if (summaryMd.startsWith('{"_meta":')) {
+      try { agg = JSON.parse(summaryMd.split('\n')[0])._meta ?? {}; } catch { /* fall through */ }
+    }
+    const partners = ((snapshotRow.top_trade_partners as any[]) ?? []).slice(0, 3).map((p: any) => ({
+      country: p.country as string,
+      sharePct: p.share_pct as number | undefined,
     }));
     tradeSummary = {
-      asOfYear:
-        trade.asOfYear ??
-        trade.exportsToUs?.year ??
-        trade.importsFromUs?.year ??
-        undefined,
-      exportsUsd: trade.exportsUsd != null ? formatCurrency(trade.exportsUsd) : undefined,
-      importsUsd: trade.importsUsd != null ? formatCurrency(trade.importsUsd) : undefined,
+      asOfYear: snapshotRow.year,
+      exportsUsd: agg.exports_usd != null ? formatCurrency(agg.exports_usd) : undefined,
+      importsUsd: agg.imports_usd != null ? formatCurrency(agg.imports_usd) : undefined,
       topPartners: partners,
     };
   }
@@ -246,6 +235,9 @@ export async function fetchCountryProfileReportData(iso3: string): Promise<Count
     day: 'numeric',
     year: 'numeric',
   });
+
+  const policyRecords = await resolvePolicyStatusRegistry(iso3Upper);
+  primePolicyStatusCache(iso3Upper, policyRecords);
 
   const baseData: Omit<CountryProfileReportData, 'sections'> = {
     country: {
@@ -258,7 +250,7 @@ export async function fetchCountryProfileReportData(iso3: string): Promise<Count
     },
     generatedAt,
     freshnessAt: profile?.freshness_at ?? lite?.freshness_at ?? undefined,
-    summary: profile?.summary_md?.trim() ?? buildExecutiveSummaryFallback(country.name, signalScan, metrics, topSector),
+    summary: profile?.summary_md?.trim(),
     whyNow: profile?.why_now_md?.trim(),
     riskNarrative: profile?.risk_narrative_md?.trim(),
     opportunityThesis: profile?.opportunity_thesis_md?.trim(),
@@ -271,34 +263,18 @@ export async function fetchCountryProfileReportData(iso3: string): Promise<Count
       attractiveness: s.attractiveness_score as number | undefined,
       teaser: s.teaser as string | undefined,
     })),
-    marketAccess: getVerifiedMarketAccessForReport(iso3Upper),
+    marketAccess: await getVerifiedMarketAccessForReportAsync(iso3Upper),
+    policyRecords,
     markets: {
       asOfDate: profile?.freshness_at ?? lite?.freshness_at ?? undefined,
     },
     tradeSummary,
     sources: 'World Bank, IMF, UN Comtrade, Souvera Curated Intelligence',
-    sourceMeta: {
-      defaultSource: 'World Bank, IMF, UN Comtrade, Souvera Curated Intelligence',
-      metrics: {
-        gdp_current_usd: {
-          source_name: 'World Bank / Souvera country_lite_v',
-          as_of: macroAsOfYear != null ? String(macroAsOfYear) : undefined,
-          retrieved_at: lite?.freshness_at ?? profile?.freshness_at ?? undefined,
-        },
-        gdp_growth_pct: {
-          source_name: 'World Bank / Souvera country_lite_v',
-          as_of: macroAsOfYear != null ? String(macroAsOfYear) : undefined,
-        },
-        fdi_net_inflows_usd: {
-          source_name: 'World Bank / Souvera country_professional_v',
-          as_of: macroAsOfYear != null ? String(macroAsOfYear) : undefined,
-        },
-        inflation_cpi_pct: {
-          source_name: 'World Bank / Souvera country_professional_v',
-          as_of: macroAsOfYear != null ? String(macroAsOfYear) : undefined,
-        },
-      },
-    },
+    sourceMeta: buildTop20SourceMeta(
+      countryIso2 ?? country.iso2,
+      macroAsOfYear,
+      lite?.freshness_at ?? profile?.freshness_at ?? undefined
+    ),
   };
 
   const assembled: CountryProfileReportData = {

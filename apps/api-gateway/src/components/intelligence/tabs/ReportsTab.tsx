@@ -2,13 +2,24 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { FileText, Sparkles, Download, Clock, Zap, Building2, Ship, TrendingUp, Shield, Mail, ChevronRight, Loader2, CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react';
+import {
+  FileText, Sparkles, Download, Clock, Zap, Building2, Ship, TrendingUp, Shield, Mail,
+  ChevronRight, Loader2, CheckCircle2, AlertCircle, ArrowRight, X,
+} from 'lucide-react';
 import { EntitlementKey } from '@/lib/intelligence-entitlements';
 import { HelpTooltip } from '@/components/shared/HelpTooltip';
 import { planCompareHref, upgradeWorkflowHref } from '@/lib/upgrade-paths';
 import { buildQuotaStatusForPlanId, formatReportQuotaSummary } from '@/lib/reports/quota';
 import { ReportPreviewModal } from './ReportPreviewModal';
 import { getDeepDiveSectorOptions } from '@/lib/sectors/sector-taxonomy';
+import { TEMPLATE_ID_BY_REPORT_TYPE } from '@/lib/reports/template-ids';
+import { formatPreflightErrorsMessage } from '@/lib/reports/reports-v2-api';
+import {
+  isReportGenerationPausedForUi,
+  REPORTS_PAUSED_BANNER_BODY,
+  REPORTS_PAUSED_BANNER_TITLE,
+  REPORTS_PAUSED_USER_MESSAGE,
+} from '@/lib/reports/report-generation-availability';
 
 function inferPlanIdFromEntitlements(entitlements: EntitlementKey[]): string {
   if (entitlements.includes('admin_access')) return 'platform_admin';
@@ -20,9 +31,12 @@ function inferPlanIdFromEntitlements(entitlements: EntitlementKey[]): string {
 interface ReportHistoryItem {
   id: string;
   reportType: string;
+  templateId?: string | null;
   status: string;
   storagePath?: string | null;
   downloadUrl?: string | null;
+  downloadFilename?: string | null;
+  downloadProxyUrl?: string | null;
   createdAt: string;
   errorMessage?: string | null;
 }
@@ -57,7 +71,9 @@ export default function ReportsTab({ data, userEntitlements, planId }: ReportsTa
   /** Business+: Investment Memo, Trade Profile, Sector Deep-Dive, AI Custom */
   const hasBusinessReports =
     userEntitlements.includes('investment_thesis') || userEntitlements.includes('admin_access');
+  const reportsPaused = isReportGenerationPausedForUi();
 
+  const [showPausedModal, setShowPausedModal] = useState(false);
   const [loadingReport, setLoadingReport] = useState<string | null>(null);
   const [sectorDeepDiveKey, setSectorDeepDiveKey] = useState('technology');
   const [aiQuery, setAiQuery] = useState('');
@@ -177,6 +193,22 @@ export default function ReportsTab({ data, userEntitlements, planId }: ReportsTa
     return () => window.clearInterval(timer);
   }, [hasPendingReports, loadReportHistory]);
 
+  const onGeneratePdfClick = (
+    reportType: string,
+    options?: { sectorKey?: string },
+    requiresBusiness = false
+  ) => {
+    if (reportsPaused) {
+      setShowPausedModal(true);
+      return;
+    }
+    if (requiresBusiness && !hasBusinessReports) return;
+    void handleGenerateReport(reportType, options);
+  };
+
+  const pausedGenerateBtnClass =
+    'bg-zinc-700/90 text-zinc-500 border border-zinc-600 cursor-pointer hover:bg-zinc-700';
+
   const handleGenerateReport = async (reportType: string, options?: { sectorKey?: string }) => {
     const iso3 = data.country?.iso3;
     if (!iso3) {
@@ -227,7 +259,16 @@ export default function ReportsTab({ data, userEntitlements, planId }: ReportsTa
             `${json.error ?? 'Report quota exceeded'}. Resets ${resetLabel} UTC.`
           );
         }
-        throw new Error(json.error ?? 'Failed to queue report');
+        if (res.status === 422 && json.error === 'PREFLIGHT_FAILED') {
+          throw new Error(
+            formatPreflightErrorsMessage(
+              json.preflight as { errors?: Array<{ code: string; message: string }> } | undefined
+            )
+          );
+        }
+        throw new Error(
+          (json.message as string | undefined) ?? (json.error as string | undefined) ?? 'Failed to queue report'
+        );
       }
 
       if (json.quota) {
@@ -298,6 +339,42 @@ export default function ReportsTab({ data, userEntitlements, planId }: ReportsTa
 
   return (
     <div className="space-y-8">
+      {showPausedModal && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="reports-paused-title"
+          onClick={() => setShowPausedModal(false)}
+        >
+          <div
+            className="bg-zinc-900 border border-zinc-700 rounded-xl p-6 max-w-md w-full shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3 mb-3">
+              <h3 id="reports-paused-title" className="text-lg font-semibold text-white">
+                {REPORTS_PAUSED_BANNER_TITLE}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowPausedModal(false)}
+                className="text-zinc-500 hover:text-white p-1"
+                aria-label="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <p className="text-sm text-zinc-300 leading-relaxed">{REPORTS_PAUSED_BANNER_BODY}</p>
+            <button
+              type="button"
+              onClick={() => setShowPausedModal(false)}
+              className="mt-5 w-full py-2.5 bg-zinc-700 hover:bg-zinc-600 text-white rounded-lg text-sm font-semibold transition-colors"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
       {previewReportType && iso3 && (
         <ReportPreviewModal
           reportType={previewReportType}
@@ -333,7 +410,10 @@ export default function ReportsTab({ data, userEntitlements, planId }: ReportsTa
           <div className="flex items-start gap-3">
             <FileText className="w-5 h-5 shrink-0 mt-0.5 text-blue-400" />
             <p className="text-sm leading-relaxed">
-              <span className="font-semibold text-white">Professional plan:</span> Country Profile PDF generation is active. Upgrade to Business+ to unlock Investment Memos, Trade Profiles, Sector Deep-Dives, and AI custom reports.
+              <span className="font-semibold text-white">Professional plan:</span>{' '}
+              {reportsPaused
+                ? 'Institutional PDF reports are being refreshed across all markets. Upgrade to Business+ for Investment Memos, Trade Profiles, Sector Deep-Dives, and AI custom reports when generation resumes.'
+                : 'Country Profile PDF generation is active. Upgrade to Business+ to unlock Investment Memos, Trade Profiles, Sector Deep-Dives, and AI custom reports.'}
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-2 shrink-0">
@@ -470,25 +550,41 @@ export default function ReportsTab({ data, userEntitlements, planId }: ReportsTa
               <Zap className="w-5 h-5 text-blue-400" />
               Quick Reports
             </h3>
-            <p className="text-sm text-zinc-400 mt-1">Pre-built reports, generated on-demand with latest data</p>
+            <p className="text-sm text-zinc-400 mt-1">
+              {reportsPaused
+                ? 'Institutional PDF exports are being refreshed — explore live intelligence in the tabs above'
+                : 'Pre-built reports, generated on-demand with latest data'}
+            </p>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <label htmlFor="report-download-format" className="text-xs text-zinc-500 uppercase tracking-wide">
-              Format
-            </label>
-            <select
-              id="report-download-format"
-              value={downloadFormat}
-              onChange={(e) => setDownloadFormat(e.target.value as 'pdf' | 'pptx')}
-              className="text-sm bg-zinc-800 border border-zinc-600 text-white rounded-lg px-3 py-1.5"
-            >
-              <option value="pdf">PDF (ready)</option>
-              <option value="pptx">PowerPoint (soon)</option>
-            </select>
-          </div>
+          {!reportsPaused && (
+            <div className="flex items-center gap-2 shrink-0">
+              <label htmlFor="report-download-format" className="text-xs text-zinc-500 uppercase tracking-wide">
+                Format
+              </label>
+              <select
+                id="report-download-format"
+                value={downloadFormat}
+                onChange={(e) => setDownloadFormat(e.target.value as 'pdf' | 'pptx')}
+                className="text-sm bg-zinc-800 border border-zinc-600 text-white rounded-lg px-3 py-1.5"
+              >
+                <option value="pdf">PDF (ready)</option>
+                <option value="pptx">PowerPoint (soon)</option>
+              </select>
+            </div>
+          )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {reportsPaused && (
+          <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-5 py-4 flex gap-3">
+            <Clock className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-amber-100">{REPORTS_PAUSED_BANNER_TITLE}</p>
+              <p className="text-sm text-amber-200/80 mt-1">{REPORTS_PAUSED_BANNER_BODY}</p>
+            </div>
+          </div>
+        )}
+
+        <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 ${reportsPaused ? 'opacity-75' : ''}`}>
           {/* Country Profile */}
           <div className="bg-gradient-to-br from-zinc-900/90 to-zinc-800/50 border border-zinc-700/50 rounded-xl p-6 hover:border-blue-500/30 transition-all duration-300">
             <div className="flex items-start gap-4 mb-4">
@@ -534,15 +630,15 @@ export default function ReportsTab({ data, userEntitlements, planId }: ReportsTa
               <button
                 type="button"
                 onClick={() => handleGenerateReport('Country Profile')}
-                disabled={isGenerating('Country Profile')}
-                className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 disabled:cursor-wait text-white text-sm rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                disabled={reportsPaused || isGenerating('Country Profile')}
+                className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
               >
                 {isGenerating('Country Profile') ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
-                  <Download className="w-4 h-4" />
+                  <Clock className="w-4 h-4" />
                 )}
-                Generate PDF
+                {reportsPaused ? 'Coming soon' : 'Generate PDF'}
               </button>
               <button
                 type="button"
@@ -598,9 +694,15 @@ export default function ReportsTab({ data, userEntitlements, planId }: ReportsTa
             <div className="flex gap-2">
               <button
                 type="button"
-                onClick={() => hasBusinessReports && handleGenerateReport('Investment Memo')}
-                disabled={!hasBusinessReports || isGenerating('Investment Memo')}
-                className={`flex-1 px-4 py-2 ${hasBusinessReports ? 'bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60' : 'bg-zinc-700 cursor-not-allowed'} text-white text-sm rounded-lg font-semibold transition-colors flex items-center justify-center gap-2`}
+                onClick={() => onGeneratePdfClick('Investment Memo', undefined, true)}
+                disabled={!reportsPaused && (!hasBusinessReports || isGenerating('Investment Memo'))}
+                className={`flex-1 px-4 py-2 text-sm rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 ${
+                  reportsPaused
+                    ? pausedGenerateBtnClass
+                    : hasBusinessReports
+                      ? 'bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white'
+                      : 'bg-zinc-700 cursor-not-allowed text-white'
+                }`}
               >
                 {isGenerating('Investment Memo') ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -664,9 +766,15 @@ export default function ReportsTab({ data, userEntitlements, planId }: ReportsTa
             <div className="flex gap-2">
               <button
                 type="button"
-                onClick={() => hasBusinessReports && handleGenerateReport('Trade Profile')}
-                disabled={!hasBusinessReports || isGenerating('Trade Profile')}
-                className={`flex-1 px-4 py-2 ${hasBusinessReports ? 'bg-cyan-600 hover:bg-cyan-700 disabled:opacity-60' : 'bg-zinc-700 cursor-not-allowed'} text-white text-sm rounded-lg font-semibold transition-colors flex items-center justify-center gap-2`}
+                onClick={() => onGeneratePdfClick('Trade Profile', undefined, true)}
+                disabled={!reportsPaused && (!hasBusinessReports || isGenerating('Trade Profile'))}
+                className={`flex-1 px-4 py-2 text-sm rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 ${
+                  reportsPaused
+                    ? pausedGenerateBtnClass
+                    : hasBusinessReports
+                      ? 'bg-cyan-600 hover:bg-cyan-700 disabled:opacity-60 text-white'
+                      : 'bg-zinc-700 cursor-not-allowed text-white'
+                }`}
               >
                 {isGenerating('Trade Profile') ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -742,11 +850,16 @@ export default function ReportsTab({ data, userEntitlements, planId }: ReportsTa
               <button
                 type="button"
                 onClick={() =>
-                  hasBusinessReports &&
-                  handleGenerateReport('Sector Deep-Dive', { sectorKey: sectorDeepDiveKey })
+                  onGeneratePdfClick('Sector Deep-Dive', { sectorKey: sectorDeepDiveKey }, true)
                 }
-                disabled={!hasBusinessReports || isGenerating('Sector Deep-Dive')}
-                className={`flex-1 px-4 py-2 ${hasBusinessReports ? 'bg-purple-600 hover:bg-purple-700 disabled:opacity-60' : 'bg-zinc-700 cursor-not-allowed'} text-white text-sm rounded-lg font-semibold transition-colors flex items-center justify-center gap-2`}
+                disabled={!reportsPaused && (!hasBusinessReports || isGenerating('Sector Deep-Dive'))}
+                className={`flex-1 px-4 py-2 text-sm rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 ${
+                  reportsPaused
+                    ? pausedGenerateBtnClass
+                    : hasBusinessReports
+                      ? 'bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white'
+                      : 'bg-zinc-700 cursor-not-allowed text-white'
+                }`}
               >
                 {isGenerating('Sector Deep-Dive') ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -832,9 +945,13 @@ export default function ReportsTab({ data, userEntitlements, planId }: ReportsTa
 
             <button
               type="button"
-              onClick={() => handleGenerateReport('AI Custom Report')}
-              disabled={isGenerating('AI Custom Report')}
-              className="w-full px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 disabled:opacity-60 disabled:cursor-wait text-white rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+              onClick={() => onGeneratePdfClick('AI Custom Report')}
+              disabled={!reportsPaused && isGenerating('AI Custom Report')}
+              className={`w-full px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 ${
+                reportsPaused
+                  ? pausedGenerateBtnClass
+                  : 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 disabled:opacity-60 disabled:cursor-wait text-white'
+              }`}
             >
               {isGenerating('AI Custom Report') ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
@@ -983,11 +1100,10 @@ export default function ReportsTab({ data, userEntitlements, planId }: ReportsTa
                             ? 'Generating…'
                             : 'Queued'}
                     </span>
-                    {item.storagePath && item.downloadUrl ? (
+                    {item.storagePath && item.downloadProxyUrl ? (
                       <a
-                        href={item.downloadUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        href={item.downloadProxyUrl}
+                        download={item.downloadFilename ?? undefined}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition-colors"
                       >
                         <Download className="w-3.5 h-3.5" />

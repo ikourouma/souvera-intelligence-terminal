@@ -1,13 +1,21 @@
 import type { Metadata } from 'next';
-import { TourismHospitalityHub } from './TourismHospitalityHub';
+import { Palmtree } from 'lucide-react';
+import { SectorOverviewPage } from '@/components/sectors/SectorOverviewPage';
+import { TOURISM_HOSPITALITY_SECTOR } from '@/data/sectors/sector-overviews';
 
 export const metadata: Metadata = {
   title: 'Tourism & Hospitality | Souvera',
-  description: 'Destination, hospitality, aviation, events, and visitor-economy intelligence across African and Caribbean markets.',
-  keywords: ['tourism Africa', 'tourism Caribbean', 'hospitality investment', 'visitor economy', 'aviation connectivity', 'diaspora travel', 'events tourism', 'cultural tourism', 'heritage tourism', 'destination infrastructure'],
+  description: TOURISM_HOSPITALITY_SECTOR.description,
+  keywords: [
+    'tourism Africa',
+    'tourism Caribbean',
+    'hospitality investment',
+    'visitor economy',
+    'aviation connectivity',
+  ],
   openGraph: {
     title: 'Tourism & Hospitality | Souvera',
-    description: 'Destination, hospitality, aviation, events, and visitor-economy intelligence across African and Caribbean markets.',
+    description: TOURISM_HOSPITALITY_SECTOR.subtitle,
     url: 'https://souvera.vercel.app/sectors/tourism-hospitality',
   },
   alternates: {
@@ -16,5 +24,7 @@ export const metadata: Metadata = {
 };
 
 export default function TourismHospitalityPage() {
-  return <TourismHospitalityHub />;
+  return (
+    <SectorOverviewPage content={TOURISM_HOSPITALITY_SECTOR} icon={Palmtree} accentColor="cyan" />
+  );
 }

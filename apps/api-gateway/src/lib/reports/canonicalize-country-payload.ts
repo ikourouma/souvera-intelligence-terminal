@@ -9,6 +9,8 @@ import type {
   CanonicalMetrics,
   DataCoverage,
 } from '@/types/report-integrity';
+import { EXTERNAL_SECTOR_KEYS, FISCAL_COVERAGE_KEYS } from '@/lib/indicators/top20';
+import { buildCoverageMap } from './coverage-map';
 import { getLatestPolicyVerifiedAt, getPolicyStatusRegistry } from './policy-status-registry';
 
 function maxMacroYear(years: { year: number }[]): number | null {
@@ -22,6 +24,14 @@ function rowForYear(
 ): CountryProfileReportData['economyYears'][0] | undefined {
   if (year == null) return undefined;
   return payload.economyYears.find((y) => y.year === year);
+}
+
+function hasKeysOnRow(
+  row: CountryProfileReportData['economyYears'][0] | undefined,
+  keys: readonly string[]
+): boolean {
+  if (!row) return false;
+  return keys.some((k) => (row as Record<string, number | undefined>)[k] != null);
 }
 
 function fmtUsdBillions(n: number): string {
@@ -67,8 +77,10 @@ function computeConfidence(coverage: DataCoverage): 'high' | 'medium' | 'low' {
   if (coverage.hasMacroSeries && coverage.macroYearCount >= 3) score += 2;
   if (coverage.hasTradeSummary) score += 1;
   if (coverage.hasVerifiedPolicy) score += 1;
-  if (coverage.hasMarketsAsOf) score += 1;
-  if (score >= 4) return 'high';
+  if (coverage.hasMarketsFeed) score += 1;
+  if (coverage.hasPopulationInCanonical) score += 1;
+  if (coverage.hasExternalSectorSeries) score += 1;
+  if (score >= 5) return 'high';
   if (score >= 2) return 'medium';
   return 'low';
 }
@@ -84,10 +96,12 @@ export function canonicalizeCountryPayload(
     gdpGrowthPct: macroRow?.gdp_growth_pct,
     fdiNetInflowsUsd: macroRow?.fdi_net_inflows_usd,
     inflationCpiPct: macroRow?.inflation_cpi_pct,
-    fxToUsd: macroRow?.fx_to_usd,
+    fxToUsd: macroRow?.fx_to_usd ?? macroRow?.official_exchange_rate,
+    populationTotal: macroRow?.population_total,
   };
 
-  const policyRecords = getPolicyStatusRegistry(payload.country.iso3);
+  const policyRecords =
+    payload.policyRecords ?? getPolicyStatusRegistry(payload.country.iso3);
 
   const asOf: AsOfStamps = {
     macroYear,
@@ -100,9 +114,27 @@ export function canonicalizeCountryPayload(
     hasMacroSeries: payload.economyYears.length > 0,
     hasTradeSummary: Boolean(payload.tradeSummary?.exportsUsd || payload.tradeSummary?.importsUsd),
     hasMarketsAsOf: Boolean(payload.markets?.asOfDate),
-    hasVerifiedPolicy: policyRecords.some((p) => p.status !== 'unknown' && p.lastVerifiedAt),
+    hasMarketsFeed: false,
+    hasFiscalSeries: hasKeysOnRow(macroRow, FISCAL_COVERAGE_KEYS),
+    hasExternalSectorSeries: hasKeysOnRow(macroRow, EXTERNAL_SECTOR_KEYS),
+    hasPopulationInCanonical: macroRow?.population_total != null,
+    hasVerifiedPolicy: policyRecords.some(
+      (p) => p.publishable === true && p.evidenceArtifactId && p.lastVerifiedAt
+    ),
     macroYearCount: payload.economyYears.length,
   };
+
+  const coverageMap = buildCoverageMap(payload, {
+    payload,
+    asOf,
+    canonicalMetrics,
+    dataCoverage,
+    coverageMap: [],
+    confidence: 'medium',
+    policyRecords,
+    signalDrivers: [],
+    signalConfidence: 'Medium',
+  });
 
   const confidence = computeConfidence(dataCoverage);
   const signalDrivers = buildCanonicalDrivers(canonicalMetrics, macroYear);
@@ -112,6 +144,7 @@ export function canonicalizeCountryPayload(
     asOf,
     canonicalMetrics,
     dataCoverage,
+    coverageMap,
     confidence,
     policyRecords,
     signalDrivers,

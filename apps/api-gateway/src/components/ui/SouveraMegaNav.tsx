@@ -6,155 +6,14 @@ import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { usePathname } from 'next/navigation';
 import {
-  ChevronDown, ArrowRight, Globe, TrendingUp,
-  Building2, Map, Menu, X, Zap,
+  ChevronDown, ArrowRight, Menu, X,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { MOBILE_UTILITY_LINKS, SITE_MEGA_NAV } from '@/lib/site-navigation';
 import { AccountMenu } from './AccountMenu';
 import type { User } from '@supabase/supabase-js';
 
-const navigation = [
-  {
-    name: 'Platform',
-    icon: Zap,
-    sections: [
-      {
-        title: 'Core Infrastructure',
-        links: [
-          { name: 'Platform Overview', href: '/platform' },
-          { name: 'Intelligence Terminal', href: '/platform/terminal' },
-          { name: 'Signal Engine', href: '/platform/signal-engine' },
-        ],
-      },
-      {
-        title: 'Data & Integration',
-        links: [
-          { name: 'Data Foundation', href: '/platform/data-foundation' },
-          { name: 'API Access', href: '/platform/api' },
-        ],
-      },
-    ],
-  },
-  {
-    name: 'Intelligence',
-    icon: Globe,
-    sections: [
-      {
-        title: 'Regional Coverage',
-        links: [
-          { name: 'Intelligence Overview', href: '/intelligence' },
-          { name: 'Africa Intelligence', href: '/intelligence/africa' },
-          { name: 'Caribbean Intelligence', href: '/intelligence/caribbean' },
-        ],
-      },
-      {
-        title: 'Analysis Tools',
-        links: [
-          { name: 'Intelligence Map', href: '/intelligence/map' },
-          { name: 'Country Comparison', href: '/intelligence/compare' },
-        ],
-      },
-    ],
-  },
-  {
-    name: 'Sectors',
-    icon: Building2,
-    sections: [
-      {
-        title: 'Core Infrastructure',
-        links: [
-          { name: 'Sector Overview', href: '/sectors' },
-          { name: 'Digital Infrastructure', href: '/sectors/digital-infrastructure' },
-          { name: 'Fintech & Digital Finance', href: '/sectors/fintech' },
-        ],
-      },
-      {
-        title: 'Industry Sectors',
-        links: [
-          { name: 'Mining & Critical Minerals', href: '/sectors/critical-minerals' },
-          { name: 'Energy & Renewables', href: '/sectors/energy' },
-          { name: 'Agriculture & Agribusiness', href: '/sectors/agriculture' },
-        ],
-      },
-      {
-        title: 'Services & Connectivity',
-        links: [
-          { name: 'Logistics & Trade', href: '/sectors/logistics' },
-          { name: 'Tourism & Hospitality', href: '/sectors/tourism-hospitality' },
-        ],
-      },
-    ],
-  },
-  {
-    name: 'Insights',
-    icon: TrendingUp,
-    sections: [
-      {
-        title: 'Research & Analysis',
-        links: [
-          { name: 'Insights Overview', href: '/insights' },
-          { name: 'Strategic Briefings', href: '/insights/briefings' },
-          { name: 'Market Rankings', href: '/insights/rankings' },
-        ],
-      },
-      {
-        title: 'Methodology',
-        links: [
-          { name: 'Data Methodology', href: '/insights/methodology' },
-        ],
-      },
-    ],
-  },
-  {
-    name: 'Access',
-    icon: Map,
-    sections: [
-      {
-        title: 'Get Started',
-        links: [
-          { name: 'Access Plans', href: '/access' },
-          { name: 'Request Access', href: '/access/request-access' },
-          { name: 'Request Demo', href: '/access/request-demo' },
-        ],
-      },
-      {
-        title: 'Enterprise',
-        links: [
-          { name: 'Institutional Solutions', href: '/access/institutional' },
-          { name: 'Contact Sales', href: '/contact' },
-        ],
-      },
-    ],
-  },
-  {
-    name: 'Resources',
-    icon: Globe,
-    sections: [
-      {
-        title: 'Data & Compliance',
-        links: [
-          { name: 'Data Sources', href: '/resources/data-sources' },
-          { name: 'Source Registry', href: '/resources/source-registry' },
-          { name: 'Compliance', href: '/resources/compliance' },
-        ],
-      },
-      {
-        title: 'Support',
-        links: [
-          { name: 'FAQ', href: '/resources/faq' },
-          { name: 'About Souvera', href: '/about' },
-          { name: 'Legal', href: '/legal' },
-        ],
-      },
-    ],
-  },
-];
-
-const mobileUtilityLinks = [
-  { name: 'Access', href: '/access' },
-  { name: 'Insights', href: '/insights' },
-  { name: 'Contact', href: '/contact' },
-];
+const navigation = SITE_MEGA_NAV;
 
 // Helper to get display info from user
 function getUserDisplayInfo(user: User | null, fullName?: string | null) {
@@ -532,7 +391,7 @@ export function SouveraMegaNav() {
                 <Link href="/profile" onClick={() => setMobileOpen(false)} className="sv-mobile-item text-[10px] font-bold tracking-widest uppercase text-center py-3 rounded-sm transition-colors" style={{ background: '#161D26', color: '#9CA3AF', border: '1px solid #1F2A37' }}>
                   Profile
                 </Link>
-                <Link href="/access" onClick={() => setMobileOpen(false)} className="sv-mobile-item text-[10px] font-bold tracking-widest uppercase text-center py-3 rounded-sm transition-colors" style={{ background: '#161D26', color: '#9CA3AF', border: '1px solid #1F2A37' }}>
+                <Link href="/profile#subscription" onClick={() => setMobileOpen(false)} className="sv-mobile-item text-[10px] font-bold tracking-widest uppercase text-center py-3 rounded-sm transition-colors" style={{ background: '#161D26', color: '#9CA3AF', border: '1px solid #1F2A37' }}>
                   Plans
                 </Link>
                 <button onClick={async () => { await supabase.auth.signOut(); setMobileOpen(false); window.location.href = '/'; }} className="sv-mobile-item text-[10px] font-bold tracking-widest uppercase text-center py-3 rounded-sm transition-colors" style={{ background: '#161D26', color: '#EF4444', border: '1px solid #1F2A37' }}>
@@ -541,7 +400,7 @@ export function SouveraMegaNav() {
               </div>
             ) : (
               <div className="grid grid-cols-3 gap-2 pt-2" style={{ borderTop: '1px solid #1F2A37' }}>
-                {mobileUtilityLinks.map((link) => (
+                {MOBILE_UTILITY_LINKS.map((link) => (
                   <Link key={link.name} href={link.href} onClick={() => setMobileOpen(false)} className="sv-mobile-item text-[10px] font-bold tracking-widest uppercase text-center py-3 rounded-sm transition-colors" style={{ background: '#161D26', color: '#9CA3AF', border: '1px solid #1F2A37' }}>
                     {link.name}
                   </Link>

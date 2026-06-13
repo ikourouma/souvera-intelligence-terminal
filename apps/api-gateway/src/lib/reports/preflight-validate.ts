@@ -6,30 +6,21 @@ import type { CountryProfileReportData } from './country-profile-data';
 import type { CanonicalCountryPayload, PreflightIssue, PreflightReport } from '@/types/report-integrity';
 import { canonicalizeCountryPayload } from './canonicalize-country-payload';
 import { parseDisplayMetrics, parseUsdString, relativeDiff } from './parse-display-metrics';
+import {
+  checkCopyQualityWarnings,
+  checkNarrativeGdpScale,
+  checkNarrativeYearDrift,
+  checkNumericClaimsGovernance,
+  collectRenderableNarrativeTexts,
+} from './preflight-narrative-rules';
+import { findPlaceholderLeaks } from './placeholder-leak';
 
 const PCT_TOLERANCE = 0.35;
 const USD_TOLERANCE = 0.08;
 
-function collectTextLeaves(obj: unknown, prefix = ''): Array<{ path: string; text: string }> {
-  const out: Array<{ path: string; text: string }> = [];
-  if (typeof obj === 'string' && obj.trim().length > 20) {
-    out.push({ path: prefix || 'text', text: obj });
-    return out;
-  }
-  if (Array.isArray(obj)) {
-    obj.forEach((item, i) => {
-      out.push(...collectTextLeaves(item, `${prefix}[${i}]`));
-    });
-    return out;
-  }
-  if (obj && typeof obj === 'object') {
-    for (const [k, v] of Object.entries(obj)) {
-      const p = prefix ? `${prefix}.${k}` : k;
-      if (k === 'glossary' || k === 'capabilities' || k === 'terms') continue;
-      out.push(...collectTextLeaves(v, p));
-    }
-  }
-  return out;
+export interface PreflightValidateOptions {
+  /** When true (default), year-drift and legacy signal drift are errors, not warnings. */
+  strict?: boolean;
 }
 
 function economyYearsSet(payload: CountryProfileReportData): Set<number> {
@@ -88,6 +79,10 @@ function checkMetricConflicts(
   return issues;
 }
 
+function contextWindow(text: string, index: number, before = 50, after = 50): string {
+  return text.slice(Math.max(0, index - before), index + after).toLowerCase();
+}
+
 function checkNarrativeContradictions(
   payload: CountryProfileReportData,
   canonical: CanonicalCountryPayload
@@ -96,19 +91,11 @@ function checkNarrativeContradictions(
   const years = economyYearsSet(payload);
   const macroYear = canonical.asOf.macroYear;
   const cm = canonical.canonicalMetrics;
-
-  const texts = [
-    { path: 'summary', text: payload.summary },
-    ...collectTextLeaves(payload.sections, 'sections'),
-  ].filter((t) => t.text);
+  const texts = collectRenderableNarrativeTexts(payload);
 
   const pctRegex = /(-?\d+(?:\.\d+)?)\s*%/g;
   const yearRegex = /\b(20\d{2})\b/g;
   const usdRegex = /\$\s*([\d,.]+)\s*([KMB])?/gi;
-
-  function contextWindow(text: string, index: number, before = 50, after = 50): string {
-    return text.slice(Math.max(0, index - before), index + after).toLowerCase();
-  }
 
   for (const { path, text } of texts) {
     if (!text) continue;
@@ -125,8 +112,14 @@ function checkNarrativeContradictions(
       const pct = parseFloat(match[1]);
       if (Number.isNaN(pct)) continue;
       const ctx = contextWindow(text, match.index);
+      const isGdpLevelChange =
+        /%\s*change|change\s+over\s+(?:the\s+)?period|expanded\s+from\s+\$|from\s+\$[\d,.]+\s*[bmk]?\s*\(\d{4}\)\s+to\s+\$/i.test(
+          ctx
+        );
       const isGdpGrowthClaim =
-        /gdp\s+growth|growth\s+of|growth\s+reached|gdp\s+expanded|gdp\s+growth:/i.test(ctx) &&
+        !isGdpLevelChange &&
+        (/gdp\s+growth|growth\s+of|growth\s+reached|gdp\s+growth:/i.test(ctx) ||
+          (/gdp\s+expanded/i.test(ctx) && !/\$[\d,.]+\s*[bmk]?/i.test(ctx))) &&
         !/sector|technology|agriculture|services|yoy|inflation|import|export/i.test(ctx);
       if (
         isGdpGrowthClaim &&
@@ -150,7 +143,7 @@ function checkNarrativeContradictions(
         macroYear != null &&
         y > macroYear + 1 &&
         /gdp|inflation|fdi\s+inflow/i.test(ctx) &&
-        !/election|pipeline|infrastructure|presidential|forecast/i.test(ctx)
+        !/election|pipeline|infrastructure|presidential|forecast|target|treaty|deadline/i.test(ctx)
       ) {
         issues.push({
           code: 'NARRATIVE_FUTURE_YEAR',
@@ -171,6 +164,8 @@ function checkNarrativeContradictions(
       }
     }
 
+    if (path.includes('indicatorBullets') || /\$\d+.*→.*\$/i.test(text)) continue;
+
     usdRegex.lastIndex = 0;
     while ((match = usdRegex.exec(text)) !== null) {
       const raw = `$${match[1]}${match[2] ?? ''}`;
@@ -178,7 +173,7 @@ function checkNarrativeContradictions(
       const ctx = contextWindow(text, match.index);
       const isGdpScale =
         /\bgdp\b/i.test(ctx) &&
-        !/fdi|inflow|export|import|trade|partner|pipeline/i.test(ctx);
+        !/fdi|inflow|export|import|trade|partner|pipeline|economy\s+scale|economic\s+output/i.test(ctx);
       if (
         usd != null &&
         cm.gdpCurrentUsd != null &&
@@ -200,6 +195,8 @@ function checkNarrativeContradictions(
     }
   }
 
+  issues.push(...checkNarrativeGdpScale(texts, canonical, years));
+
   return issues;
 }
 
@@ -217,25 +214,19 @@ function checkPolicyVerification(
         message: `${p.framework}: ${p.statusLabel} — high-impact policy status not fully verified.`,
       });
     }
-    if (
-      p.framework === 'AGOA' &&
-      ['active', 'suspended'].includes(p.status) &&
-      !p.authoritativeSourceUrl
-    ) {
+    const assertive = ['active', 'suspended', 'graduated', 'ineligible'].includes(p.status);
+    if (assertive && p.publishable !== true) {
       errors.push({
-        code: 'POLICY_NO_SOURCE',
-        path: `policyRecords[AGOA]`,
-        message: 'AGOA status asserted without authoritative_source_url.',
+        code: 'POLICY_NO_EVIDENCE',
+        path: `policyRecords[${p.framework}]`,
+        message: `${p.framework} asserts "${p.clientStatusLabel ?? p.statusLabel}" without evidence-backed artifact (Evidence Vault).`,
       });
     }
-    if (
-      ['active', 'suspended', 'graduated'].includes(p.status) &&
-      !p.lastVerifiedAt
-    ) {
+    if (assertive && !p.lastVerifiedAt) {
       errors.push({
         code: 'POLICY_UNVERIFIED_DATE',
         path: `policyRecords[${p.framework}]`,
-        message: `${p.framework} status "${p.statusLabel}" lacks last_verified_at.`,
+        message: `${p.framework} status lacks last_reviewed_at.`,
       });
     }
   }
@@ -257,39 +248,60 @@ function checkPolicyVerification(
   return { errors, warnings };
 }
 
-function checkSignalDrift(
-  payload: CountryProfileReportData,
-  canonical: CanonicalCountryPayload
+function checkPlaceholderLeaks(
+  narrativeTexts: Array<{ path: string; text: string }>
 ): PreflightIssue[] {
-  const warnings: PreflightIssue[] = [];
-  const scanText = `${payload.signalScan.badge} ${payload.signalScan.bullets.join(' ')}`;
-
-  if (scanText.includes('(2025)') && canonical.asOf.macroYear != null && canonical.asOf.macroYear < 2025) {
-    warnings.push({
-      code: 'SIGNAL_YEAR_DRIFT',
-      path: 'signalScan.bullets',
-      message: `Signal bullets reference 2025 but macro as-of is ${canonical.asOf.macroYear}.`,
-    });
+  const issues: PreflightIssue[] = [];
+  for (const { path, text } of narrativeTexts) {
+    if (!text) continue;
+    const leaks = findPlaceholderLeaks(text);
+    for (const token of leaks) {
+      issues.push({
+        code: 'PLACEHOLDER_LEAK',
+        path,
+        message: `Unresolved template token ${token} in client-facing text.`,
+        detail: text.slice(0, 120),
+      });
+    }
   }
+  return issues;
+}
 
-  return warnings;
+function partitionYearDriftIssues(
+  issues: PreflightIssue[],
+  strict: boolean
+): { errors: PreflightIssue[]; warnings: PreflightIssue[] } {
+  if (strict) return { errors: issues, warnings: [] };
+  return { errors: [], warnings: issues };
 }
 
 export function preflightValidate(
   payload: CountryProfileReportData,
-  canonical?: CanonicalCountryPayload
+  canonical?: CanonicalCountryPayload,
+  options: PreflightValidateOptions = {}
 ): PreflightReport {
+  const strict = options.strict !== false;
   const canon = canonical ?? canonicalizeCountryPayload(payload);
+  const narrativeTexts = collectRenderableNarrativeTexts(payload);
 
   const policy = checkPolicyVerification(canon);
+  const yearDrift = checkNarrativeYearDrift(narrativeTexts, canon, strict);
+  const yearDriftSplit = partitionYearDriftIssues(yearDrift, strict);
+  const numericGov = checkNumericClaimsGovernance(narrativeTexts, payload, canon, strict);
+
   const errors: PreflightIssue[] = [
     ...checkMetricConflicts(payload, canon),
     ...checkNarrativeContradictions(payload, canon),
+    ...yearDriftSplit.errors,
+    ...numericGov.errors,
     ...policy.errors,
+    ...checkPlaceholderLeaks(narrativeTexts),
   ];
 
   const warnings: PreflightIssue[] = [
-    ...checkSignalDrift(payload, canon),
+    ...yearDriftSplit.warnings,
+    ...numericGov.warnings,
+    ...checkCopyQualityWarnings(narrativeTexts),
     ...policy.warnings,
   ];
 

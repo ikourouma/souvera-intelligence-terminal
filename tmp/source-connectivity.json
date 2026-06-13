@@ -1,0 +1,51 @@
+{
+  "checkedAt": "2026-06-03T21:59:21.068Z",
+  "durationMs": 16904,
+  "results": [
+    {
+      "sourceKey": "world_bank",
+      "url": "https://api.worldbank.org/v2/country/NG/indicator/NY.GDP.MKTP.CD?format=json&per_page=5&date=2023:2024",
+      "ok": true,
+      "status": 200,
+      "ms": 944
+    },
+    {
+      "sourceKey": "imf_dataservices",
+      "url": "https://dataservices.imf.org/REST/SDMX_JSON.svcDataflow",
+      "ok": false,
+      "status": 0,
+      "ms": 32,
+      "error": "fetch failed"
+    },
+    {
+      "sourceKey": "faostat",
+      "url": "https://fenixservices.fao.org/faostat/api/v1/en",
+      "ok": false,
+      "status": 0,
+      "ms": 15012,
+      "error": "fetch failed"
+    },
+    {
+      "sourceKey": "world_bank_projects",
+      "url": "https://search.worldbank.org/api/v2/projects?format=json&rows=1",
+      "ok": true,
+      "status": 200,
+      "ms": 289
+    },
+    {
+      "sourceKey": "rest_countries",
+      "url": "https://restcountries.com/v3.1/alpha/nga",
+      "ok": true,
+      "status": 200,
+      "ms": 110
+    },
+    {
+      "sourceKey": "un_comtrade",
+      "url": "https://comtradeapi.un.org/docs",
+      "ok": false,
+      "status": 404,
+      "ms": 514
+    }
+  ],
+  "registryCount": 13
+}

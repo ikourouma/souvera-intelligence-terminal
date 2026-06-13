@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { ComingSoonPage } from '@/components/templates/ComingSoonPage';
+import { TerminalBridge } from './TerminalBridge';
 
 export const metadata: Metadata = {
   title: 'Intelligence Terminal | Souvera',
@@ -15,14 +15,5 @@ export const metadata: Metadata = {
 };
 
 export default function TerminalPage() {
-  return (
-    <ComingSoonPage
-      title="Intelligence Terminal"
-      tagline="Coming Soon"
-      description="Our interactive intelligence terminal is currently in development. Request early access to be notified when it launches."
-      iconName="terminal"
-      expectedRelease="Q2 2026"
-      backLink={{ label: 'Back to Platform', href: '/platform' }}
-    />
-  );
+  return <TerminalBridge />;
 }

@@ -1,0 +1,66 @@
+{
+  "auditDate": "2026-06-04",
+  "storage": {
+    "bucketId": "reports",
+    "bucketPublic": false,
+    "objectPathPattern": "{user_id}/{request_id}.pdf",
+    "contentType": "application/pdf",
+    "uploadUpsert": true,
+    "signedUrlTtlSeconds": 604800,
+    "implementations": [
+      "apps/api-gateway/src/lib/reports/process-report-request.ts",
+      "apps/api-gateway/src/lib/reports/ensure-reports-bucket.ts",
+      "infra/supabase/migrations/create-reports-storage-bucket.sql"
+    ]
+  },
+  "download": {
+    "primaryMechanism": "supabase_signed_url_in_json",
+    "v1GenerateRoute": "/api/v1/reports/generate",
+    "v2GenerateRoute": "/api/v2/reports/generate",
+    "v2ReturnsRawPdf": true,
+    "historyRoute": "/api/v1/reports/history",
+    "contentDispositionOnV2Only": true,
+    "proxyRouteAfterPhase2": "/api/v1/reports/download/[requestId]"
+  },
+  "tables": {
+    "primary": "souvera_report_requests",
+    "legacyUnusedByPipeline": ["souvera_reports"]
+  },
+  "souvera_report_requests": {
+    "columns": [
+      { "name": "id", "type": "uuid", "role": "pk, storage path segment" },
+      { "name": "user_id", "type": "uuid", "role": "owner, storage path prefix" },
+      { "name": "country_id", "type": "uuid", "role": "fk souvera_countries" },
+      { "name": "iso3", "type": "text", "role": "country code" },
+      { "name": "report_type", "type": "text", "role": "legacy product label" },
+      { "name": "status", "type": "souvera_report_request_status", "role": "pipeline state" },
+      { "name": "query_text", "type": "text", "role": "ai custom query" },
+      { "name": "file_path", "type": "text", "role": "storage object path" },
+      { "name": "download_url", "type": "text", "role": "cached signed url" },
+      { "name": "error_message", "type": "text", "role": "failure" },
+      { "name": "metadata", "type": "jsonb", "role": "sectorKey etc" },
+      { "name": "sector_key", "type": "text", "role": "sector deep dive key" },
+      { "name": "template_id", "type": "text", "role": "canonical template id" },
+      { "name": "report_filename", "type": "text", "role": "download filename" },
+      { "name": "generator_used", "type": "text", "role": "generator audit" },
+      { "name": "generated_at_utc", "type": "timestamptz", "role": "pdf generated utc" },
+      { "name": "created_at", "type": "timestamptz", "role": "created" },
+      { "name": "updated_at", "type": "timestamptz", "role": "updated" },
+      { "name": "completed_at", "type": "timestamptz", "role": "completed" }
+    ],
+    "migrations": [
+      "infra/supabase/migrations/create-report-requests-table.sql",
+      "infra/supabase/migrations/create-reports-storage-bucket.sql",
+      "infra/supabase/migrations/create-report-quota-tables.sql",
+      "infra/supabase/migrations/add-report-requests-sector-key.sql",
+      "infra/supabase/migrations/add-report-requests-template-metadata.sql"
+    ]
+  },
+  "caching": {
+    "completedRequestShortCircuit": true,
+    "storagePathPerRequestId": true,
+    "crossRequestObjectReuse": false,
+    "signedUrlStoredOnRow": true,
+    "signedUrlExpiryDays": 7
+  }
+}

@@ -6,7 +6,7 @@
 
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { createServerClient } from '@/lib/supabase/server';
+import { verifyAdminAccess } from '@/lib/admin/verify-admin';
 import { 
   Database, 
   Settings, 
@@ -17,32 +17,17 @@ import {
   Activity,
   Home,
   FileText,
-  ClipboardList
+  ClipboardList,
+  Newspaper,
+  Scale,
 } from 'lucide-react';
-
-async function verifyAdminAccess(): Promise<boolean> {
-  try {
-    const supabase = await createServerClient();
-    const { data: { user }, error } = await supabase.auth.getUser();
-    
-    if (error || !user) {
-      return false;
-    }
-
-    // For MVP, allow any authenticated user to access admin
-    // In production, check for admin role
-    return true;
-  } catch {
-    return false;
-  }
-}
 
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
 export default async function AdminLayout({ children }: AdminLayoutProps) {
-  const isAdmin = await verifyAdminAccess();
+  const { isAdmin } = await verifyAdminAccess();
   
   if (!isAdmin) {
     redirect('/login?redirect=/admin/data/sources');
@@ -53,8 +38,15 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
     { href: '/admin/data/indicators', label: 'Indicators', icon: BarChart3 },
     { href: '/admin/data/upload', label: 'Upload Data', icon: FileText },
     { href: '/admin/data/ingestion', label: 'Ingestion', icon: Upload },
+    { href: '/admin/data/news-pulse', label: 'News Pulse', icon: Newspaper },
+    { href: '/admin/data/reports', label: 'Reports Reset', icon: ClipboardList },
     { href: '/admin/data/quality', label: 'Data Quality', icon: AlertTriangle },
     { href: '/admin/data/crosswalks', label: 'Crosswalks', icon: Globe },
+  ];
+
+  const contentNavItems = [
+    { href: '/admin/content/news', label: 'Curated News', icon: Newspaper },
+    { href: '/admin/content/trade-policy', label: 'Trade Policy', icon: Scale },
   ];
 
   return (
@@ -108,6 +100,20 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
                   className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-colors group"
                 >
                   <item.icon className="w-5 h-5 text-zinc-500 group-hover:text-indigo-400 transition-colors" />
+                  <span className="text-sm font-medium">{item.label}</span>
+                </Link>
+              ))}
+
+              <p className="px-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-4 mt-8">
+                Content
+              </p>
+              {contentNavItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-colors group"
+                >
+                  <item.icon className="w-5 h-5 text-zinc-500 group-hover:text-blue-400 transition-colors" />
                   <span className="text-sm font-medium">{item.label}</span>
                 </Link>
               ))}

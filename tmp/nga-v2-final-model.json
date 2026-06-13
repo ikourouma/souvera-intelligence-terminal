@@ -1,0 +1,759 @@
+{
+  "renderModel": "CountryProfileV2Model",
+  "payload": {
+    "country": {
+      "name": "Nigeria",
+      "iso3": "NGA",
+      "iso2": "NG",
+      "region": "Africa",
+      "capital": "Abuja",
+      "currencyCode": "NGN"
+    },
+    "generatedAt": "June 3, 2026",
+    "freshnessAt": "2026-05-26T19:20:29.1+00:00",
+    "summary": "Nigeria is profiled in Souvera's institutional intelligence coverage. FDI net inflows $4.5B (2024). GDP growth 3.3% (2024). GDP growth is tracking at 3.3% (2024). Technology & Software leads the sector scorecard by attractiveness. This document synthesizes macro indicators, sector positioning, market-access frameworks, and bilateral trade data for professional due diligence.",
+    "metrics": [
+      {
+        "label": "GDP (current USD)",
+        "value": "$477.4B"
+      },
+      {
+        "label": "GDP growth",
+        "value": "3.3%"
+      },
+      {
+        "label": "Population",
+        "value": "223.8M"
+      },
+      {
+        "label": "FDI net inflows",
+        "value": "$4.5B"
+      },
+      {
+        "label": "Inflation (CPI)",
+        "value": "18.8%"
+      },
+      {
+        "label": "FX rate (local/USD)",
+        "value": "1547.50"
+      }
+    ],
+    "signalScan": {
+      "badge": "Emerging · Reform momentum",
+      "bullets": [
+        "FDI net inflows $4.5B (2024)",
+        "GDP growth 3.3% (2024)"
+      ]
+    },
+    "sectors": [
+      {
+        "label": "Technology & Software",
+        "strength": 82,
+        "growth": 88,
+        "attractiveness": 91,
+        "teaser": "Nigeria leads Africa in tech innovation with 400+ funded startups, $2B+ VC investment, and global success stories like Flutterwave, Paystack, and Andela."
+      },
+      {
+        "label": "Agriculture & Food Processing",
+        "strength": 74,
+        "growth": 68,
+        "attractiveness": 79,
+        "teaser": "Nigeria is Africa's largest agricultural producer, cultivating 70M+ hectares with key exports including cocoa, cashew, sesame, and cassava. $90B sector employing 35% of the workforce."
+      },
+      {
+        "label": "Energy & Power",
+        "strength": 76,
+        "growth": 72,
+        "attractiveness": 85,
+        "teaser": "Nigeria holds Africa's largest natural gas reserves (209 TCF), 37B barrels of proven oil reserves, and rapidly expanding renewable energy capacity (solar, hydro)."
+      },
+      {
+        "label": "Manufacturing & Textiles",
+        "strength": 68,
+        "growth": 64,
+        "attractiveness": 73,
+        "teaser": "Nigeria's manufacturing sector produces $50B+ in annual output across cement, steel, textiles, automotive, and consumer goods. Growing export capacity to U.S. and regional markets."
+      },
+      {
+        "label": "Mining & Natural Resources",
+        "strength": 58,
+        "growth": 76,
+        "attractiveness": 88,
+        "teaser": "Nigeria holds untapped reserves of lithium, tin, coal, gold, and rare earth elements. $2B mining sector with high growth potential for battery minerals and strategic metals."
+      }
+    ],
+    "marketAccess": [
+      {
+        "label": "AGOA",
+        "statusLabel": "Unverified (Needs review)",
+        "description": "AGOA eligibility for Nigeria requires reconciliation against the current USTR beneficiary country list before this report asserts Suspended/Eligible status."
+      },
+      {
+        "label": "AfCFTA",
+        "statusLabel": "Active",
+        "description": "African Continental Free Trade Area — 54 member states; phased tariff elimination per AfCFTA agreement."
+      },
+      {
+        "label": "ECOWAS",
+        "statusLabel": "Member",
+        "description": "Economic Community of West African States — regional trade and investment protocols among 15 member states."
+      }
+    ],
+    "markets": {
+      "asOfDate": "2026-05-26T19:20:29.1+00:00"
+    },
+    "tradeSummary": {
+      "asOfYear": 2024,
+      "exportsUsd": "$38.2B",
+      "importsUsd": "$24.5B",
+      "topPartners": [
+        {
+          "country": "China",
+          "sharePct": 34
+        },
+        {
+          "country": "United States",
+          "sharePct": 13
+        },
+        {
+          "country": "European Union",
+          "sharePct": 18
+        }
+      ]
+    },
+    "sources": "World Bank, IMF, UN Comtrade, Souvera Curated Intelligence",
+    "sourceMeta": {
+      "defaultSource": "World Bank, IMF, UN Comtrade, Souvera Curated Intelligence",
+      "metrics": {
+        "gdp_current_usd": {
+          "source_name": "World Bank / Souvera country_lite_v",
+          "as_of": "2024",
+          "retrieved_at": "2026-05-26T19:20:29.1+00:00"
+        },
+        "gdp_growth_pct": {
+          "source_name": "World Bank / Souvera country_lite_v",
+          "as_of": "2024"
+        },
+        "fdi_net_inflows_usd": {
+          "source_name": "World Bank / Souvera country_professional_v",
+          "as_of": "2024"
+        },
+        "inflation_cpi_pct": {
+          "source_name": "World Bank / Souvera country_professional_v",
+          "as_of": "2024"
+        }
+      }
+    },
+    "economyYears": [
+      {
+        "year": 2019,
+        "gdp_current_usd": 598586817819.073,
+        "gdp_growth_pct": -6.36889840510109
+      },
+      {
+        "year": 2020,
+        "gdp_current_usd": 609147716972.859,
+        "gdp_growth_pct": 1.10925253938163
+      },
+      {
+        "year": 2021,
+        "gdp_current_usd": 646950257577.814,
+        "gdp_growth_pct": 4.31882949523192
+      },
+      {
+        "year": 2022,
+        "gdp_current_usd": 487387801880.597,
+        "gdp_growth_pct": 3.32684556421316
+      },
+      {
+        "year": 2023,
+        "gdp_current_usd": 252261880141.151,
+        "gdp_growth_pct": 4.06236408888319
+      },
+      {
+        "year": 2024,
+        "gdp_current_usd": 477380000000,
+        "gdp_growth_pct": 3.25,
+        "fdi_net_inflows_usd": 4500000000,
+        "inflation_cpi_pct": 18.75,
+        "fx_to_usd": 1547.5
+      }
+    ],
+    "sections": {
+      "glossary": {
+        "intro": "This glossary defines key institutions, economic indicators, and trade programs referenced in this Country Profile.",
+        "paragraphs": [
+          "Nigeria sits within a complex landscape of multilateral institutions, regional trade blocs, and development finance channels. This report assumes no prior familiarity with local acronyms or global development architecture — every term below is explained for first-time investors and board-level readers.",
+          "Understanding these definitions helps interpret macro data, market-access status, and risk mitigation options in the sections that follow. Africa-focused frameworks (AGOA, AfCFTA, ECOWAS) appear throughout this profile. Souvera Intelligence Terminal surfaces live status for each framework in the country terminal Market Access tab."
+        ],
+        "terms": [
+          {
+            "term": "IMF (International Monetary Fund)",
+            "definition": "A global institution that monitors economic stability, provides policy advice, and lends to countries facing balance-of-payments crises. IMF forecasts and program reviews are widely cited in sovereign and corporate credit analysis."
+          },
+          {
+            "term": "World Bank",
+            "definition": "Multilateral development bank focused on poverty reduction and infrastructure. Its Doing Business successor indicators, country economic updates, and project pipelines inform sector entry timing."
+          },
+          {
+            "term": "GDP (Gross Domestic Product)",
+            "definition": "The total value of goods and services produced within a country in a given period. GDP scale indicates market size; GDP growth signals expansion or contraction of economic activity."
+          },
+          {
+            "term": "FDI (Foreign Direct Investment)",
+            "definition": "Cross-border investment where a foreign entity establishes lasting interest in a local enterprise (greenfield, joint venture, or acquisition). FDI inflows signal international confidence in a market."
+          },
+          {
+            "term": "CPI / Inflation",
+            "definition": "Consumer Price Index measures average price changes for household goods and services. Elevated inflation erodes purchasing power and can pressure interest rates and currency stability."
+          },
+          {
+            "term": "FX / Exchange Rate",
+            "definition": "The price of one currency in terms of another (e.g., local currency per U.S. dollar). Exchange-rate movements affect import costs, export competitiveness, and the dollar value of local earnings."
+          },
+          {
+            "term": "AGOA (African Growth and Opportunity Act)",
+            "definition": "U.S. trade preference program granting eligible African countries duty-free access for thousands of product lines. Eligibility is subject to annual U.S. Presidential review and can be restored or suspended."
+          },
+          {
+            "term": "AfCFTA (African Continental Free Trade Area)",
+            "definition": "Pan-African agreement creating a single market of 54 countries and 1.3 billion consumers, with phased tariff elimination. Enables regional manufacturing hubs and cross-border supply chains."
+          },
+          {
+            "term": "ECOWAS (Economic Community of West African States)",
+            "definition": "Regional bloc of 15 West African nations promoting free movement of goods, services, and people. Membership provides duty-free regional trade and harmonized investment protocols."
+          },
+          {
+            "term": "CBI (Caribbean Basin Initiative)",
+            "definition": "U.S. preferential trade program for Caribbean Basin countries, allowing duty-free entry for many goods exported to the United States when eligibility criteria are met."
+          },
+          {
+            "term": "CARICOM (Caribbean Community)",
+            "definition": "Political and economic union of Caribbean states. The CSME (Caribbean Single Market and Economy) component supports regional labor mobility and services trade."
+          },
+          {
+            "term": "MIGA (Multilateral Investment Guarantee Agency)",
+            "definition": "World Bank Group agency providing political risk insurance against expropriation, currency inconvertibility, and breach of contract — commonly used to de-risk greenfield FDI."
+          },
+          {
+            "term": "DFC (U.S. International Development Finance Corporation)",
+            "definition": "U.S. government development finance institution offering loans, equity, and political risk insurance for projects in emerging markets, often alongside private capital."
+          },
+          {
+            "term": "Afreximbank (African Export-Import Bank)",
+            "definition": "Pan-African multilateral bank specializing in trade finance, export development, and intra-African trade facilitation. Key counterparty for AfCFTA corridor transactions."
+          },
+          {
+            "term": "Special Economic Zone (SEZ)",
+            "definition": "Designated geographic area offering tax holidays, streamlined customs, and repatriation guarantees to attract manufacturing and export-oriented investment."
+          },
+          {
+            "term": "Joint Venture (JV)",
+            "definition": "Partnership between a foreign investor and a local company sharing ownership, capital, and operational responsibility. JVs accelerate market access and navigate regulatory complexity."
+          },
+          {
+            "term": "Political Risk Insurance (PRI)",
+            "definition": "Coverage protecting investors against government actions such as expropriation, war, civil disturbance, and currency transfer restrictions. Offered by MIGA, DFC, and private insurers."
+          },
+          {
+            "term": "Letter of Credit (L/C)",
+            "definition": "Bank guarantee that a buyer's payment to a seller will be received on time and for the correct amount. Standard instrument in commodity and cross-border goods trade."
+          },
+          {
+            "term": "Souvera Signal Scan",
+            "definition": "Souvera's proprietary synthesis of macro momentum, FDI trends, inflation trajectory, and sector leadership — producing an actionable investment-window badge updated with terminal data."
+          },
+          {
+            "term": "S/G/A Scorecard",
+            "definition": "Souvera sector scoring framework: Strength (current competitive position), Growth (expansion trajectory), and Attractiveness (investment appeal). Scores run 0–100; higher indicates stronger positioning."
+          }
+        ]
+      },
+      "souvera": {
+        "intro": "This Country Profile is produced by Souvera Intelligence Terminal — the institutional research platform for Africa and Caribbean market intelligence.",
+        "paragraphs": [
+          "Souvera synthesizes macro data, sector scorecards, bilateral trade flows, market-access frameworks (AGOA, AfCFTA, CBI, CARICOM), and curated editorial intelligence into a single decision-grade view. Unlike static annual country briefs, Souvera profiles refresh from live data foundations and signal models as conditions evolve.",
+          "Subscribers use the terminal for country comparison, trade policy tracking, sector deep-dives, and on-demand PDF reports. This document mirrors the seven intelligence tabs — Overview, Economy, Sectors, Opportunity, Risk, Trade, and Reports — packaged for board packs, investment committees, and due diligence workflows."
+        ],
+        "bullets": [
+          "Live macro indicators with freshness timestamps",
+          "Souvera Signal Scan — proprietary momentum synthesis",
+          "Market access registry with AGOA / AfCFTA / regional status",
+          "Sector scorecards (Strength · Growth · Attractiveness)",
+          "Exportable institutional PDFs with quota-managed AI custom briefs"
+        ],
+        "capabilities": [
+          "Country Intelligence Map — 50+ markets with tiered depth",
+          "Trade Policy Hub — AGOA, AfCFTA, CBI legislative tracking",
+          "Insights Rankings — comparative market scoring",
+          "Reports — template PDFs + AI custom intelligence briefs"
+        ]
+      },
+      "geography": {
+        "intro": "Nigeria occupies a strategic position within Africa economic geography — a market profile designed for investors who may not yet know the country's location, scale, or demographic advantage.",
+        "paragraphs": [
+          "Nigeria is part of Sub-Saharan Africa's frontier and emerging-market corridor, where AfCFTA continental integration is reshaping supply chains and manufacturing location decisions. The country connects West, East, or Central African trade routes depending on its coastal and land-border profile.",
+          "The administrative capital is Abuja, which hosts core policy institutions, while commercial hubs often concentrate financial services, logistics, and technology clusters. Understanding this urban hierarchy helps investors site operations, hire talent, and engage regulators.",
+          "With a population of 223.8M and economic output of $477.4B, Nigeria offers scale sufficient for consumer markets, labor-intensive manufacturing, and services expansion — subject to infrastructure and market-access conditions detailed later in this profile."
+        ],
+        "facts": [
+          {
+            "label": "Region",
+            "value": "Africa",
+            "note": "Sub-Saharan Africa — frontier and emerging market corridor with AfCFTA continental integration."
+          },
+          {
+            "label": "Capital",
+            "value": "Abuja",
+            "note": "Administrative and policy center"
+          },
+          {
+            "label": "Currency",
+            "value": "NGN",
+            "note": "Official unit of account"
+          },
+          {
+            "label": "ISO Codes",
+            "value": "NGA / NG",
+            "note": "International identifiers"
+          },
+          {
+            "label": "Economic Scale",
+            "value": "$477B+",
+            "note": "GDP (2024) — West Africa's largest economy, representing 24% of regional output"
+          },
+          {
+            "label": "Population",
+            "value": "223.8M",
+            "note": "Population (latest) — Africa's most populous nation with median age of 19.7 years"
+          },
+          {
+            "label": "Tech Hub",
+            "value": "Lagos",
+            "note": "Fintech Capital — 400+ funded startups, $2B+ VC investment"
+          },
+          {
+            "label": "Growth Leader",
+            "value": "3.3%",
+            "note": "GDP Growth (2024) — Post-reform macro trajectory per structured series"
+          }
+        ]
+      },
+      "introduction": {
+        "headline": "Africa's Largest Economy",
+        "intro": "Nigeria is West Africa's economic powerhouse and Africa's most populous nation, with a rapidly growing technology ecosystem. Post-2023 reforms have unlocked sustained economic momentum, positioning it as a premier investment destination on the continent.",
+        "paragraphs": [
+          "Nigeria is West Africa's economic powerhouse and Africa's most populous nation, with a rapidly growing technology ecosystem. Post-2023 reforms have unlocked sustained economic momentum, positioning it as a premier investment destination on the continent.",
+          "Nigeria entered sustained growth following 2023 currency reforms. Technology sector expansion and agricultural modernization are driving GDP acceleration, with inflation declining from peak levels."
+        ],
+        "bullets": [
+          "1. Economic Momentum: Macro momentum is anchored to the latest structured series (2024): GDP growth 3.3%, FDI $4.5B, inflation 18.8%. Technology and agricultural modernization remain key structural drivers.",
+          "2. Policy Stability: The Tinubu administration's economic reforms—currency unification, fuel subsidy removal, and tax reforms—have passed the volatility phase. Markets have adjusted, and policy continuity through 2027 is highly probable.",
+          "3. Demographic Dividend: Nigeria's youth bulge (median age 19.7 years) is maturing into a tech-savvy consumer class. Mobile internet penetration exceeds 75%, and digital payment adoption is accelerating at 35% annually."
+        ]
+      },
+      "political": {
+        "intro": "Political environment assessment for Nigeria — governance quality, institutional stability, and security conditions that affect investment timelines and capital repatriation.",
+        "paragraphs": [
+          "Nigeria's political landscape spans governance, security, corruption. For international investors, political risk is not abstract: it determines contract enforcement, license continuity, tax policy stability, and the security of personnel and assets on the ground.",
+          "Governance & Stability (MODERATE): Nigeria's democracy is mature (25 years, 7 peaceful transitions), but challenges persist: 2027 presidential election watchpoint, security issues (Boko Haram, banditry), corruption rank 145/180. Souvera monitors election cycles, security hotspots, and governance indicators alongside macro data because political shocks often precede currency and FDI volatility.",
+          "Private sector resilience: Nigerian companies (Dangote, BUA) have operated through multiple volatility cycles"
+        ],
+        "items": [
+          {
+            "title": "Governance & Stability",
+            "severity": "MODERATE",
+            "body": "Nigeria's democracy is mature (25 years, 7 peaceful transitions), but challenges persist: 2027 presidential election watchpoint, security issues (Boko Haram, banditry), corruption rank 145/180.",
+            "mitigants": [
+              "Strong institutions (CBN independence)",
+              "IMF/World Bank oversight"
+            ]
+          }
+        ]
+      },
+      "economic": {
+        "intro": "Economic overview for Nigeria — macro scale, growth trajectory, and price stability based on World Bank, IMF, CBN.",
+        "paragraphs": [
+          "This section summarizes Nigeria's macroeconomic performance using official and multilateral data sources (World Bank, IMF, CBN). Indicators include GDP scale and growth, inflation, foreign direct investment, population, and exchange-rate dynamics — the core variables that drive sovereign risk pricing and corporate valuation multiples.",
+          "Reflecting ongoing macro adjustment post-2023 currency reform. Investors should read headline metrics alongside the multi-year trajectory in the indicator panel — single-year snapshots can mislead when reforms or currency moves create base effects.",
+          "Nigeria's GDP moved from $598.6B (2019) to $477.4B (2024), a 20% decrease over the series window. The 2023 currency reform initially compressed GDP in dollar terms; the 2024 level reflects technology sector momentum and oil production recovery per structured macro data.",
+          "Growth reached 3.3% in 2024 — the strongest performance since 2014, driven by technology (+15% YoY), agriculture (+4.2% YoY), and services (+7.1% YoY). Upgrade to Business for GDP growth forecasts.",
+          "The naira depreciated following the 2023 exchange rate unification. Volatility has stabilized since Q4 2024 under a managed float policy."
+        ],
+        "indicatorBullets": [
+          "GDP growth: -6.4% (2019) → 3.3% (2024)",
+          "GDP scale: $599B → $477B over 6 years",
+          "Inflation 18.8% (2024) — declining from 2023 peak"
+        ]
+      },
+      "tradeAndSectors": {
+        "intro": "Trade and sector analysis for Nigeria — how the country connects to global and regional markets, and where export-oriented investment can capture preferential access.",
+        "paragraphs": [
+          "Nigeria recorded approximately $38.2B in goods exports and $24.5B in imports in the latest Souvera trade registry refresh. Bilateral flows, AGOA restoration opportunity, regional integration. Bilateral concentration matters: top partners include China (34%), United States (13%), European Union (18%) shape currency earnings, supply-chain dependence, and geopolitical exposure.",
+          "Trade performance is only half the story. Preferential frameworks — AGOA, AfCFTA, ECOWAS, CBI, or CARICOM — determine whether manufactured and agricultural exports enter major markets at reduced or zero duty. Investors should align product mix and origin rules with active agreements.",
+          "Sector scorecards below rank Strength, Growth, and Attractiveness (S/G/A) for each vertical Souvera tracks. These scores synthesize terminal data, editorial intelligence, and comparative regional benchmarks — helping investors prioritize sectors before committing diligence resources."
+        ],
+        "regionalFrameworkIntro": "Regional trade frameworks define duty treatment, rules of origin, and dispute mechanisms for cross-border goods and services. Each agreement below includes a plain-language summary of what it means for exporters and manufacturers seeking market access.",
+        "sectorScorecardIntro": "The Souvera sector scorecard ranks verticals on Strength (current competitive position), Growth (expansion trajectory), and Attractiveness (investment appeal). Scores run 0–100. Higher scores indicate stronger positioning relative to regional peers. Use this section to shortlist sectors before deep due diligence.",
+        "marketAccessIntro": "Market access status tracks live eligibility for preferential trade programs — including suspensions, restorations under review, and active membership. Status changes can unlock or close export corridors worth billions in duty savings; Souvera updates this registry as policy shifts.",
+        "tradeFinanceIntro": "Trade finance instruments bridge the gap between shipment and payment — essential when counterparties span multiple jurisdictions. The channels below are commonly used for AfCFTA, ECOWAS, and bilateral export corridors.",
+        "tradeFinanceBullets": [
+          "Afreximbank TRADAR-style supply chain finance for AfCFTA corridors",
+          "DFC/MIGA political risk coverage for cross-border manufacturing exports",
+          "ECOWAS regional L/C facilitation via partner banks"
+        ],
+        "regionalAgreements": [
+          {
+            "name": "AGOA",
+            "description": "U.S. preferential market access · eligibility subject to annual Presidential review The African Growth and Opportunity Act allows qualifying exports to enter the United States duty-free when a country is certified eligible — subject to annual U.S. Presidential review."
+          },
+          {
+            "name": "AfCFTA",
+            "description": "54 nations · 1.3B consumers · 90% tariff elimination by 2030 The African Continental Free Trade Area creates a single market of 54 countries, phasing out tariffs on 90% of goods and enabling regional manufacturing and distribution strategies."
+          },
+          {
+            "name": "ECOWAS",
+            "description": "15 West African nations · 350M people · duty-free regional trade The Economic Community of West African States provides duty-free trade among 15 member nations and harmonized investment protocols for West African operations."
+          }
+        ]
+      },
+      "opportunity": {
+        "intro": "Investment opportunity assessment for Nigeria — multi-sector opportunities at structural inflection point.",
+        "paragraphs": [
+          "Nigeria offers multiple entry channels across technology, agriculture, infrastructure, energy, and services. The pillars below summarize where patient capital has the highest structural tailwinds — based on Souvera terminal intelligence, not generic emerging-market templates.",
+          "Each opportunity area includes specific sub-themes (fintech, value-add agriculture, power, logistics) with quantified market gaps where available. Investors should cross-reference Risk Assessment and Market Access sections before sizing commitments."
+        ],
+        "lead": "Nigeria represents a major economy at a structural inflection point, offering multi-sector investment opportunities across technology, agriculture, infrastructure, and financial services.",
+        "entryPointsIntro": "Investment entry points describe how foreign capital typically enters the market — through local partnerships, private equity, greenfield development, or public markets. Each channel below is explained for readers unfamiliar with local capital markets or regulatory pathways.",
+        "pillars": [
+          {
+            "title": "Technology Sector",
+            "subtitle": "Africa's Leading Tech Hub",
+            "narrative": "Nigeria's technology ecosystem has reached critical mass, with Lagos emerging as Africa's leading tech hub. Fintech transaction volumes are large and growing; verify latest figures against sector sources before sizing exposure.",
+            "bullets": [
+              "Fintech infrastructure: Payment gateways, lending platforms, digital banking",
+              "AgriTech: Supply chain digitization, farmer financing, logistics optimization",
+              "EdTech: Online learning platforms serving 45 million school-age population",
+              "E-commerce: Last-mile delivery, warehousing, B2B marketplaces"
+            ]
+          },
+          {
+            "title": "Agricultural Value-Add",
+            "subtitle": "$10B Import Substitution Play",
+            "narrative": "Nigeria is Africa's largest agricultural producer but imports $10 billion in processed food annually. Massive opportunity in value-added processing and export-oriented agriculture.",
+            "bullets": [
+              "Cassava processing: 60M tons/year production, minimal value-add exports",
+              "Cocoa value chain: 3rd largest producer, 70% exported raw",
+              "Rice milling: Closing $2B import gap",
+              "Cold chain infrastructure: 95% of post-harvest losses preventable"
+            ]
+          },
+          {
+            "title": "Infrastructure Development",
+            "subtitle": "Multi-year infrastructure pipeline",
+            "narrative": "A multi-year infrastructure pipeline spans power, transport, and housing — driven by urbanization. Treat headline pipeline totals as estimates until tied to structured project data.",
+            "bullets": [
+              "Power generation: Targeting 25GW by 2030",
+              "Port modernization: Lekki Deep Sea Port Phase 2 expansion",
+              "Rail infrastructure: Lagos-Kano standard gauge railway",
+              "Housing: 20M unit deficit, urbanization at 3.5%/year"
+            ]
+          }
+        ],
+        "entryPoints": [
+          {
+            "title": "Joint Ventures",
+            "body": "Partner with Nigerian conglomerates like Dangote, BUA, Flour Mills for established market access and operational expertise A joint venture pairs your capital and expertise with a local partner who holds licenses, land access, distribution networks, and government relationships. For first-time entrants, JVs reduce regulatory friction and accelerate time-to-revenue compared to wholly owned subsidiaries."
+          },
+          {
+            "title": "Private Equity",
+            "body": "Mid-market tech companies at Series B-C stage with proven business models and regional expansion potential Private equity invests in established companies with proven revenue — typically Series B through pre-IPO — rather than building operations from scratch. This channel suits investors seeking growth equity exposure without day-to-day operational burden."
+          },
+          {
+            "title": "Greenfield Projects",
+            "body": "Special Economic Zones offering tax holidays and repatriation guarantees for new manufacturing/assembly operations Greenfield investment means building new facilities on undeveloped sites — factories, warehouses, or processing plants. Special Economic Zones often bundle tax incentives, customs clearance, and repatriation guarantees for greenfield exporters."
+          },
+          {
+            "title": "Listed Equities",
+            "body": "Nigerian Stock Exchange (NSE) provides liquidity for blue-chip exposure across banking, consumer goods, and industrial sectors Public markets provide liquid exposure to blue-chip local companies. Exchange-listed equities suit portfolio investors who want tradable positions rather than illiquid private stakes."
+          }
+        ],
+        "regionalAdvantagesIntro": "Regional advantages quantify access beyond the domestic market — neighboring trade blocs, U.S. preference programs, and workforce scale. These advantages compound domestic returns when export-oriented business models are part of the investment thesis.",
+        "regionalAdvantages": [
+          {
+            "title": "ECOWAS Market Access (350M)",
+            "body": "West African Economic Community. 350M Regional membership provides duty-free trade with neighboring states and harmonized investment protocols — critical for distribution and regional services plays."
+          },
+          {
+            "title": "AfCFTA Access (1.3B)",
+            "body": "Duty-free African market. 1.3B AfCFTA phases out tariffs on 90% of goods across 54 African countries by 2030, enabling regional manufacturing hubs and pan-African brands."
+          },
+          {
+            "title": "U.S. Market Access (AGOA)",
+            "body": "Restoration opportunity under review. AGOA This regional positioning extends the addressable market beyond domestic borders and should be modeled in export revenue scenarios."
+          },
+          {
+            "title": "Annual Graduates (200K+)",
+            "body": "English-speaking skilled workforce. 200K+ English-speaking graduates support BPO, tech, and professional services outsourcing at competitive cost bases versus North America and Europe."
+          }
+        ]
+      },
+      "risk": {
+        "intro": "Risk assessment for Nigeria — balanced assessment with structural reforms and mitigation frameworks.",
+        "paragraphs": [
+          "Institutional investors require explicit risk taxonomy: macro (currency, inflation, debt), political (governance, security), operational (power, logistics, talent), and sector-specific exposures. Nigeria's profile below follows this structure with severity ratings and mitigants for each factor.",
+          "No emerging market is risk-free. The objective is risk-adjusted return — identifying where mitigation tools (insurance, local partners, phased deployment, hard-currency revenue) bring exposures within acceptable bounds for your mandate."
+        ],
+        "lead": "Nigeria's investment landscape requires a balanced assessment of macro, political, and operational risks. Risks are real but manageable through strategic partnerships and phased capital deployment.",
+        "categories": [
+          {
+            "title": "Macro Risks",
+            "items": [
+              {
+                "title": "Currency Volatility",
+                "severity": "MODERATE",
+                "body": "Naira depreciated post-2023 unification; FX at 1547.50 (2024) per structured series. Volatility has moderated under managed float policy. CBN reserve position should be verified against latest official releases.",
+                "mitigants": [
+                  "Hedging instruments available",
+                  "Hard currency revenue options"
+                ]
+              },
+              {
+                "title": "Inflation",
+                "severity": "MODERATE-HIGH",
+                "body": "Inflation at 18.8% (2024) remains elevated but declining from the 2023 peak. CBN policy rates should be verified against latest official releases.",
+                "mitigants": [
+                  "Monetary tightening",
+                  "Agricultural reforms underway"
+                ]
+              },
+              {
+                "title": "Debt Sustainability",
+                "severity": "LOW-MODERATE",
+                "body": "Debt sustainability metrics should be verified against IMF/World Bank sovereign updates; treat debt-to-GDP ratios as estimates until tied to structured fiscal series.",
+                "mitigants": [
+                  "Below IMF threshold",
+                  "Fiscal reforms improving revenue"
+                ]
+              }
+            ]
+          },
+          {
+            "title": "Political Risks",
+            "items": [
+              {
+                "title": "Governance & Stability",
+                "severity": "MODERATE",
+                "body": "Nigeria's democracy is mature (25 years, 7 peaceful transitions), but challenges persist: 2027 presidential election watchpoint, security issues (Boko Haram, banditry), corruption rank 145/180.",
+                "mitigants": [
+                  "Strong institutions (CBN independence)",
+                  "IMF/World Bank oversight"
+                ]
+              }
+            ]
+          },
+          {
+            "title": "Operational Risks",
+            "items": [
+              {
+                "title": "Power Supply",
+                "severity": "HIGH IMPACT",
+                "body": "Grid instability requires self-generation (diesel/solar), adding 15-25% to operating costs. Lagos/Abuja grids more reliable than national grid.",
+                "mitigants": [
+                  "Solar/diesel backup standard",
+                  "Power reforms underway"
+                ]
+              },
+              {
+                "title": "Logistics",
+                "severity": "MODERATE",
+                "body": "Port congestion averages 10-14 days clearance. Road quality variable; Lagos-Abuja corridor is well-maintained.",
+                "mitigants": [
+                  "Lekki Deep Sea Port operational",
+                  "Infrastructure improvements ongoing"
+                ]
+              },
+              {
+                "title": "Talent Retention",
+                "severity": "MODERATE",
+                "body": "Brain drain to Europe/U.S./Canada impacts skilled workforce availability, particularly in tech and professional services.",
+                "mitigants": [
+                  "Competitive salaries retain talent",
+                  "Equity participation effective"
+                ]
+              }
+            ]
+          }
+        ],
+        "mitigationIntro": "Mitigation strategies translate risk awareness into actionable frameworks. Each strategy below describes how institutional investors typically de-risk capital deployment — with specific instruments, partners, and sequencing recommendations. These are standard practices among DFIs, private equity sponsors, and multinational corporates operating in frontier and emerging markets.",
+        "mitigationStrategies": [
+          {
+            "title": "Local Partnerships",
+            "body": "Partner with established Nigerian conglomerates (Dangote, BUA, Flour Mills) for political relationships, supply chains, and operational expertise. Select partners with audited financials, export track records, and government relations depth. Structure governance rights, exit clauses, and anti-corruption covenants in shareholder agreements before capital injection."
+          },
+          {
+            "title": "Insurance Products",
+            "body": "Utilize political risk insurance, currency hedging, and credit insurance from MIGA, DFC, Afreximbank, or private insurers to protect capital. MIGA and DFC cover expropriation and currency inconvertibility; private insurers offer contract frustration and trade credit coverage. Premium costs typically run 1–3% of insured value — material but often required by lender covenants."
+          },
+          {
+            "title": "Revenue Diversification",
+            "body": "Balance domestic and export markets to hedge currency risk. Hard currency revenue streams (exports, diaspora) offset naira volatility. Model scenarios where 30–50% of revenue is hard-currency (exports, offshore clients, diaspora remittance-linked demand) to offset local-currency depreciation on operating costs and dividends."
+          },
+          {
+            "title": "Phased Capital Deployment",
+            "body": "De-risk through pilot phases: Start with small-scale operations, validate business model, then scale based on demonstrated ROI. Phase 1: pilot with capped exposure and KPI gates. Phase 2: scale on proven unit economics. Phase 3: full deployment with institutional debt or PE co-investment. This sequencing limits downside while preserving optionality."
+          }
+        ],
+        "closingSummary": "Nigeria's risk-adjusted returns remain compelling for investors with 5-7 year horizons and operational flexibility. The combination of $477.4B economy scale (2024), structural reforms, and proven risk mitigation frameworks creates an attractive risk-reward profile for patient capital."
+      },
+      "signalAndDifferentiation": {
+        "intro": "Souvera Signal Scan synthesizes macro momentum, FDI, inflation, and sector leadership into an actionable badge.",
+        "paragraphs": [
+          "Investment Window: Institutional investors who enter now—while inflation is declining and FDI is ramping—stand to capture outsized returns as the market matures within 24-36 months.",
+          "Differentiators vs static country briefs: live data refresh, trade policy legislative tracking, sector S/G/A scorecards, and quota-managed AI custom briefs grounded in this same intelligence foundation."
+        ],
+        "badge": "Emerging · Reform momentum",
+        "signalBullets": [
+          "FDI net inflows $4.5B (2024)",
+          "GDP growth 3.3% (2024)"
+        ],
+        "differentiators": [
+          "Live Signal Scan — updated with macro and sector inputs, not annual PDF refresh cycles",
+          "Market Access Registry — AGOA restoration/suspension, AfCFTA, ECOWAS, CBI, CARICOM in one view",
+          "Trade Policy Intelligence — legislative tracker and export opportunity mapping",
+          "Terminal-to-PDF parity — this report mirrors the seven country intelligence tabs",
+          "AI Custom Briefs — query-driven reports grounded in Souvera data (Business+ quota)"
+        ]
+      }
+    }
+  },
+  "canonical": {
+    "asOf": {
+      "macroYear": 2024,
+      "tradeYear": 2024,
+      "marketsDate": "2026-05-26T19:20:29.1+00:00",
+      "policyVerifiedAt": "2026-01-15"
+    },
+    "canonicalMetrics": {
+      "gdpCurrentUsd": 477380000000,
+      "gdpGrowthPct": 3.25,
+      "fdiNetInflowsUsd": 4500000000,
+      "inflationCpiPct": 18.75,
+      "fxToUsd": 1547.5
+    },
+    "dataCoverage": {
+      "hasMacroSeries": true,
+      "hasTradeSummary": true,
+      "hasMarketsAsOf": true,
+      "hasVerifiedPolicy": true,
+      "macroYearCount": 6
+    },
+    "confidence": "high",
+    "policyRecords": [
+      {
+        "framework": "AGOA",
+        "status": "needs_review",
+        "statusLabel": "Unverified (Needs review)",
+        "description": "AGOA eligibility for Nigeria requires reconciliation against the current USTR beneficiary country list before this report asserts Suspended/Eligible status.",
+        "authoritativeSourceUrl": "https://ustr.gov/issue-areas/trade-development/preference-programs/african-growth-and-opportunity-act-agoa",
+        "lastVerifiedAt": null
+      },
+      {
+        "framework": "AfCFTA",
+        "status": "active",
+        "statusLabel": "Active",
+        "description": "African Continental Free Trade Area — 54 member states; phased tariff elimination per AfCFTA agreement.",
+        "authoritativeSourceUrl": "https://au.int/en/ti/cfta/about/about-the-afcfta",
+        "lastVerifiedAt": "2026-01-15"
+      },
+      {
+        "framework": "ECOWAS",
+        "status": "active",
+        "statusLabel": "Member",
+        "description": "Economic Community of West African States — regional trade and investment protocols among 15 member states.",
+        "authoritativeSourceUrl": "https://www.ecowas.int/",
+        "lastVerifiedAt": "2026-01-15"
+      }
+    ],
+    "signalDrivers": [
+      "FDI net inflows $4.5B (2024)",
+      "GDP growth 3.3% (2024)",
+      "Inflation 18.8% (2024)"
+    ],
+    "signalConfidence": "High"
+  },
+  "coverPageModel": {
+    "country": {
+      "name": "Nigeria",
+      "iso3": "NGA",
+      "iso2": "NG",
+      "region": "Africa",
+      "capital": "Abuja",
+      "currencyCode": "NGN"
+    },
+    "generatedAt": "June 3, 2026",
+    "platformFreshnessAt": "May 26, 2026",
+    "asOf": {
+      "macroYear": "2024",
+      "tradeYear": "2024",
+      "marketsDate": "May 26, 2026",
+      "policyVerifiedAt": "Jan 15, 2026"
+    },
+    "signal": {
+      "badge": "Emerging · Reform momentum",
+      "confidence": "High",
+      "drivers": [
+        "FDI net inflows $4.5B (2024)",
+        "GDP growth 3.3% (2024)",
+        "Inflation 18.8% (2024)"
+      ]
+    },
+    "stance": {
+      "baseCase": "Nigeria represents a major economy at a structural inflection point, offering multi-sector investment opportunities across technology, agriculture, infrastructure, and financial services.",
+      "topRisks": "Nigeria's investment landscape requires a balanced assessment of macro, political, and operational risks. Risks are real but manageable through strategic partnerships and phased capital deployment.",
+      "watchpoints": "Governance & Stability"
+    }
+  },
+  "preflight": {
+    "passed": false,
+    "errors": [
+      {
+        "code": "NARRATIVE_GDP_SCALE",
+        "path": "sections.economic.indicatorBullets[1]",
+        "message": "Narrative economy scale ($599B) diverges from canonical 477.4B (2024).",
+        "detail": "GDP scale: $599B → $477B over 6 years"
+      }
+    ],
+    "warnings": [
+      {
+        "code": "COPY_PROMOTIONAL_TONE",
+        "path": "sections.introduction.intro",
+        "message": "Promotional tone (\"unlocked\") without source or benchmark context.",
+        "detail": "Nigeria is West Africa's economic powerhouse and Africa's most populous nation, with a rapidly growing technology ecosys"
+      },
+      {
+        "code": "COPY_PROMOTIONAL_TONE",
+        "path": "sections.introduction.paragraphs[0]",
+        "message": "Promotional tone (\"unlocked\") without source or benchmark context.",
+        "detail": "Nigeria is West Africa's economic powerhouse and Africa's most populous nation, with a rapidly growing technology ecosys"
+      },
+      {
+        "code": "POLICY_NEEDS_REVIEW",
+        "path": "policyRecords[AGOA]",
+        "message": "AGOA: Unverified (Needs review) — high-impact policy status not fully verified."
+      }
+    ]
+  },
+  "stamps": {
+    "macroAsOfYear": 2024,
+    "tradeAsOfYear": 2024,
+    "marketsAsOfDate": "2026-05-26T19:20:29.1+00:00",
+    "policyVerifiedAt": "2026-01-15"
+  },
+  "preflightWarningCount": 3,
+  "preflightWarningCodes": [
+    "COPY_PROMOTIONAL_TONE",
+    "COPY_PROMOTIONAL_TONE",
+    "POLICY_NEEDS_REVIEW"
+  ]
+}

@@ -13,6 +13,8 @@ interface TooltipCountry {
   populationTotal?: number;
   capital?: string;
   subregion?: string;
+  /** UI-only USTR country page (not shown in PDFs). */
+  ustrCountryPageUrl?: string;
 }
 
 interface MapTooltipProps {
@@ -133,18 +135,31 @@ export function MapTooltip({ country, position }: MapTooltipProps) {
             </div>
 
             {/* Footer */}
-            <div className="px-4 py-2.5 flex items-center justify-between">
-              {colors && (
-                <span 
-                  className="text-[9px] font-bold uppercase tracking-widest" 
-                  style={{ color: colors.fill }}
+            <div className="px-4 py-2.5 space-y-1.5">
+              {country.ustrCountryPageUrl && (
+                <a
+                  href={country.ustrCountryPageUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="pointer-events-auto text-[10px] text-emerald-400 hover:text-emerald-300 font-semibold block truncate"
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  {colors.label}
-                </span>
+                  USTR country page ↗
+                </a>
               )}
-              <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">
-                Click for full brief →
-              </span>
+              <div className="flex items-center justify-between">
+                {colors && (
+                  <span
+                    className="text-[9px] font-bold uppercase tracking-widest"
+                    style={{ color: colors.fill }}
+                  >
+                    {colors.label}
+                  </span>
+                )}
+                <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">
+                  Click for full brief →
+                </span>
+              </div>
             </div>
           </>
         )}

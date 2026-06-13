@@ -10,6 +10,16 @@ import Image from 'next/image';
 import { REGION_COLORS, type AfricaRegion, DATA_STATUS_LABELS } from '@/lib/map-constants';
 import { EntitledMetricCard } from './EntitledMetricCard';
 import { EntitledSectorList } from './EntitledSectorList';
+import {
+  countryMapPanelCta,
+  countryTerminalHref,
+  planRankFromTier,
+  canAccessCountryTerminal,
+} from '@/lib/intelligence/routing';
+import { mapPanelSectorsEmptyMessage } from '@/lib/intelligence/map-panel-sectors';
+import { isFullTerminalPilot } from '@/lib/intelligence/country-names';
+import { PLAN_RANKS } from '@souvera/entitlements';
+import type { RegionFilter } from '@/lib/market-coverage';
 import type { Country } from './SouveraMapWorkspace';
 
 interface CountryPanelData {
@@ -59,6 +69,7 @@ interface CountryPanelData {
   meta: {
     accessTier: string;
     authenticated: boolean;
+    planRank?: number;
     sources: Array<{ key: string; name: string }>;
   };
 }
@@ -71,6 +82,8 @@ interface CountryIntelligencePanelProps {
   topEconomies?: Country[];
   defaultPanelTitle?: string;
   defaultPanelSubtitle?: string;
+  /** Workspace region — drives default-panel CTA routing */
+  region?: RegionFilter;
 }
 
 /**
@@ -118,10 +131,29 @@ export function CountryIntelligencePanel({
   topEconomies = [],
   defaultPanelTitle = 'Top 10 Economies',
   defaultPanelSubtitle = 'Largest African economies by GDP',
+  region: workspaceRegion = 'africa',
 }: CountryIntelligencePanelProps) {
   const [data, setData] = useState<CountryPanelData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [meAccess, setMeAccess] = useState({
+    authenticated: false,
+    planRank: 0,
+    planId: 'public',
+  });
+
+  useEffect(() => {
+    fetch('/api/v1/me', { credentials: 'include', cache: 'no-store' })
+      .then((r) => r.json())
+      .then((me) => {
+        setMeAccess({
+          authenticated: me.authenticated === true,
+          planRank: me.access?.rank ?? planRankFromTier(me.access?.planId),
+          planId: me.access?.planId ?? 'public',
+        });
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     // Early return for no selection - handled by conditional rendering
@@ -134,7 +166,10 @@ export function CountryIntelligencePanel({
       setError(null);
 
       try {
-        const response = await fetch(`/api/v1/country-lite?iso3=${selectedIso3}`);
+        const response = await fetch(`/api/v1/country-lite?iso3=${selectedIso3}`, {
+          credentials: 'include',
+          cache: 'no-store',
+        });
         
         if (cancelled) return;
         
@@ -181,16 +216,30 @@ export function CountryIntelligencePanel({
     return undefined;
   };
 
-  const region = selectedIso3 ? getRegionColor(selectedIso3) : undefined;
-  const regionColor = region ? REGION_COLORS[region] : null;
+  const africaRegion = selectedIso3 ? getRegionColor(selectedIso3) : undefined;
+  const regionColor = africaRegion ? REGION_COLORS[africaRegion] : null;
 
-  // Check if FDI is accessible (Professional+ has full_macro)
-  const hasFdiAccess = data?.meta?.accessTier && 
-    ['professional', 'business', 'investor', 'institutional', 'platform_admin'].includes(data.meta.accessTier);
+  const panelRegion: 'africa' | 'caribbean' | 'all' =
+    workspaceRegion === 'caribbean'
+      ? 'caribbean'
+      : workspaceRegion === 'all'
+        ? 'all'
+        : 'africa';
 
-  // Check if user has sector rationale access
-  const hasSectorRationale = data?.meta?.accessTier && 
-    ['professional', 'business', 'investor', 'institutional', 'platform_admin'].includes(data.meta.accessTier);
+  const defaultPanelCta = countryMapPanelCta({
+    isAuthenticated: meAccess.authenticated,
+    planRank: meAccess.planRank,
+    accessTier: meAccess.planId,
+    region: panelRegion,
+    source: 'map-workspace-default',
+  });
+
+  const planRankFromData =
+    data?.meta?.planRank ?? planRankFromTier(data?.meta?.accessTier);
+  const planRank = Math.max(meAccess.planRank, planRankFromData);
+  const panelAuthenticated = meAccess.authenticated || data?.meta?.authenticated === true;
+  const hasFdiAccess = planRank >= PLAN_RANKS.professional;
+  const hasSectorRationale = planRank >= PLAN_RANKS.professional;
 
   // Default state (no country selected)
   if (!selectedIso3) {
@@ -284,10 +333,10 @@ export function CountryIntelligencePanel({
               </p>
             </div>
             <Link
-              href="/access/request-access"
+              href={defaultPanelCta.href}
               className="block w-full text-center px-4 py-4 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold uppercase tracking-wider rounded-sm transition-colors"
             >
-              Request Full Access
+              {defaultPanelCta.label}
             </Link>
           </div>
         </div>
@@ -514,19 +563,29 @@ export function CountryIntelligencePanel({
               sectors={data.sectors}
               maxVisible={hasSectorRationale ? 5 : 1}
               showRationale={hasSectorRationale}
-              totalCount={5}
+              totalCount={data.sectors.length}
             />
           </div>
         )}
 
-        {/* Sectors data pending - Professional+ only */}
-        {(!data.sectors || data.sectors.length === 0) && hasSectorRationale && (
+        {(!data.sectors || data.sectors.length === 0) && (
           <div className="px-5 py-3 border-t border-zinc-800/50">
             <h4 className="text-[10px] font-bold text-amber-400 uppercase tracking-widest mb-2.5">
               Key Sectors
             </h4>
-            <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-4">
-              <p className="text-sm text-zinc-500">Sectors data pending</p>
+            <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-4 space-y-3">
+              <p className="text-sm text-zinc-500 leading-relaxed">
+                {mapPanelSectorsEmptyMessage(data.country.iso3)}
+              </p>
+              {canAccessCountryTerminal(panelAuthenticated, planRank) &&
+                isFullTerminalPilot(data.country.iso3) && (
+                  <Link
+                    href={countryTerminalHref(data.country.iso3, { tab: 'sectors' })}
+                    className="inline-flex text-[10px] font-bold uppercase tracking-widest text-blue-400 hover:text-blue-300"
+                  >
+                    Open full Sectors tab →
+                  </Link>
+                )}
             </div>
           </div>
         )}
@@ -534,15 +593,28 @@ export function CountryIntelligencePanel({
 
       {/* CTA Footer */}
       <div className="p-4 border-t border-zinc-800 bg-zinc-900/80 shrink-0">
-        <Link
-          href={`/access/request-access?country=${data.country.iso3}&name=${encodeURIComponent(data.country.name)}&source=map-workspace`}
-          className="block w-full text-center px-4 py-4 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold uppercase tracking-wider rounded-sm transition-colors group"
-        >
-          <span className="flex items-center justify-center gap-2">
-            Explore {data.country.name} Opportunities
-            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-          </span>
-        </Link>
+        {(() => {
+          const cta = countryMapPanelCta({
+            iso3: data.country.iso3,
+            countryName: data.country.name,
+            isAuthenticated: panelAuthenticated,
+            planRank,
+            accessTier: meAccess.authenticated ? meAccess.planId : data.meta.accessTier,
+            source: 'map-workspace',
+            region: panelRegion,
+          });
+          return (
+            <Link
+              href={cta.href}
+              className="block w-full text-center px-4 py-4 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold uppercase tracking-wider rounded-sm transition-colors group"
+            >
+              <span className="flex items-center justify-center gap-2">
+                {cta.label}
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </span>
+            </Link>
+          );
+        })()}
       </div>
     </div>
   );

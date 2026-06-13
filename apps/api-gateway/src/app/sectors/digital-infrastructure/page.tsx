@@ -1,13 +1,21 @@
 import type { Metadata } from 'next';
-import { DigitalInfrastructureHub } from './DigitalInfrastructureHub';
+import { Network } from 'lucide-react';
+import { SectorOverviewPage } from '@/components/sectors/SectorOverviewPage';
+import { DIGITAL_INFRASTRUCTURE_SECTOR } from '@/data/sectors/sector-overviews';
 
 export const metadata: Metadata = {
   title: 'Digital Infrastructure | Souvera',
-  description: 'Sovereign-grade intelligence on broadband, cloud, digital public infrastructure, AI readiness, cybersecurity, payments, and institutional digital transformation across African and Caribbean markets.',
-  keywords: ['digital infrastructure', 'broadband Africa', 'cloud infrastructure', 'digital public infrastructure', 'e-government', 'AI readiness', 'cybersecurity', 'sovereign data', 'fiber backbone', 'data center Africa'],
+  description: DIGITAL_INFRASTRUCTURE_SECTOR.description,
+  keywords: [
+    'digital infrastructure Africa',
+    'broadband Africa',
+    'data centers Africa',
+    'digital public infrastructure',
+    'e-government Africa',
+  ],
   openGraph: {
     title: 'Digital Infrastructure | Souvera',
-    description: 'Sovereign-grade intelligence on broadband, cloud, digital public infrastructure, AI readiness, cybersecurity, payments, and institutional digital transformation across African and Caribbean markets.',
+    description: DIGITAL_INFRASTRUCTURE_SECTOR.subtitle,
     url: 'https://souvera.vercel.app/sectors/digital-infrastructure',
   },
   alternates: {
@@ -16,5 +24,11 @@ export const metadata: Metadata = {
 };
 
 export default function DigitalInfrastructurePage() {
-  return <DigitalInfrastructureHub />;
+  return (
+    <SectorOverviewPage
+      content={DIGITAL_INFRASTRUCTURE_SECTOR}
+      icon={Network}
+      accentColor="indigo"
+    />
+  );
 }

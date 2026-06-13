@@ -4,8 +4,8 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import { MapWorkspaceTopNav } from './MapWorkspaceTopNav';
 import { AfricaMapPanel } from './AfricaMapPanel';
+import { CaribbeanMapPanel } from './CaribbeanMapPanel';
 import { CountryIntelligencePanel } from './CountryIntelligencePanel';
-import { CaribbeanMarketShell } from './CaribbeanMarketShell';
 import { AllRegionsMarketShell } from './AllRegionsMarketShell';
 import { ISO3_REGION, type AfricaRegion, DATA_STATUS_LABELS } from '@/lib/map-constants';
 import { type RegionFilter, getWorkspaceLabelForRegion } from '@/lib/market-coverage';
@@ -109,7 +109,10 @@ export function SouveraMapWorkspace({
     setError(null);
 
     try {
-      const response = await fetch(`/api/v1/countries?region=${currentRegion}`);
+      const response = await fetch(`/api/v1/countries?region=${currentRegion}`, {
+        credentials: 'include',
+        cache: 'no-store',
+      });
       
       if (!response.ok) {
         throw new Error(`Failed to fetch countries: ${response.statusText}`);
@@ -289,14 +292,15 @@ export function SouveraMapWorkspace({
           />
         )}
         
-        {/* Main workspace layout for Caribbean */}
+        {/* Main workspace layout for Caribbean — geospatial map (v2, migrated 2026-05-20) */}
         <div className="flex flex-col lg:flex-row lg:h-[650px] xl:h-[700px]">
-          {/* Market List Panel (Left) */}
+          {/* Map Panel (Left) — v1 list archived: see /intelligence/caribbean/list-archive */}
           <div className="flex-1 lg:w-[65%] xl:w-[68%] min-h-[400px] lg:h-full border-b lg:border-b-0 lg:border-r border-zinc-800">
-            <CaribbeanMarketShell
+            <CaribbeanMapPanel
               countries={caribbeanCountries}
               selectedIso3={selectedIso3}
               onCountrySelect={handleCountrySelect}
+              loading={loading}
             />
           </div>
 
@@ -310,6 +314,7 @@ export function SouveraMapWorkspace({
               topEconomies={topEconomies}
               defaultPanelTitle={defaultPanelTitle}
               defaultPanelSubtitle={defaultPanelSubtitle}
+              region={currentRegion}
             />
           </div>
         </div>
@@ -386,6 +391,7 @@ export function SouveraMapWorkspace({
               topEconomies={topEconomies}
               defaultPanelTitle={defaultPanelTitle}
               defaultPanelSubtitle={defaultPanelSubtitle}
+              region={currentRegion}
             />
           </div>
         </div>
@@ -456,6 +462,7 @@ export function SouveraMapWorkspace({
             topEconomies={topEconomies}
             defaultPanelTitle={defaultPanelTitle}
             defaultPanelSubtitle={defaultPanelSubtitle}
+            region={currentRegion}
           />
         </div>
       </div>

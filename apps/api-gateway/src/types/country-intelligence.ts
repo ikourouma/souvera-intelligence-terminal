@@ -3,6 +3,8 @@
  */
 
 import type { EntitlementKey } from '@souvera/entitlements';
+import type { EconomyYearPoint } from '@/lib/intelligence/country-economy-content';
+import type { CountrySourceMeta } from '@/lib/intelligence/country-source-meta';
 
 export interface CountryIdentity {
   iso3: string;
@@ -136,25 +138,42 @@ export interface CountryTrade {
   pending?: boolean;
 }
 
-export interface TimeSeriesYear {
-  year: number;
-  gdp_current_usd?: number;
-  gdp_growth_pct?: number;
-  fdi_net_inflows_usd?: number;
-  inflation_cpi_pct?: number;
-  fx_to_usd?: number;
-  fx_parallel_usd?: number;
-  debt_to_gdp_pct?: number;
-}
+export type TimeSeriesYear = EconomyYearPoint;
 
 export interface CountryTimeSeries {
-  years: TimeSeriesYear[];
+  years: EconomyYearPoint[];
   forecast?: Array<{ year: number; gdp_growth_pct: number }>;
 }
 
 export interface DataFreshness {
   updatedAt: string;
   sources: Array<{ key: string; name: string }>;
+}
+
+/** UI-only official links (USTR country page, etc.) — not rendered in PDFs. */
+export interface OfficialReferenceLink {
+  refType: string;
+  label: string;
+  url: string;
+  sourceKey: string;
+  lastReviewedAt: string;
+}
+
+export interface MarketAccessFrameworkDto {
+  id: string;
+  label: string;
+  emoji?: string;
+  description: string;
+  status: string;
+  statusLabel?: string;
+}
+
+export interface AgoaPolicyUiSnapshot {
+  statusLabel: string;
+  evidenceBacked: boolean;
+  apparelEligible: boolean;
+  notes: string;
+  agoaStatus: 'eligible' | 'suspended' | 'graduated' | 'ineligible' | 'not_applicable' | 'under_review';
 }
 
 export interface CountryIntelligenceResponse {
@@ -168,6 +187,12 @@ export interface CountryIntelligenceResponse {
   trade: CountryTrade | null;
   timeSeries: CountryTimeSeries | null;
   freshness: DataFreshness;
+  /** Evidence Vault–backed frameworks (Phase 0B). */
+  marketAccess?: MarketAccessFrameworkDto[];
+  agoaPolicy?: AgoaPolicyUiSnapshot;
+  /** Top 20 metric source attribution (Phase 0C). */
+  sourceMeta?: CountrySourceMeta;
+  officialReferences?: OfficialReferenceLink[];
   meta: {
     accessTier: string;
     authenticated: boolean;

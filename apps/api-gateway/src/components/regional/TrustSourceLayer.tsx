@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { Database, RefreshCw, Shield } from 'lucide-react';
+import { DATA_STATUS_LABELS } from '@/lib/map-constants';
 
 interface TrustSourceLayerProps {
   region?: 'africa' | 'caribbean';
@@ -83,20 +84,22 @@ export function TrustSourceLayer({ region, title = 'Data Sources & Credibility' 
           </div>
         </div>
 
-        {/* Preview Data Disclaimer */}
-        <div className="p-6 bg-amber-500/5 border border-amber-500/20 rounded-sm">
+        {/* Live & Curated Data Disclaimer */}
+        <div className="p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-sm">
           <div className="flex items-start gap-4">
-            <Shield className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+            <Shield className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
             <div className="flex-1">
-              <h4 className="text-sm font-bold text-amber-400 mb-2">
-                Preview Data Notice
+              <h4 className="text-sm font-bold text-emerald-400 mb-2">
+                {DATA_STATUS_LABELS.previewData}
               </h4>
-              <p className="text-sm text-amber-400/80 leading-relaxed mb-3">
-                Data shown on this page is curated preview data sourced from official institutions. Automated data feeds are in development.
+              <p className="text-sm text-emerald-400/80 leading-relaxed mb-3">
+                Souvera combines live institutional feeds with editorially curated country profiles.
+                Pilot terminals (Nigeria, Jamaica) are fully populated. All metrics are
+                source-attributed and tier-gated.
               </p>
               <Link
                 href="/resources/source-registry"
-                className="text-sm text-amber-400 hover:text-amber-300 underline"
+                className="text-sm text-emerald-400 hover:text-emerald-300 underline"
               >
                 View Source Registry →
               </Link>

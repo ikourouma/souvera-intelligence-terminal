@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { User, LogOut, ChevronDown, Map, CreditCard } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { managePlanHref } from '@/lib/intelligence/routing';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface AccountMenuProps {
@@ -190,7 +191,7 @@ export function AccountMenu({ user }: AccountMenuProps) {
               Account Settings
             </Link>
             <Link
-              href="/access"
+              href={managePlanHref(true)}
               onClick={() => setIsOpen(false)}
               className="flex items-center gap-3 px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors"
             >

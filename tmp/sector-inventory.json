@@ -1,0 +1,67 @@
+{
+  "generatedAt": "2026-05-31",
+  "reportsDropdown": {
+    "definedIn": "apps/api-gateway/src/components/intelligence/tabs/ReportsTab.tsx",
+    "wiredToApi": false,
+    "options": [
+      { "id": null, "label": "Technology & Software" },
+      { "id": null, "label": "Agriculture & Food Processing" },
+      { "id": null, "label": "Energy & Power" },
+      { "id": null, "label": "Manufacturing" },
+      { "id": null, "label": "Mining & Minerals" }
+    ],
+    "missingExpected": [
+      { "slug": "tourism-hospitality", "label": "Tourism & Hospitality", "hubRoute": "/sectors/tourism-hospitality" }
+    ],
+    "missingFromHub": [
+      { "slug": "fintech", "label": "Fintech & Digital Finance" },
+      { "slug": "logistics", "label": "Logistics & Trade" },
+      { "slug": "critical-minerals", "label": "Critical Minerals" },
+      { "slug": "digital-infrastructure", "label": "Digital Infrastructure" }
+    ]
+  },
+  "hubSectors": {
+    "africa": [
+      { "key": "fintech", "name": "Fintech", "href": "/sectors/fintech" },
+      { "key": "energy", "name": "Energy", "href": "/sectors/energy" },
+      { "key": "critical-minerals", "name": "Mining & Critical Minerals", "href": "/sectors/critical-minerals" },
+      { "key": "agriculture", "name": "Agriculture & Agritech", "href": "/sectors/agriculture" },
+      { "key": "logistics", "name": "Logistics & Trade", "href": "/sectors/logistics" },
+      { "key": "tourism", "name": "Tourism & Hospitality", "href": "/sectors/tourism", "redirectsTo": "/sectors/tourism-hospitality" }
+    ],
+    "caribbean": [
+      { "key": "tourism", "name": "Tourism & Hospitality", "href": "/sectors/tourism-hospitality" },
+      { "key": "energy", "name": "Energy & LNG", "href": "/sectors/energy" },
+      { "key": "fintech", "name": "Fintech & Digital Finance", "href": "/sectors/fintech" },
+      { "key": "logistics", "name": "Logistics & Trade", "href": "/sectors/logistics" },
+      { "key": "agriculture", "name": "Agriculture", "href": "/sectors/agriculture" }
+    ]
+  },
+  "sectorOverviewSlugs": [
+    { "slug": "fintech", "title": "Fintech & Digital Finance" },
+    { "slug": "energy", "title": "Energy & Renewables" },
+    { "slug": "logistics", "title": "Logistics & Trade" },
+    { "slug": "agriculture", "title": "Agriculture & Agritech" },
+    { "slug": "critical-minerals", "title": "Critical Minerals" },
+    { "slug": "tourism-hospitality", "title": "Tourism & Hospitality" },
+    { "slug": "digital-infrastructure", "title": "Digital Infrastructure" }
+  ],
+  "dbSectorKeys": {
+    "ngaSeed": [
+      { "sectorKey": "technology", "sectorLabel": "Technology & Software" },
+      { "sectorKey": "agriculture", "sectorLabel": "Agriculture & Food Processing" },
+      { "sectorKey": "energy", "sectorLabel": "Energy & Power" },
+      { "sectorKey": "manufacturing", "sectorLabel": "Manufacturing" },
+      { "sectorKey": "mining", "sectorLabel": "Mining & Minerals" }
+    ],
+    "tourismInNgaSeed": false,
+    "table": "souvera_country_sectors",
+    "api": "/api/v1/country/[iso3]"
+  },
+  "gaps": [
+    "Tourism & Hospitality absent from Reports dropdown",
+    "Sector Deep-Dive does not pass sectorKey to generate API",
+    "Dropdown hardcoded; not union of hub slugs + country API sectors",
+    "No Sector Deep-Dive v2 institutional template"
+  ]
+}

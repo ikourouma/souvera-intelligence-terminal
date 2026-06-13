@@ -1,13 +1,14 @@
 'use client';
 
 import { HubPageTemplate, type HubContent } from '@/components/templates/HubPageTemplate';
-import { Banknote, Gem, Zap, Wheat, Truck, Palmtree } from 'lucide-react';
+import { Banknote, Gem, Zap, Wheat, Truck, Palmtree, Network } from 'lucide-react';
 
 const CONTENT: HubContent = {
   tagline: 'Sector Intelligence',
   title: 'Strategic Sectors Across Two Continents.',
   subtitle: 'Deep-dive analysis into the industries driving growth.',
-  description: 'Souvera tracks six strategic sectors across African and Caribbean markets, providing institutional-grade analysis of market size, growth trajectories, key players, and investment opportunities.',
+  description:
+    'Souvera tracks strategic sectors across African and Caribbean markets, providing institutional-grade analysis of market size, growth trajectories, key players, and investment opportunities.',
   primaryCta: {
     label: 'Request Access',
     href: '/access/request-access',
@@ -17,12 +18,21 @@ const CONTENT: HubContent = {
     href: '/insights/methodology',
   },
   highlights: [
-    { value: '6', label: 'Strategic Sectors' },
+    { value: '7', label: 'Strategic Sectors' },
     { value: '$600B+', label: 'Market Opportunity' },
     { value: '50+', label: 'Markets Covered' },
-    { value: 'IMF', label: 'Data Sources' },
+    { value: 'Live', label: 'Sector Overviews' },
   ],
   links: [
+    {
+      title: 'Digital Infrastructure',
+      description:
+        'Broadband, cloud readiness, digital public infrastructure, and cybersecurity across African and Caribbean markets.',
+      href: '/sectors/digital-infrastructure',
+      icon: Network,
+      badge: 'Infrastructure',
+      badgeColor: '#6366F1',
+    },
     {
       title: 'Fintech & Digital Finance',
       description: 'Mobile money, B2B payments, digital banking, and regulatory developments across African markets.',
@@ -66,7 +76,7 @@ const CONTENT: HubContent = {
     {
       title: 'Tourism & Hospitality',
       description: 'Caribbean tourism dynamics, eco-tourism, luxury resort development, and cultural tourism.',
-      href: '/sectors/tourism',
+      href: '/sectors/tourism-hospitality',
       icon: Palmtree,
       badge: '$40B Market',
       badgeColor: '#06B6D4',

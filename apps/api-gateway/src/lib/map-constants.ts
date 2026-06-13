@@ -117,6 +117,28 @@ export const NAME_TO_ISO3: Record<string, string> = {
   'South Africa': 'ZAF', 'Botswana': 'BWA', 'Lesotho': 'LSO',
   'Eswatini': 'SWZ', 'Swaziland': 'SWZ', 'Namibia': 'NAM',
   'Zimbabwe': 'ZWE', 'Mozambique': 'MOZ', 'Zambia': 'ZMB', 'Malawi': 'MWI',
+
+  // Caribbean (approved Souvera markets)
+  'Antigua and Barbuda': 'ATG', 'Antigua & Barbuda': 'ATG',
+  'Bahamas': 'BHS', 'The Bahamas': 'BHS',
+  'Barbados': 'BRB',
+  'Belize': 'BLZ',
+  'Cuba': 'CUB',
+  'Dominica': 'DMA',
+  'Dominican Republic': 'DOM',
+  'Grenada': 'GRD',
+  'Guyana': 'GUY',
+  'Haiti': 'HTI',
+  'Jamaica': 'JAM',
+  'Puerto Rico': 'PRI',
+  'Saint Kitts and Nevis': 'KNA', 'St. Kitts and Nevis': 'KNA',
+  'Saint Lucia': 'LCA', 'St. Lucia': 'LCA',
+  'Saint Vincent and the Grenadines': 'VCT', 'St. Vincent and the Grenadines': 'VCT',
+  'Suriname': 'SUR',
+  'Trinidad and Tobago': 'TTO',
+  'British Virgin Islands': 'VGB', 'Virgin Islands, British': 'VGB',
+  'Turks and Caicos Islands': 'TCA', 'Turks and Caicos': 'TCA',
+  'Cayman Islands': 'CYM',
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -127,6 +149,116 @@ export const GEO_URLS = {
   primary: 'https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson',
   fallback: 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json',
 } as const;
+
+/**
+ * Caribbean map geodata — Natural Earth 50m has reliable ISO_A3 / ADM0_A3 for
+ * sovereign states and most territories. rembish iso-a2-markers supplements
+ * micro-islands (<1000 km²) as point geometries.
+ */
+export const CARIBBEAN_GEO_URLS = {
+  /** Natural Earth 50m admin-0 — best ISO coverage for Caribbean states */
+  primary:
+    'https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_50m_admin_0_countries.geojson',
+  /** Same holtzy source as Africa fallback */
+  fallback: GEO_URLS.primary,
+  /** Point markers for micro-territories (ATG, BRB, VCT, etc.) */
+  markers: 'https://cdn.jsdelivr.net/gh/rembish/iso-topojson@main/iso-a2-markers.json',
+} as const;
+
+/** Caribbean micro-territories rendered as lat/lng markers when polygons are too small */
+export const CARIBBEAN_MARKER_ISO3 = [
+  'ATG', 'BRB', 'DMA', 'GRD', 'KNA', 'LCA', 'VCT', 'CYM', 'VGB', 'TCA', 'PRI',
+] as const;
+
+/** Default mercator viewport for full Caribbean arc (Cuba → Trinidad + Bahamas) */
+export const CARIBBEAN_MAP_VIEW = {
+  center: [-74, 12.5] as [number, number],
+  scale: { mobile: 620, desktop: 780 },
+  zoom: { min: 0.3, max: 18, initial: 1 },
+} as const;
+
+/** Caribbean sub-zones for map coloring (mirrors Africa regional palette pattern) */
+export type CaribbeanZone =
+  | 'greater_antilles'
+  | 'lesser_antilles'
+  | 'bahamas'
+  | 'mainland_rim'
+  | 'territories';
+
+export interface CaribbeanZoneColorConfig {
+  fill: string;
+  hover: string;
+  label: string;
+}
+
+export const CARIBBEAN_ZONE_COLORS: Record<CaribbeanZone, CaribbeanZoneColorConfig> = {
+  greater_antilles: {
+    fill: '#0d9488',
+    hover: '#14b8a6',
+    label: 'Greater Antilles',
+  },
+  lesser_antilles: {
+    fill: '#2563eb',
+    hover: '#3b82f6',
+    label: 'Lesser Antilles',
+  },
+  bahamas: {
+    fill: '#7c3aed',
+    hover: '#a78bfa',
+    label: 'Bahamas',
+  },
+  mainland_rim: {
+    fill: '#d97706',
+    hover: '#f59e0b',
+    label: 'Mainland rim',
+  },
+  territories: {
+    fill: '#db2777',
+    hover: '#f472b6',
+    label: 'Territories',
+  },
+};
+
+/** ISO3 → Caribbean sub-zone (all 20 approved markets) */
+export const ISO3_CARIBBEAN_ZONE: Record<string, CaribbeanZone> = {
+  CUB: 'greater_antilles',
+  JAM: 'greater_antilles',
+  HTI: 'greater_antilles',
+  DOM: 'greater_antilles',
+  ATG: 'lesser_antilles',
+  BRB: 'lesser_antilles',
+  DMA: 'lesser_antilles',
+  GRD: 'lesser_antilles',
+  KNA: 'lesser_antilles',
+  LCA: 'lesser_antilles',
+  VCT: 'lesser_antilles',
+  TTO: 'lesser_antilles',
+  BHS: 'bahamas',
+  GUY: 'mainland_rim',
+  SUR: 'mainland_rim',
+  BLZ: 'mainland_rim',
+  PRI: 'territories',
+  VGB: 'territories',
+  TCA: 'territories',
+  CYM: 'territories',
+};
+
+/** Caribbean map palette — selected state (zone colors used for fills) */
+export const CARIBBEAN_MAP_COLORS = {
+  selected: '#f0fdfa',
+  selectedStroke: '#ffffff',
+  label: 'Caribbean',
+} as const;
+
+export function getCaribbeanZone(iso3: string | undefined | null): CaribbeanZone | undefined {
+  if (!iso3) return undefined;
+  return ISO3_CARIBBEAN_ZONE[iso3.toUpperCase()];
+}
+
+export function getCaribbeanZoneColors(iso3: string | undefined | null): CaribbeanZoneColorConfig {
+  const zone = getCaribbeanZone(iso3);
+  return zone ? CARIBBEAN_ZONE_COLORS[zone] : CARIBBEAN_ZONE_COLORS.greater_antilles;
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helper Functions
@@ -207,6 +339,37 @@ export function resolveIso3FromGeo(properties: {
 }
 
 /**
+ * Resolve ISO3 for Caribbean map features — checks direct iso_a3 against
+ * approved Caribbean list, then name lookup (includes Caribbean aliases).
+ */
+export function resolveCaribbeanIso3FromGeo(properties: {
+  name?: string;
+  NAME?: string;
+  iso_a3?: string;
+  ISO_A3?: string;
+  ADM0_A3?: string;
+  iso_a3_eh?: string;
+  ISO_A3_EH?: string;
+  [key: string]: unknown;
+}): string | null {
+  const directIso3 =
+    properties?.iso_a3 ??
+    properties?.ISO_A3 ??
+    properties?.ADM0_A3 ??
+    properties?.iso_a3_eh ??
+    properties?.ISO_A3_EH;
+  if (directIso3 && directIso3 !== '-99' && isApprovedCaribbeanIso3(directIso3)) {
+    return directIso3.toUpperCase();
+  }
+  const name = properties?.name ?? properties?.NAME ?? '';
+  const fromName = NAME_TO_ISO3[name];
+  if (fromName && isApprovedCaribbeanIso3(fromName)) {
+    return fromName;
+  }
+  return null;
+}
+
+/**
  * Check if a GeoJSON country name is a disputed territory.
  */
 export function isDisputedTerritory(iso3: string | undefined | null): boolean {
@@ -219,8 +382,9 @@ export function isDisputedTerritory(iso3: string | undefined | null): boolean {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const DATA_STATUS_LABELS = {
-  previewData: 'Curated Preview Data',
-  sourceAttributed: 'Source-Attributed Preview',
-  freshnessUnknown: 'Preview data · freshness pending',
-  unavailable: 'Preview data temporarily unavailable',
+  previewData: 'Live & Curated Data',
+  sourceAttributed: 'Source-Attributed · Live & Curated',
+  freshnessUnknown: 'Live data · freshness updating',
+  unavailable: 'Data temporarily unavailable',
+  pilotNote: 'NGA + JAM pilot terminals live · 74-country rollout in progress',
 } as const;

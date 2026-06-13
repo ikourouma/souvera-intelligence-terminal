@@ -245,6 +245,7 @@ export function getAGOAStatusLabel(status: string | null | undefined): string {
     case 'graduated': return 'Graduated';
     case 'ineligible': return 'Ineligible';
     case 'not_applicable': return 'Not Applicable';
+    case 'under_review': return 'Under Review';
     default: return 'Unknown';
   }
 }
@@ -256,6 +257,7 @@ export function getAGOAStatusColor(status: string | null | undefined): string {
     case 'graduated': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
     case 'ineligible': return 'bg-zinc-500/20 text-zinc-400 border-zinc-500/30';
     case 'not_applicable': return 'bg-zinc-500/20 text-zinc-400 border-zinc-500/30';
+    case 'under_review': return 'bg-amber-500/20 text-amber-400 border-amber-500/30';
     default: return 'bg-zinc-500/20 text-zinc-400 border-zinc-500/30';
   }
 }

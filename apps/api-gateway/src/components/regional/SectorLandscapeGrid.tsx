@@ -84,7 +84,7 @@ const CARIBBEAN_SECTORS: Sector[] = [
     keyCountries: ['Bahamas', 'Jamaica', 'Barbados'],
     signal: 'stable',
     icon: Plane,
-    link: '/sectors/tourism',
+    link: '/sectors/tourism-hospitality',
   },
   {
     key: 'energy',
@@ -96,12 +96,13 @@ const CARIBBEAN_SECTORS: Sector[] = [
     link: '/sectors/energy',
   },
   {
-    key: 'financial-services',
-    name: 'Financial Services',
-    description: 'Offshore banking centers, international business companies, and wealth management services.',
-    keyCountries: ['Cayman Islands', 'Bahamas', 'Bermuda'],
-    signal: 'stable',
+    key: 'fintech',
+    name: 'Fintech & Digital Finance',
+    description: 'Digital payments, CBDC pilots, remittance corridors, and nearshore financial services — aligned with Jamaica\'s lead sector.',
+    keyCountries: ['Jamaica', 'Barbados', 'Trinidad & Tobago'],
+    signal: 'high_growth',
     icon: TrendingUp,
+    link: '/sectors/fintech',
   },
   {
     key: 'bpo',
@@ -110,6 +111,7 @@ const CARIBBEAN_SECTORS: Sector[] = [
     keyCountries: ['Jamaica', 'Barbados', 'Dominican Republic'],
     signal: 'emerging',
     icon: Ship,
+    link: '/sectors/digital-infrastructure',
   },
   {
     key: 'logistics',
@@ -119,6 +121,15 @@ const CARIBBEAN_SECTORS: Sector[] = [
     signal: 'stable',
     icon: Ship,
     link: '/sectors/logistics',
+  },
+  {
+    key: 'agriculture',
+    name: 'Agro-Export & Blue Economy',
+    description: 'Specialty crops, agro-processing, fisheries, and sustainable marine economy — key to Jamaica and regional food security.',
+    keyCountries: ['Jamaica', 'Dominican Republic', 'Guyana'],
+    signal: 'stable',
+    icon: Sprout,
+    link: '/sectors/agriculture',
   },
 ];
 

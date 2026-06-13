@@ -23,6 +23,7 @@ interface LeadSubmission {
   organization_type?: string;
   role?: string;
   inquiry_type?: string;
+  access_type?: string;
   message?: string;
   source_page?: string;
 }
@@ -104,6 +105,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const accessType = sanitizeString(body.access_type);
+    const VALID_ACCESS_TYPES = ['explorer', 'professional', 'business', 'institutional'];
+
     const submission: LeadSubmission & { ip_address: string; user_agent: string } = {
       form_type: formType,
       email,
@@ -113,6 +117,7 @@ export async function POST(request: NextRequest) {
       organization_type: sanitizeString(body.organization_type),
       role: sanitizeString(body.role),
       inquiry_type: sanitizeString(body.inquiry_type),
+      access_type: accessType && VALID_ACCESS_TYPES.includes(accessType) ? accessType : undefined,
       message: sanitizeString(body.message),
       source_page: sanitizeString(body.source_page),
       ip_address: ip,

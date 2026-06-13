@@ -25,6 +25,11 @@ export const env = {
     afdb: () => getEnvVar('AFDB_API_KEY', false),
     tradingEconomics: () => getEnvVar('TRADING_ECONOMICS_API_KEY', false),
     iea: () => getEnvVar('IEA_API_TOKEN', false),
+    gemini: () => getEnvVar('GEMINI_API_KEY', false),
+  },
+  ai: {
+    geminiApiKey: () => getEnvVar('GEMINI_API_KEY', false),
+    geminiModel: () => getEnvVar('GEMINI_MODEL', false) || 'gemini-2.5-flash',
   },
   app: {
     env: () => getEnvVar('APP_ENV', false) || 'dev',
@@ -35,6 +40,9 @@ export const env = {
 // External API base URLs (no keys required for public APIs)
 export const DATA_SOURCE_URLS = {
   worldBank: 'https://api.worldbank.org/v2',
+  imfDataServices: 'https://dataservices.imf.org/REST/SDMX_JSON.svc',
+  faostat: 'https://fenixservices.fao.org/faostat/api/v1/en',
+  worldBankProjects: 'https://search.worldbank.org/api/v2/projects',
   imf: 'https://api.imf.org',
   oecd: 'https://sdmx.oecd.org/public/rest/v1',
   restCountries: 'https://restcountries.com/v3.1',

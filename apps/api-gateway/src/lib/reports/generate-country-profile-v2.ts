@@ -16,10 +16,11 @@ export type CountryProfileV2Result =
   | { ok: false; preflight: PreflightReport };
 
 export function runCountryProfileIntegrity(
-  payload: CountryProfileReportData
+  payload: CountryProfileReportData,
+  options: { strict?: boolean } = {}
 ): PreflightReport {
   const canonical = canonicalizeCountryPayload(payload);
-  return preflightValidate(payload, canonical);
+  return preflightValidate(payload, canonical, { strict: options.strict });
 }
 
 export async function generateCountryProfileCoverV2(
@@ -48,7 +49,7 @@ export async function generateCountryProfileFullV2(
   options: CountryProfileV2GenerateOptions = {}
 ): Promise<CountryProfileV2Result> {
   const strict = options.strict !== false;
-  const preflight = runCountryProfileIntegrity(payload);
+  const preflight = runCountryProfileIntegrity(payload, { strict });
 
   if (!preflight.passed) {
     const proofBypass = options.proofLayout && isProofLayoutAllowed();
@@ -60,6 +61,7 @@ export async function generateCountryProfileFullV2(
   const html = renderCountryProfileV2Html({
     payload,
     canonical: preflight.canonical,
+    preflightWarnings: preflight.warnings,
   });
 
   const pdf = await renderHtmlToPdfA4WithHeaderFooter(html, {

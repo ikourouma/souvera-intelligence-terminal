@@ -1,0 +1,125 @@
+{
+  "generatedAt": "2026-05-31",
+  "designPrinciple": "One template engine; region manifests for policy frameworks; reports mirror 7-tab model",
+  "terminalTabs": [
+    {
+      "id": "overview",
+      "label": "Overview",
+      "entitlement": "sector_teasers",
+      "dataSources": ["souvera_country_profiles", "souvera_country_lite_v", "country-overview-content.ts"],
+      "preflight": ["narrative_year_drift", "placeholder_leak", "copy_warnings"],
+      "missingBehavior": "not_covered_panels"
+    },
+    {
+      "id": "economy",
+      "label": "Economy",
+      "entitlement": "full_macro",
+      "dataSources": ["souvera_country_observations", "country-economy-content.ts", "souvera_country_professional_v"],
+      "preflight": ["metric_conflicts", "gdp_scale_in_prose", "numeric_governance"],
+      "missingBehavior": "not_covered_panels"
+    },
+    {
+      "id": "sectors",
+      "label": "Sectors",
+      "entitlement": "sector_teasers",
+      "dataSources": ["souvera_country_sectors", "country-sectors-content.ts"],
+      "preflight": ["unsourced_numerics_in_teasers"],
+      "missingBehavior": "not_covered_panels"
+    },
+    {
+      "id": "opportunity",
+      "label": "Opportunity",
+      "entitlement": "investment_thesis",
+      "dataSources": ["souvera_country_profiles.opportunity_thesis_md", "country-opportunity-content.ts"],
+      "preflight": ["numeric_governance"],
+      "missingBehavior": "not_covered_panels"
+    },
+    {
+      "id": "risk",
+      "label": "Risk",
+      "entitlement": "risk_analysis",
+      "dataSources": ["souvera_country_profiles.risk_narrative_md", "country-risk-content.ts"],
+      "preflight": ["narrative_contradictions"],
+      "missingBehavior": "not_covered_panels"
+    },
+    {
+      "id": "trade",
+      "label": "Trade",
+      "entitlement": "trade_data",
+      "dataSources": ["*-trade.ts curated files", "policy-status-registry", "tradeSummary"],
+      "preflight": ["POLICY_NO_EVIDENCE"],
+      "missingBehavior": "not_covered_panels"
+    },
+    {
+      "id": "reports",
+      "label": "Reports",
+      "entitlement": "full_macro",
+      "dataSources": ["souvera_report_requests", "/api/v1/reports/generate"],
+      "preflight": ["preflightValidate for v2 Country Profile"],
+      "missingBehavior": "hard_block_on_preflight_errors"
+    }
+  ],
+  "reportProducts": [
+    {
+      "type": "Country Profile",
+      "minPlan": "Professional+",
+      "templateVersion": "v2",
+      "entrypoint": "generateCountryProfileFullV2 → renderCountryProfileV2Html",
+      "pageTarget": "15-25",
+      "requiredDomains": ["macro", "policy", "sectors", "trade", "narratives"],
+      "missingBehavior": "not_covered_panels",
+      "preflight": "strict",
+      "implemented": true
+    },
+    {
+      "type": "Investment Memo",
+      "minPlan": "Business+",
+      "templateVersion": "v1",
+      "entrypoint": "templates.ts → renderReportPdfBytes",
+      "pageTarget": "5-8",
+      "requiredDomains": ["opportunity", "risk", "summary"],
+      "missingBehavior": "stub_sections",
+      "preflight": "none",
+      "implemented": "partial"
+    },
+    {
+      "type": "Trade Profile",
+      "minPlan": "Business+",
+      "templateVersion": "v1",
+      "entrypoint": "templates.ts",
+      "pageTarget": "5-8",
+      "requiredDomains": ["trade", "policy"],
+      "missingBehavior": "generic_stub",
+      "preflight": "none",
+      "implemented": "partial"
+    },
+    {
+      "type": "Sector Deep-Dive",
+      "minPlan": "Business+",
+      "templateVersion": "v1",
+      "entrypoint": "templates.ts",
+      "pageTarget": "10-15",
+      "requiredDomains": ["sectors"],
+      "missingBehavior": "generic_stub",
+      "preflight": "none",
+      "implemented": "partial",
+      "gaps": ["sector not passed to API", "no v2 template"]
+    },
+    {
+      "type": "AI Custom Report",
+      "minPlan": "Business+",
+      "templateVersion": "v1",
+      "entrypoint": "templates.ts",
+      "pageTarget": "variable",
+      "requiredDomains": ["query", "profile_md"],
+      "missingBehavior": "synthesis_from_query",
+      "preflight": "none",
+      "implemented": "partial",
+      "uiOnlyParams": ["budgetRange", "timeline", "riskAppetite"]
+    }
+  ],
+  "regionManifests": {
+    "africa": { "count": 54, "frameworks": ["AGOA", "AfCFTA", "ECOWAS"], "doc": "docs/coverage/africa-coverage.md" },
+    "caribbean": { "count": 20, "frameworks": ["CBI", "CARICOM"], "doc": "docs/coverage/caribbean-coverage.md" }
+  }
+}

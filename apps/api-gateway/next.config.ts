@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  serverExternalPackages: ['puppeteer', 'puppeteer-core', '@sparticuz/chromium'],
   
   async redirects() {
     return [
@@ -16,6 +17,8 @@ const nextConfig: NextConfig = {
       { source: '/terminal/caribbean/economies', destination: '/intelligence/caribbean', permanent: true },
       { source: '/terminal/countries', destination: '/intelligence/africa', permanent: true },
       { source: '/terminal/compare', destination: '/intelligence/compare', permanent: true },
+      { source: '/terminal/map', destination: '/intelligence/map', permanent: true },
+      { source: '/terminal/caribbean', destination: '/intelligence/caribbean', permanent: true },
       { source: '/terminal/reports', destination: '/insights/briefings', permanent: true },
       { source: '/terminal/signals', destination: '/platform/signal-engine', permanent: true },
       
@@ -46,7 +49,8 @@ const nextConfig: NextConfig = {
       { source: '/sector/energy-&-renewables', destination: '/sectors/energy', permanent: true },
       { source: '/sector/mining-&-critical-minerals', destination: '/sectors/critical-minerals', permanent: true },
       { source: '/sector/fintech-&-digital-finance', destination: '/sectors/fintech', permanent: true },
-      { source: '/sector/tourism-&-hospitality', destination: '/sectors/tourism', permanent: true },
+      { source: '/sector/tourism-&-hospitality', destination: '/sectors/tourism-hospitality', permanent: true },
+      { source: '/sectors/tourism', destination: '/sectors/tourism-hospitality', permanent: true },
       { source: '/sector/logistics-&-trade', destination: '/sectors/logistics', permanent: true },
       { source: '/sector/:sector', destination: '/sectors/:sector', permanent: true },
       
