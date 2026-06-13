@@ -5,7 +5,7 @@
 // ===========================================
 
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createServerClient } from '@/lib/supabase/server';
 import { verifyAdminAccess } from '@/lib/admin/verify-admin';
 
 export async function GET() {
@@ -19,7 +19,7 @@ export async function GET() {
   }
 
   try {
-    const supabase = await createClient();
+    const supabase = await createServerClient();
 
     const { data: ingestionJobs, error: ingestionError } = await supabase
       .from('souvera_ingestion_jobs')
