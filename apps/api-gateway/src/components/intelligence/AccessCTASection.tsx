@@ -2,12 +2,17 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
 export function AccessCTASection() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
-
+  const searchParams = useSearchParams();
+  
+  // Hide this section if a country is selected
+  const selectedCountry = searchParams.get('selected');
+  
   useEffect(() => {
     async function checkAuth() {
       const supabase = createClient();
@@ -17,6 +22,11 @@ export function AccessCTASection() {
     }
     checkAuth();
   }, []);
+
+  // Don't show access CTA if a country is already selected
+  if (selectedCountry) {
+    return null;
+  }
 
   if (loading) {
     return (
