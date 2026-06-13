@@ -32,8 +32,9 @@ export function useUserAccess() {
         // Get current user
         const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-        if (authError) {
-          throw new Error(`Auth error: ${authError.message}`);
+        // Missing session is not an error - it just means user is not logged in
+        if (authError && authError.message !== 'Auth session missing!') {
+          console.warn('[useUserAccess] Auth error:', authError.message);
         }
 
         if (!user) {
