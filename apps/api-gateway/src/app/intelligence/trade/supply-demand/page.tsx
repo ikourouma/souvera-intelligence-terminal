@@ -7,18 +7,36 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { BarChart3, ArrowLeft, FileText, Lock } from 'lucide-react';
+import { checkServerEntitlement } from '@/lib/access/server-entitlements';
+import { UpgradePrompt } from '@/components/access';
 
 export const metadata: Metadata = {
   title: 'Supply-Demand Matrix | Trade Intelligence | Souvera',
-  description: 'Explore supply capacity and demand signals across 74 markets and 7 key sectors.',
+  description: 'Explore supply capacity and demand signals across 74 markets and 8 key sectors.',
 };
 
-export default function SupplyDemandPage() {
+export default async function SupplyDemandPage() {
+  // Check if user has access to Supply-Demand Matrix (Investor+ tier required)
+  const { hasAccess } = await checkServerEntitlement('supply_demand_matrix');
+
+  if (!hasAccess) {
+    return (
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-6">
+        <UpgradePrompt
+          feature="Supply-Demand Matrix"
+          requiredTier="investor"
+          featureDescription="Access the comprehensive 74-market × 8-sector supply-demand matrix with supply capacity scores, demand signals, and opportunity indicators across Africa and the Caribbean."
+          mode="card"
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-zinc-950">
       {/* Header */}
       <section className="border-b border-zinc-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-[1600px] mx-auto px-6 lg:px-12 py-8">
           <Link 
             href="/intelligence/trade"
             className="inline-flex items-center gap-2 text-zinc-400 hover:text-white mb-6 transition-colors"
@@ -40,7 +58,7 @@ export default function SupplyDemandPage() {
             Supply-Demand Matrix
           </h1>
           <p className="text-lg text-zinc-400 max-w-3xl">
-            Explore supply capacity and demand signals across 74 markets and 7 key sectors.
+            Macro sector signals across 74 markets and 8 key sectors — the anchor layer for trade opportunity analysis.
           </p>
 
           {/* Data Attribution */}
@@ -56,7 +74,7 @@ export default function SupplyDemandPage() {
       </section>
 
       {/* Content */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <section className="max-w-[1600px] mx-auto px-6 lg:px-12 py-12">
         {/* Access Notice */}
         <div className="mb-8 p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-lg">
           <div className="flex items-center gap-3">
@@ -102,13 +120,14 @@ export default function SupplyDemandPage() {
               </ul>
             </div>
             <div>
-              <p className="text-zinc-500 mb-2">Sectors (7)</p>
+              <p className="text-zinc-500 mb-2">Sectors (8)</p>
               <ul className="space-y-1 text-zinc-300">
+                <li>• Manufacturing & Textiles</li>
+                <li>• Agriculture & Food Processing</li>
+                <li>• Energy & Power</li>
+                <li>• Mining & Critical Minerals</li>
                 <li>• Digital Infrastructure</li>
                 <li>• Fintech & Digital Finance</li>
-                <li>• Energy & Renewables</li>
-                <li>• Agriculture & Agribusiness</li>
-                <li>• Mining & Critical Minerals</li>
                 <li>• Logistics & Trade</li>
                 <li>• Tourism & Hospitality</li>
               </ul>

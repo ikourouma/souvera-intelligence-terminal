@@ -36,6 +36,7 @@ export type EntitlementKey =
   | 'investment_thesis'
   | 'fx_metrics'
   | 'forecast_metrics'
+  | 'supply_demand_matrix'
   | 'api_access'
   | 'export_access'
   | 'admin_access'
@@ -144,6 +145,7 @@ export const PLAN_ENTITLEMENTS: Record<AccessTier, EntitlementKey[]> = {
     'investment_thesis',
     'fx_metrics',
     'forecast_metrics',
+    'supply_demand_matrix',
   ],
   institutional: [
     'country_identity',
@@ -161,6 +163,7 @@ export const PLAN_ENTITLEMENTS: Record<AccessTier, EntitlementKey[]> = {
     'export_access',
     'fx_metrics',
     'forecast_metrics',
+    'supply_demand_matrix',
   ],
   platform_admin: [
     'country_identity',
@@ -179,6 +182,7 @@ export const PLAN_ENTITLEMENTS: Record<AccessTier, EntitlementKey[]> = {
     'admin_access',
     'fx_metrics',
     'forecast_metrics',
+    'supply_demand_matrix',
   ],
   super_admin: [
     'country_identity',
@@ -197,6 +201,7 @@ export const PLAN_ENTITLEMENTS: Record<AccessTier, EntitlementKey[]> = {
     'admin_access',
     'fx_metrics',
     'forecast_metrics',
+    'supply_demand_matrix',
     'super_admin_access',
     'user_management',
     'system_configuration',

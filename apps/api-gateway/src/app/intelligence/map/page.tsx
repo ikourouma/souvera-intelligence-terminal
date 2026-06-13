@@ -5,6 +5,7 @@ import { SouveraMegaNav } from '@/components/ui/SouveraMegaNav';
 import { SouveraFooter } from '@/components/ui/SouveraFooter';
 import { SouveraMapWorkspaceWithUrl } from '@/components/intelligence/SouveraMapWorkspaceWithUrl';
 import { RegionAwareMapHero } from '@/components/intelligence/RegionAwareMapHero';
+import { AccessCTASection } from '@/components/intelligence/AccessCTASection';
 
 export const metadata: Metadata = {
   title: 'Intelligence Map | Africa Intelligence Terminal | Souvera',
@@ -51,35 +52,7 @@ export default function MapPage() {
       </section>
 
       {/* Enhanced Access Section */}
-      <section className="py-12 lg:py-16 border-t border-zinc-800">
-        <div className="max-w-[1600px] mx-auto px-6 lg:px-12">
-          <div className="max-w-3xl">
-            <h2
-              className="text-xl lg:text-2xl font-bold mb-4"
-              style={{ fontFamily: 'Space Grotesk, sans-serif' }}
-            >
-              Enhanced Intelligence Access
-            </h2>
-            <p className="text-zinc-400 leading-relaxed mb-6">
-              Advanced intelligence features including FDI data, full sector rationale, investment signals, and comprehensive country narratives are available to Professional and Business tier users.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <Link
-                href="/access/request-access"
-                className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] tracking-widest uppercase transition-all rounded-sm"
-              >
-                Request Access
-              </Link>
-              <Link
-                href="/intelligence/africa"
-                className="px-8 py-4 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-white font-bold text-[11px] tracking-widest uppercase transition-all rounded-sm"
-              >
-                Africa Regional Overview
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+      <AccessCTASection />
 
       <SouveraFooter />
     </main>
