@@ -30,8 +30,12 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
   const { isAdmin } = await verifyAdminAccess();
   
   if (!isAdmin) {
-    redirect('/login?redirect=/admin/data/sources');
+    redirect('/login?redirect=/admin');
   }
+
+  const dashboardNavItems = [
+    { href: '/admin', label: 'Dashboard', icon: Home },
+  ];
 
   const navItems = [
     { href: '/admin/data/sources', label: 'Data Sources', icon: Database },
@@ -90,6 +94,17 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
           {/* Sidebar Navigation */}
           <aside className="w-64 flex-shrink-0">
             <nav className="sticky top-24 space-y-1">
+              {dashboardNavItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-colors group mb-4"
+                >
+                  <item.icon className="w-5 h-5 text-zinc-500 group-hover:text-emerald-400 transition-colors" />
+                  <span className="text-sm font-medium">{item.label}</span>
+                </Link>
+              ))}
+
               <p className="px-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-4">
                 Data Management
               </p>
