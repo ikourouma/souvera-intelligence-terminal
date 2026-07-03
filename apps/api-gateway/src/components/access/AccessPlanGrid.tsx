@@ -3,8 +3,33 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { CheckCircle2, ArrowRight } from 'lucide-react';
+import { CheckCircle2, ArrowRight, Loader2 } from 'lucide-react';
 import { ACCESS_PLANS, type AccessPlan } from '@/lib/access-plans';
+
+interface CMSPlan {
+  plan_id: string;
+  display_name: string;
+  badge_text: string;
+  badge_color: string;
+  tagline?: string;
+  description: string;
+  features: string[];
+  cta_text: string;
+  cta_url: string;
+  cta_style: string;
+  is_featured: boolean;
+  is_visible: boolean;
+  show_price?: boolean;
+  price_monthly?: number;
+  price_annual?: number;
+  display_order: number;
+}
+
+interface MergedPlan extends AccessPlan {
+  priceMonthly?: number | null;
+  priceAnnual?: number | null;
+  showPrice?: boolean;
+}
 
 function appendSource(href: string, source: string | null): string {
   if (!source) return href;
@@ -17,6 +42,48 @@ export function AccessPlanGrid() {
   const highlightParam = searchParams.get('highlight') as string | null;
   const source = searchParams.get('source');
   const [hashPlan, setHashPlan] = useState<string | null>(null);
+  const [plans, setPlans] = useState<MergedPlan[]>(ACCESS_PLANS.map(p => ({ ...p })));
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchCMSPricing() {
+      try {
+        const response = await fetch('/api/v1/marketing/pricing');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.plans && data.plans.length > 0) {
+            const cmsPlans = data.plans as CMSPlan[];
+            
+            setPlans(ACCESS_PLANS.map(staticPlan => {
+              const cmsPlan = cmsPlans.find(cp => cp.plan_id === staticPlan.id);
+              if (cmsPlan) {
+                return {
+                  ...staticPlan,
+                  name: cmsPlan.display_name || staticPlan.name,
+                  badge: cmsPlan.badge_text || staticPlan.badge,
+                  badgeColor: cmsPlan.badge_color || staticPlan.badgeColor,
+                  description: cmsPlan.description || staticPlan.description,
+                  features: cmsPlan.features?.length > 0 ? cmsPlan.features : staticPlan.features,
+                  cta: cmsPlan.cta_text || staticPlan.cta,
+                  ctaHref: cmsPlan.cta_url || staticPlan.ctaHref,
+                  featured: cmsPlan.is_featured ?? staticPlan.featured,
+                  priceMonthly: cmsPlan.price_monthly,
+                  priceAnnual: cmsPlan.price_annual,
+                  showPrice: cmsPlan.show_price !== false,
+                };
+              }
+              return { ...staticPlan };
+            }));
+          }
+        }
+      } catch (err) {
+        console.error('[AccessPlanGrid] Failed to fetch CMS pricing:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchCMSPricing();
+  }, []);
 
   useEffect(() => {
     const syncHash = () => {
@@ -39,9 +106,29 @@ export function AccessPlanGrid() {
 
   const activePlan = hashPlan ?? highlightParam;
 
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="p-8 rounded-sm bg-[#121821] border border-zinc-800 animate-pulse">
+            <div className="h-6 bg-zinc-800 rounded w-20 mb-4" />
+            <div className="h-8 bg-zinc-800 rounded w-32 mb-3" />
+            <div className="h-4 bg-zinc-800 rounded w-full mb-6" />
+            <div className="space-y-3 mb-8">
+              {[1, 2, 3, 4].map((j) => (
+                <div key={j} className="h-4 bg-zinc-800 rounded w-3/4" />
+              ))}
+            </div>
+            <div className="h-12 bg-zinc-800 rounded" />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {ACCESS_PLANS.map((plan) => (
+      {plans.map((plan) => (
         <PlanCard
           key={plan.id}
           plan={plan}
@@ -58,10 +145,15 @@ function PlanCard({
   highlighted,
   ctaHref,
 }: {
-  plan: AccessPlan;
+  plan: MergedPlan;
   highlighted: boolean;
   ctaHref: string;
 }) {
+  const formatPrice = (price: number) => {
+    if (price === 0) return 'Free';
+    return `$${price.toLocaleString()}`;
+  };
+
   return (
     <div
       id={`plan-${plan.id}`}
@@ -90,9 +182,29 @@ function PlanCard({
           </span>
         )}
       </div>
-      <h3 className="text-2xl font-bold mb-3" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+      <h3 className="text-2xl font-bold mb-2" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
         {plan.name}
       </h3>
+      
+      {/* Price Display */}
+      {plan.showPrice && plan.priceMonthly !== undefined && plan.priceMonthly !== null && (
+        <div className="mb-4">
+          <div className="flex items-baseline gap-1">
+            <span className="text-3xl font-bold text-white" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+              {formatPrice(plan.priceMonthly)}
+            </span>
+            {plan.priceMonthly > 0 && (
+              <span className="text-sm text-zinc-500">/month</span>
+            )}
+          </div>
+          {plan.priceAnnual && plan.priceMonthly > 0 && (
+            <p className="text-xs text-zinc-500 mt-1">
+              ${plan.priceAnnual.toLocaleString()}/year (save {Math.round((1 - plan.priceAnnual / (plan.priceMonthly * 12)) * 100)}%)
+            </p>
+          )}
+        </div>
+      )}
+      
       <p className="text-sm text-zinc-500 leading-relaxed mb-6">{plan.description}</p>
       <div className="space-y-3 mb-8 flex-1">
         {plan.features.map((feature) => (

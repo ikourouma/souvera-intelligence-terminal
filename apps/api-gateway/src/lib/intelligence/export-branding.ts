@@ -31,6 +31,12 @@ export function iso3ToIso2(iso3?: string): string {
   return ISO3_TO_ISO2[upper] || upper.slice(0, 2);
 }
 
+/** Flag CDN URL for PNG export headers (falls back when DB flag_svg_url absent). */
+export function flagUrlFromIso3(iso3?: string): string | undefined {
+  const iso2 = iso3ToIso2(iso3)?.toLowerCase();
+  return iso2 ? `https://flagcdn.com/${iso2}.svg` : undefined;
+}
+
 export const EXPORT_BRAND = {
   domain: 'souveraterminal.com',
   email: 'intelligence@souveraterminal.com',
@@ -64,4 +70,25 @@ export function countryExportContext(country?: {
     flagUrl: country?.flagUrl,
     iso2: country?.iso2,
   };
+}
+
+/** Canonical country label for trade intelligence matrix country columns. */
+export function formatTradeCountryLabel(iso3: string, name?: string | null): string {
+  const code = iso3?.toUpperCase().trim() ?? '';
+  const label = name?.trim();
+  if (code && label) return `${code} - ${label}`;
+  return code || label || '—';
+}
+
+/** Case-insensitive match against ISO3 code or display name (null-safe). */
+export function tradeCountryMatchesSearch(
+  iso3: string,
+  name: string | null | undefined,
+  query: string,
+): boolean {
+  const q = query.toLowerCase().trim();
+  if (!q) return true;
+  if (iso3?.toLowerCase().includes(q)) return true;
+  if (name?.toLowerCase().includes(q)) return true;
+  return formatTradeCountryLabel(iso3, name).toLowerCase().includes(q);
 }

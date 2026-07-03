@@ -120,6 +120,7 @@ export function dbRowToPolicyRecord(row: DbPolicyRow): PolicyStatusRecord {
     lastReviewedDisplay: row.status_effective_date
       ? String(row.status_effective_date).slice(0, 4) + ' list'
       : formatReportStampDate(row.last_reviewed_at),
+    statusEffectiveDate: row.status_effective_date ?? null,
     evidenceArtifactId: row.evidence_artifact_id,
     publishable: artifactOk && status !== 'needs_review' && status !== 'unknown',
   };

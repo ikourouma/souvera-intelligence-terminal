@@ -7,16 +7,16 @@ import { ArrowRight, UserPlus, Building2, Briefcase, ChevronDown } from 'lucide-
 
 export default function RegisterPage() {
   return (
-    <main className="min-h-screen bg-zinc-950 flex flex-col md:flex-row">
+    <main className="min-h-screen bg-zinc-950 flex flex-col md:flex-row md:h-screen md:overflow-hidden">
       {/* Left Side: Marketing Slider */}
       <AuthSlider />
 
       {/* Right Side: Auth Form */}
-      <div className="w-full md:w-1/2 flex items-center justify-center p-8 lg:p-20 relative overflow-y-auto bg-zinc-950">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/5 rounded-full blur-[120px] -mr-64 -mt-64" />
-        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-emerald-500/5 rounded-full blur-[100px] -ml-32 -mb-32" />
+      <div className="w-full md:w-1/2 md:flex-1 flex flex-col items-stretch relative overflow-y-auto bg-zinc-950 px-8 lg:px-12 xl:px-16">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/5 rounded-full blur-[120px] -mr-64 -mt-64 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-emerald-500/5 rounded-full blur-[100px] -ml-32 -mb-32 pointer-events-none" />
 
-        <div className="w-full max-w-lg relative z-10 py-12">
+        <div className="w-full max-w-xl lg:max-w-2xl mx-auto pt-14 md:pt-6 pb-6 lg:py-10 relative z-10">
           {/* Logo Section */}
           <div className="mb-10">
             <Link href="/" className="flex items-center gap-3 mb-8 group">
@@ -29,7 +29,11 @@ export default function RegisterPage() {
               </span>
             </Link>
             <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">Institutional Onboarding.</h1>
-            <p className="text-zinc-500 text-sm font-medium">Join the world's most elite market intelligence network</p>
+            <p className="text-zinc-500 text-sm font-medium leading-relaxed">
+              Join the world&apos;s most elite
+              <br />
+              market intelligence network
+            </p>
           </div>
 
           {/* Form */}

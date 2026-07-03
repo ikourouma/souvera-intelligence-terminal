@@ -78,8 +78,8 @@ export function TrustSourceLayer({ region, title = 'Data Sources & Credibility' 
               Coverage
             </h3>
             <p className="text-sm text-zinc-400 leading-relaxed">
-              {region === 'africa' ? '54 nations' : region === 'caribbean' ? '20 territories' : 'All markets'}, 
-              {' '}6 core sectors, 20+ indicators per country.
+              {region === 'africa' ? '54 nations' : region === 'caribbean' ? '20 territories' : '74 markets'},{' '}
+              8 core sectors, 20+ indicators per country.
             </p>
           </div>
         </div>
@@ -92,16 +92,17 @@ export function TrustSourceLayer({ region, title = 'Data Sources & Credibility' 
               <h4 className="text-sm font-bold text-emerald-400 mb-2">
                 {DATA_STATUS_LABELS.previewData}
               </h4>
-              <p className="text-sm text-emerald-400/80 leading-relaxed mb-3">
-                Souvera combines live institutional feeds with editorially curated country profiles.
-                Pilot terminals (Nigeria, Jamaica) are fully populated. All metrics are
-                source-attributed and tier-gated.
+              <p className="text-sm text-emerald-400/80 leading-relaxed mb-2">
+                Souvera combines live institutional feeds (World Bank, IMF, GDELT News Pulse) with
+                editorially curated country profiles for pilot markets. Every metric is source-attributed
+                and tier-gated.
               </p>
+              <p className="text-xs text-emerald-400/60 mb-3">{DATA_STATUS_LABELS.pilotNote}</p>
               <Link
-                href="/resources/source-registry"
+                href="/resources/data-sources"
                 className="text-sm text-emerald-400 hover:text-emerald-300 underline"
               >
-                View Source Registry →
+                View data sources →
               </Link>
             </div>
           </div>

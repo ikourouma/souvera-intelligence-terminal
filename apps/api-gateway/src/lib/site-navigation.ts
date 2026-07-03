@@ -15,6 +15,9 @@ import {
 export interface SiteNavLink {
   name: string;
   href: string;
+  /** Featured link — rendered with distinct highlight styling in mega menu */
+  featured?: boolean;
+  badge?: string;
 }
 
 export interface SiteNavSection {
@@ -65,6 +68,12 @@ export const SITE_MEGA_NAV: SiteNavItem[] = [
       {
         title: 'Trade & Policy',
         links: [
+          {
+            name: 'AfCETA Trade Intelligence',
+            href: '/intelligence/trade/afceta',
+            featured: true,
+            badge: 'New',
+          },
           { name: 'Trade Intelligence', href: '/intelligence/trade' },
           { name: 'AGOA Legislative Tracker', href: '/intelligence/trade/agoa' },
           { name: 'AfCFTA Status Tracker', href: '/intelligence/trade/afcfta' },
@@ -195,7 +204,20 @@ export const MOBILE_UTILITY_LINKS: SiteNavLink[] = [
 ];
 
 /** Footer column links derived from the same structure where possible */
-export const FOOTER_LINK_GROUPS = {
+export interface FooterNavLink {
+  name: string;
+  href: string;
+  highlight?: 'afceta' | 'access';
+}
+
+export const FOOTER_LINK_GROUPS: {
+  platform: FooterNavLink[];
+  intelligence: FooterNavLink[];
+  insights: FooterNavLink[];
+  access: FooterNavLink[];
+  company: FooterNavLink[];
+  legal: FooterNavLink[];
+} = {
   platform: [
     { name: 'Platform Overview', href: '/platform' },
     { name: 'Intelligence Terminal', href: '/platform/terminal' },
@@ -208,6 +230,7 @@ export const FOOTER_LINK_GROUPS = {
     { name: 'Africa Intelligence', href: '/intelligence/africa' },
     { name: 'Caribbean Intelligence', href: '/intelligence/caribbean' },
     { name: 'Trade Intelligence', href: '/intelligence/trade' },
+    { name: 'AfCETA Trade Intelligence', href: '/intelligence/trade/afceta', highlight: 'afceta' },
     { name: 'AGOA Legislative Tracker', href: '/intelligence/trade/agoa' },
     { name: 'AfCFTA Status Tracker', href: '/intelligence/trade/afcfta' },
     { name: 'Supply-Demand Matrix', href: '/intelligence/trade/supply-demand' },
@@ -222,7 +245,7 @@ export const FOOTER_LINK_GROUPS = {
     { name: 'Data Methodology', href: '/insights/methodology' },
   ],
   access: [
-    { name: 'Request Access', href: '/access/request-access' },
+    { name: 'Request Access', href: '/access/request-access', highlight: 'access' },
     { name: 'Access Plans', href: '/access' },
     { name: 'Institutional Solutions', href: '/access/institutional' },
     { name: 'Request Demo', href: '/access/request-demo' },
@@ -241,4 +264,4 @@ export const FOOTER_LINK_GROUPS = {
     { name: 'Compliance', href: '/resources/compliance' },
     { name: 'Data Sources', href: '/resources/data-sources' },
   ],
-} as const;
+};

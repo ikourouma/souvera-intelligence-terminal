@@ -6,7 +6,23 @@ import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 
 // Admin-managed via Supabase `hero_slides` table.
 // Each slide: title, subtitle, badge, cta_primary, cta_secondary, stat_1, stat_2, bg_accent
+const AFCETA_HERO_SLIDE = {
+  id: 0,
+  badge: 'AfCETA Trade Intelligence',
+  title: 'Introducing AfCETA\nTrade Intelligence\nFor the Two Regions.',
+  titleLines: ['Introducing AfCETA', 'Trade Intelligence', 'For the Two Regions.'],
+  subtitle:
+    'Corridor opportunity scoring and tradable-asset mapping for governments, DFIs, and enterprises working across Africa and the Caribbean.',
+  cta_primary: { label: 'Explore AfCETA', href: '/intelligence/trade/afceta' },
+  cta_secondary: { label: 'Corridor Index', href: '/intelligence/trade/afceta/flows' },
+  stat_1: { value: '74', label: 'Markets Connected' },
+  stat_2: { value: '8', label: 'Trade Categories' },
+  ticker: ['GHA→JAM', 'NGA→TTO', 'KEN→KNA', 'Accra→Basseterre'],
+  accent: '#C026D3',
+};
+
 const FALLBACK_SLIDES = [
+  AFCETA_HERO_SLIDE,
   {
     id: 1,
     badge: 'Intelligence Platform',
@@ -45,7 +61,22 @@ const FALLBACK_SLIDES = [
   },
 ];
 
-type Slide = typeof FALLBACK_SLIDES[0];
+type Slide = typeof FALLBACK_SLIDES[0] & { titleLines?: string[] };
+
+function slideTitleLines(slide: Slide): string[] {
+  if (slide.titleLines?.length) return slide.titleLines;
+  return slide.title.replace(/\\n/g, '\n').split('\n').filter(Boolean);
+}
+
+function normalizeAfcetaSlide(slide: Slide): Slide {
+  if (!slide.cta_primary.href.includes('/intelligence/trade/afceta')) return slide;
+  return {
+    ...slide,
+    badge: AFCETA_HERO_SLIDE.badge,
+    title: AFCETA_HERO_SLIDE.title,
+    titleLines: AFCETA_HERO_SLIDE.titleLines,
+  };
+}
 
 // Live macro ticker data (scrolling strip at bottom of hero)
 const TICKER_ITEMS = [
@@ -63,8 +94,59 @@ const TICKER_ITEMS = [
   { label: 'TTO', value: 'LNG+', color: '#F59E0B' },
 ];
 
+function transformCMSSlide(cmsSlide: Record<string, unknown>): Slide {
+  return {
+    id: cmsSlide.id as number || Math.random(),
+    badge: (cmsSlide.badge as string) || 'Intelligence Platform',
+    title: (cmsSlide.title as string) || '',
+    subtitle: (cmsSlide.subtitle as string) || '',
+    cta_primary: {
+      label: (cmsSlide.cta_primary_label as string) || 'Explore',
+      href: (cmsSlide.cta_primary_url as string) || '/platform',
+    },
+    cta_secondary: {
+      label: (cmsSlide.cta_secondary_label as string) || 'Learn More',
+      href: (cmsSlide.cta_secondary_url as string) || '/access/request-access',
+    },
+    stat_1: {
+      value: (cmsSlide.stat_1_value as string) || '',
+      label: (cmsSlide.stat_1_label as string) || '',
+    },
+    stat_2: {
+      value: (cmsSlide.stat_2_value as string) || '',
+      label: (cmsSlide.stat_2_label as string) || '',
+    },
+    ticker: (cmsSlide.ticker_items as string[]) || [],
+    accent: (cmsSlide.accent_color as string) || '#2563EB',
+  };
+}
+
 export function SouveraHero() {
-  const [slides] = useState<Slide[]>(FALLBACK_SLIDES);
+  const [slides, setSlides] = useState<Slide[]>(FALLBACK_SLIDES);
+
+  useEffect(() => {
+    async function fetchSlides() {
+      try {
+        const response = await fetch('/api/v1/marketing/hero-slides');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.slides && data.slides.length > 0) {
+            const fromCms = data.slides.map(transformCMSSlide).map(normalizeAfcetaSlide);
+            const afcetaSlide = fromCms.find((s: Slide) =>
+              s.cta_primary.href.includes('/intelligence/trade/afceta'),
+            );
+            const rest = fromCms.filter(
+              (s: Slide) => !s.cta_primary.href.includes('/intelligence/trade/afceta'),
+            );
+            setSlides(afcetaSlide ? [afcetaSlide, ...rest] : [AFCETA_HERO_SLIDE, ...fromCms]);
+          }
+        }
+      } catch (err) {
+        console.error('[SouveraHero] Failed to fetch CMS slides:', err);
+      }
+    }
+    fetchSlides();
+  }, []);
   const [current, setCurrent] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -111,7 +193,7 @@ export function SouveraHero() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
 
           {/* LEFT: Copy */}
-          <div className="lg:col-span-6 space-y-8" style={{ opacity: isTransitioning ? 0 : 1, transition: 'opacity 0.3s ease' }}>
+          <div className="lg:col-span-6 space-y-8 lg:pr-6" style={{ opacity: isTransitioning ? 0 : 1, transition: 'opacity 0.3s ease' }}>
 
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm" style={{ background: 'rgba(37,99,235,0.1)', border: '1px solid rgba(37,99,235,0.2)' }}>
@@ -124,13 +206,20 @@ export function SouveraHero() {
               </span>
             </div>
 
-            {/* Headline */}
-            <h1 className="font-bold leading-[1.02] tracking-tight" style={{ fontFamily: 'Space Grotesk, Inter, sans-serif', fontSize: 'clamp(48px, 6.5vw, 84px)', color: '#F9FAFB', whiteSpace: 'pre-line' }}>
-              {slide.title.replace(/\\n/g, '\n')}
+            {/* Headline — one block per line so lines do not reflow mid-phrase */}
+            <h1
+              className="font-bold leading-[1.02] tracking-tight"
+              style={{ fontFamily: 'Space Grotesk, Inter, sans-serif', fontSize: 'clamp(40px, 5.42vw, 70px)', color: '#F9FAFB' }}
+            >
+              {slideTitleLines(slide).map((line) => (
+                <span key={line} className="block whitespace-nowrap max-sm:whitespace-normal">
+                  {line}
+                </span>
+              ))}
             </h1>
 
             {/* Subtext */}
-            <p className="leading-relaxed max-w-xl font-light" style={{ color: '#9CA3AF', fontSize: 'clamp(16px, 1.8vw, 20px)' }}>
+            <p className="leading-relaxed max-w-xl font-light" style={{ color: '#9CA3AF', fontSize: 'clamp(13px, 1.5vw, 17px)' }}>
               {slide.subtitle}
             </p>
 

@@ -164,6 +164,26 @@ export async function GET(request: NextRequest) {
       categoryGroupTotals[r.category_group].country_count += 1;
     }
 
+    // Top traders by country (aggregate US trade across categories)
+    const countryTotals: Record<string, { name: string; usTrade: number; total: number; cbi: boolean; caricom: boolean }> = {};
+    for (const r of rows) {
+      if (!countryTotals[r.iso3]) {
+        countryTotals[r.iso3] = { 
+          name: r.country_name, 
+          usTrade: 0, 
+          total: 0, 
+          cbi: r.cbi_beneficiary ?? false,
+          caricom: r.caricom_member ?? false 
+        };
+      }
+      countryTotals[r.iso3].usTrade += r.trade_with_us_usd ?? 0;
+      countryTotals[r.iso3].total += direction === 'imports' ? (r.total_imports_usd ?? 0) : (r.total_exports_usd ?? 0);
+    }
+    const topTraders = Object.entries(countryTotals)
+      .sort(([, a], [, b]) => b.usTrade - a.usTrade)
+      .slice(0, 10)
+      .map(([iso3, data]) => ({ iso3, ...data }));
+
     return NextResponse.json({
       rows,
       summary: {
@@ -177,6 +197,7 @@ export async function GET(request: NextRequest) {
         cbi_beneficiaries: cbiCount,
         caricom_members: caricomCount,
         category_group_totals: categoryGroupTotals,
+        top_traders: topTraders,
         data_vintage: `${yearFilter}`,
         direction,
         legislative_deadline: '2026-12-31', // CBTPA expiration (same as AGOA)

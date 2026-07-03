@@ -9,9 +9,12 @@ import {
   ArrowUpRight, ArrowDownLeft, Repeat,
 } from 'lucide-react';
 import { exportElementToPNG } from '@/lib/intelligence/export-png';
-import { iso3ToIso2 } from '@/lib/intelligence/export-branding';
+import { iso3ToIso2, flagUrlFromIso3, formatTradeCountryLabel, tradeCountryMatchesSearch } from '@/lib/intelligence/export-branding';
+import { buildCuratedCardAnalysisForExport } from '@/lib/intelligence/generate-card-analysis';
 import { HighlightedText } from '@/components/intelligence/HighlightedText';
+import { CollapsibleAnalysis } from '@/components/intelligence/CollapsibleAnalysis';
 import { DirectionToggle, FlowDirection } from '@/components/intelligence/DirectionToggle';
+import { Top10Card, Top10Item } from '@/components/intelligence/Top10Card';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -57,6 +60,7 @@ interface TradeFlowResponse {
       total_trade_usd: number;
       country_count: number;
     }>;
+    top_traders?: Array<{ iso3: string; name: string; intraAfrica: number; total: number }>;
     data_vintage: string;
   };
   attribution: { sources: string[]; note: string };
@@ -132,11 +136,10 @@ function generateSouveraAnalysis(row: TradeFlowRow, direction: FlowDirection): s
   const totalValue = isImport ? row.total_imports_usd : row.total_exports_usd;
   const topPartner = row.top_partners?.[0];
   const topProduct = row.top_products?.[0];
-  const prefMargin = row.preference_margin_pct;
 
   const flowText = isImport
-    ? `${row.country_name} imports ${usdB(totalValue ?? 0)} in ${row.category_label.toLowerCase()}, with ${pct(africaShare)} (${usdB(africaValue ?? 0)}) sourced from African partners.`
-    : `${row.country_name} exports ${usdB(totalValue ?? 0)} in ${row.category_label.toLowerCase()}, with ${pct(africaShare)} (${usdB(africaValue ?? 0)}) going to African markets.`;
+    ? `${formatTradeCountryLabel(row.iso3, row.country_name)} imports ${usdB(totalValue ?? 0)} in ${row.category_label.toLowerCase()}, with ${pct(africaShare)} (${usdB(africaValue ?? 0)}) sourced from African partners.`
+    : `${formatTradeCountryLabel(row.iso3, row.country_name)} exports ${usdB(totalValue ?? 0)} in ${row.category_label.toLowerCase()}, with ${pct(africaShare)} (${usdB(africaValue ?? 0)}) going to African markets.`;
 
   const productText = topProduct
     ? ` Key product: ${topProduct.description} (HS ${topProduct.hsCode}) at ${usdB(topProduct.valueUsd)}/yr (${pct(topProduct.sharePct)} of category).`
@@ -146,9 +149,7 @@ function generateSouveraAnalysis(row: TradeFlowRow, direction: FlowDirection): s
     ? ` Top ${isImport ? 'supplier' : 'destination'}: ${topPartner.country} (${pct(topPartner.sharePct)}).`
     : '';
 
-  const afcftaText = prefMargin != null && prefMargin > 0
-    ? ` AfCFTA preference margin of ${pct(prefMargin)} creates a competitive advantage for intra-Africa trade.`
-    : row.roo_compliant
+  const afcftaText = row.roo_compliant
     ? ' Compliant with AfCFTA Rules of Origin.'
     : '';
 
@@ -201,8 +202,16 @@ function ExportableSection({
         cardTitle: `${country.name} — ${category ?? title}`,
         countryName: country.name,
         iso2: iso3ToIso2(country.iso3),
+        flagUrl: flagUrlFromIso3(country.iso3),
         sourceAttribution: sourceNotes,
         dataAsOf: `${year}`,
+        disclaimer: 'Curated estimates. For research and policy analysis purposes only.',
+        curatedAnalysis: buildCuratedCardAnalysisForExport({
+          cardType: 'afcfta_flows',
+          countryName: country.name,
+          iso3: country.iso3,
+          data: { Category: category ?? title, Year: year },
+        }),
       });
     } finally {
       onExportEnd();
@@ -328,9 +337,11 @@ function CountryTradeDrawer({
                 <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
                 <p className="text-indigo-300 text-[10px] font-semibold uppercase tracking-wide">Souvera Analysis</p>
               </div>
-              <p className="text-zinc-300 text-xs leading-relaxed">
-                <HighlightedText text={`${country.name}'s intra-Africa ${isImport ? 'imports total' : 'exports total'} ${usdB(africaValue)}/yr across ${rows.length} product categories, representing ${pct(africaShare)} of total ${isImport ? 'imports' : 'exports'}. AfCFTA tariff liberalization is expected to boost intra-regional trade by 15-25% by 2030. ${country.name}'s strategic position within AfCFTA regional blocs (${rows[0]?.sub_region || 'African Union'}) enhances market access opportunities.`} />
-              </p>
+              <CollapsibleAnalysis
+                text={`${country.name}'s intra-Africa ${isImport ? 'imports total' : 'exports total'} ${usdB(africaValue)}/yr across ${rows.length} product categories, representing ${pct(africaShare)} of total ${isImport ? 'imports' : 'exports'}.\n\nAfCFTA tariff liberalization is expected to boost intra-regional trade by 15-25% by 2030. ${country.name}'s strategic position within AfCFTA regional blocs (${rows[0]?.sub_region || 'African Union'}) enhances market access opportunities and positions the economy for expanded continental integration.`}
+                titleClass="hidden"
+                className="text-zinc-300 text-xs"
+              />
             </div>
           </ExportableSection>
 
@@ -432,9 +443,11 @@ function CountryTradeDrawer({
                           <Sparkles className="w-3 h-3 text-violet-400" />
                           <p className="text-violet-300 text-[9px] font-semibold uppercase tracking-wide">Souvera Analysis</p>
                         </div>
-                        <p className="text-zinc-300 text-xs leading-relaxed">
-                          <HighlightedText text={generateSouveraAnalysis(r, direction)} />
-                        </p>
+                        <CollapsibleAnalysis
+                          text={generateSouveraAnalysis(r, direction)}
+                          titleClass="hidden"
+                          className="text-zinc-300 text-xs"
+                        />
                       </div>
                     </div>
                   </ExportableSection>
@@ -498,6 +511,12 @@ function CategoryCard({ group, rows, direction, onCountryClick }: {
         sourceAttribution: 'AfCFTA Secretariat · ITC Trade Map · UN Comtrade',
         dataAsOf: rows[0]?.year?.toString() ?? '2023',
         disclaimer: 'Curated estimates. For research and policy analysis purposes only.',
+        curatedAnalysis: buildCuratedCardAnalysisForExport({
+          cardType: 'afcfta_flows',
+          countryName: meta?.label ?? group,
+          iso3: 'AFC',
+          data: { Category: meta?.label ?? group, Direction: direction, Countries: rows.length },
+        }),
       });
     } finally {
       setExporting(false);
@@ -584,14 +603,16 @@ function CategoryCard({ group, rows, direction, onCountryClick }: {
                     key={r.id}
                     onClick={() => onCountryClick({ iso3: r.iso3, name: r.country_name }, group)}
                     className="border-b border-zinc-800/60 hover:bg-zinc-800/50 cursor-pointer transition-colors group"
-                    title={`Click for ${r.country_name} AfCFTA profile`}
+                    title={`Click for ${formatTradeCountryLabel(r.iso3, r.country_name)} AfCFTA profile`}
                   >
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <Users className="w-3 h-3 text-zinc-600 group-hover:text-emerald-400 transition-colors shrink-0" />
                         <div>
-                          <p className="text-white font-medium text-xs group-hover:text-emerald-300 transition-colors">{r.country_name}</p>
-                          <p className="text-zinc-500 text-[10px]">{r.iso3} · {r.sub_region || r.region}</p>
+                          <p className="text-white font-medium text-xs group-hover:text-emerald-300 transition-colors">{formatTradeCountryLabel(r.iso3, r.country_name)}</p>
+                          {(r.sub_region || r.region) ? (
+                            <p className="text-zinc-500 text-[10px]">{r.sub_region || r.region}</p>
+                          ) : null}
                         </div>
                       </div>
                     </td>
@@ -693,10 +714,9 @@ export function AfCFTATradeIntelligence() {
   const byGroup = useMemo(() => {
     if (!data?.rows) return {};
     const grouped: Record<string, TradeFlowRow[]> = {};
-    const searchLower = countrySearch.toLowerCase().trim();
     for (const r of data.rows) {
       if (regionFilter && r.region !== regionFilter && r.sub_region !== regionFilter) continue;
-      if (searchLower && !r.country_name.toLowerCase().includes(searchLower) && !r.iso3.toLowerCase().includes(searchLower)) continue;
+      if (!tradeCountryMatchesSearch(r.iso3, r.country_name, countrySearch)) continue;
       if (!grouped[r.category_group]) grouped[r.category_group] = [];
       grouped[r.category_group].push(r);
     }
@@ -809,11 +829,32 @@ export function AfCFTATradeIntelligence() {
             <p className="text-white font-semibold text-sm">AfCFTA — Building African Trade Integration</p>
             <p className="text-zinc-300 text-sm mt-1 leading-relaxed">
               {isImport
-                ? 'Import Intelligence shows what African nations source from within the continent. AfCFTA tariff liberalization is creating new opportunities for African suppliers to compete against extra-continental imports. The preference margin represents the tariff advantage African exporters enjoy under AfCFTA vs. MFN rates.'
+                ? 'Import Intelligence shows what African nations source from within the continent. AfCFTA tariff liberalization is creating new opportunities for African suppliers to compete against extra-continental imports. Eligibility is determined by AfCFTA rules of origin and product-specific tariff schedules — not a flat preference margin.'
                 : 'Export Intelligence shows what African nations sell to regional partners. AfCFTA aims to boost intra-Africa exports from ~18% to 50% of total African trade by 2030. Identifying high-growth export corridors supports continental value chain development.'}
             </p>
           </div>
         </div>
+
+        {/* Top 10 Traders */}
+        {data?.summary?.top_traders && data.summary.top_traders.length > 0 && (
+          <Top10Card
+            title={isImport ? 'Top 10 Intra-Africa Importers' : 'Top 10 Intra-Africa Exporters'}
+            items={data.summary.top_traders.map((t) => ({
+              id: t.iso3,
+              label: t.name,
+              sublabel: t.iso3,
+              value: t.intraAfrica,
+              secondaryValue: t.total > 0 ? (t.intraAfrica / t.total) * 100 : 0,
+              secondaryLabel: 'Africa share',
+            }))}
+            onItemClick={(item) => setSelectedCountry({ iso3: item.id, name: item.label })}
+            colorScheme="emerald"
+            exportFileName={`souvera-afcfta-top-${isImport ? 'importers' : 'exporters'}-${new Date().toISOString().slice(0, 10)}`}
+            exportTitle={`Top 10 AfCFTA ${isImport ? 'Importers' : 'Exporters'}`}
+            sourceAttribution="AfCFTA Secretariat · ITC Trade Map · UN Comtrade"
+            dataAsOf={data.summary.data_vintage}
+          />
+        )}
 
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-3">

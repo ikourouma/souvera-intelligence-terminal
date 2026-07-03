@@ -366,7 +366,7 @@ export const PRODUCT_ENRICHMENT: Record<string, ProductEnrichment> = {
     topTradeCountries: [
       { iso3: 'NGA', name: 'Nigeria', annualVolumeUSD: 5_200_000_000, role: 'exports_to_us', context: 'Largest African oil exporter. Bonny Light and Qua Iboe crudes preferred by US Gulf Coast refineries. Shell, Chevron, and ExxonMobil operate Nigerian upstream production.' },
       { iso3: 'AGO', name: 'Angola', annualVolumeUSD: 3_800_000_000, role: 'exports_to_us', context: 'Deepwater production (Block 17, Block 0) by TotalEnergies, ExxonMobil, and Chevron. Light sweet crude ideal for US refiners.' },
-      { iso3: 'GAB', name: 'Gabon', annualVolumeUSD: 380_000_000, role: 'exports_to_us', context: 'Rabi-Kounga and Olowe fields. Medium crude to US East Coast refiners. AGOA enables full tariff elimination on petroleum.' },
+      { iso3: 'GAB', name: 'Gabon', annualVolumeUSD: 380_000_000, role: 'exports_to_us', context: 'Rabi-Kounga and Olowe fields. Medium crude to US East Coast refiners. Petroleum exports are MFN-rated — crude and refined petroleum are excluded from AGOA duty-free preferences (HTS Ch. 27).' },
     ],
     cliffRiskNote: 'MFN tariff on crude oil is 5.25¢/bbl — modest per barrel, but totals $275M+ in additional annual costs across Nigerian and Angolan exports. More critically, US refiners (Motiva, Valero, Marathon) with African crude supply arrangements would face procurement reviews. Strategic consequence: AGOA expiry accelerates China\'s deepening energy relationships with Nigeria and Angola at the expense of US energy security interest in West Africa.',
   },

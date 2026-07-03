@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import gsap from 'gsap';
-import { TrendingUp, Globe2, Building2, ShieldCheck } from 'lucide-react';
+import { TrendingUp } from 'lucide-react';
 
 const marketingSlides = [
   {
@@ -69,7 +69,7 @@ export function AuthSlider() {
   const activeSlide = marketingSlides[currentSlide];
 
   return (
-    <div className="w-full md:w-1/2 relative min-h-[40vh] md:min-h-screen hidden md:flex items-end p-12 lg:p-20 border-r border-zinc-800 bg-zinc-950">
+    <div className="w-full md:w-1/2 md:flex-shrink-0 relative hidden md:flex md:sticky md:top-0 md:h-screen md:max-h-screen md:overflow-hidden items-end p-12 lg:p-20 border-r border-zinc-800 bg-zinc-950">
       <div 
         ref={bgRef}
         className="absolute inset-0 bg-cover bg-center filter brightness-[0.3] transition-all duration-1000 ease-in-out" 

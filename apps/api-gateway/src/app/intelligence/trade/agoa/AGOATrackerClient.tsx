@@ -37,15 +37,17 @@ import {
 } from 'lucide-react';
 import { exportTradePolicyCard } from '@/lib/intelligence/trade-policy-export';
 import { exportElementToPNG } from '@/lib/intelligence/export-png';
+import type { CardAnalysisInput } from '@/lib/intelligence/generate-card-analysis';
 import { PolicyExportButton } from '@/components/intelligence/trade/PolicyExportButton';
 import { HighlightedText } from '@/components/intelligence/HighlightedText';
+import { CollapsibleAnalysis } from '@/components/intelligence/CollapsibleAnalysis';
 import {
   getAGOAStatusLabel,
   getAGOAStatusColor,
   formatDisplayDate,
 } from '@/lib/data/utils';
 import {
-  getAgoaCountryTradeData,
+  aggregateAgoaTradeFromFlowRows,
   formatTradeValueUSD,
   type AgoaCountryTradeData,
 } from '@/data/agoa-country-trade-data';
@@ -163,6 +165,16 @@ function ExportableAGOASection({
         sourceAttribution: sourceNotes,
         dataAsOf: new Date().getFullYear().toString(),
         disclaimer: 'Curated estimates. For research and policy analysis purposes only.',
+        aiAnalysisConfig: {
+          cardType: 'agoa_tracker',
+          countryName: country.country_name,
+          iso3: country.country_iso3,
+          data: {
+            Status: country.agoa_status,
+            'Eligibility Since': country.agoa_eligible_since ?? 'N/A',
+            Section: title,
+          },
+        } satisfies CardAnalysisInput,
       });
     } finally {
       setExporting(false);
@@ -206,9 +218,11 @@ function ExportableAGOASection({
                 <Sparkles className="w-3 h-3 text-indigo-400" />
                 <p className="text-indigo-300 text-[9px] font-semibold uppercase tracking-wide">Souvera Analysis</p>
               </div>
-              <p className="text-zinc-300 text-xs leading-relaxed">
-                <HighlightedText text={souveraAnalysis} />
-              </p>
+              <CollapsibleAnalysis
+                text={souveraAnalysis}
+                titleClass="hidden"
+                className="text-zinc-300 text-xs"
+              />
             </div>
           </div>
         )}
@@ -251,17 +265,36 @@ interface AGOACountryDrawerProps {
 }
 
 function AGOACountryDrawer({ country, onClose, daysRemaining, isAuthenticated }: AGOACountryDrawerProps) {
+  const iso3 = country?.country_iso3 ?? '';
+  const isEligible = country?.agoa_status === 'eligible';
+
+  const [tradeData, setTradeData] = useState<AgoaCountryTradeData | undefined>(undefined);
+
+  useEffect(() => {
+    if (!country) return;
+    let cancelled = false;
+    fetch(`/api/v1/trade/agoa/flows?iso3=${country.country_iso3}&year=2023`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((payload) => {
+        if (cancelled || !payload?.rows?.length) return;
+        const aggregated = aggregateAgoaTradeFromFlowRows(
+          country.country_iso3,
+          payload.rows,
+          country.agoa_status === 'eligible'
+        );
+        if (aggregated) setTradeData(aggregated);
+      })
+      .catch(() => undefined);
+    return () => { cancelled = true; };
+  }, [country]);
+
   if (!country) return null;
 
   const dateStr = new Date().toISOString().slice(0, 10);
   const statusColor = getAGOAStatusColor(country.agoa_status);
   const statusLabel = getAGOAStatusLabel(country.agoa_status);
-  const isEligible = country.agoa_status === 'eligible';
   const isSuspended = country.agoa_status === 'suspended';
   const hasApparelEligibility = country.agoa_apparel_eligible === true;
-  
-  // Get trade data for this country
-  const tradeData: AgoaCountryTradeData | undefined = getAgoaCountryTradeData(country.country_iso3);
 
   // Generate contextual Souvera analysis with trade data
   const tradeVolumeStr = tradeData ? formatTradeValueUSD(tradeData.totalExportsToUSUSD) : null;

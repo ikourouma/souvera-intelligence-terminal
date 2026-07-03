@@ -2,6 +2,18 @@
 
 Issue tracking and backlog documentation for the Souvera Intelligence Terminal.
 
+## MVP Deferred Items
+
+| Document | Description | Priority |
+|----------|-------------|----------|
+| [mvp-deferred-items.md](mvp-deferred-items.md) | All feedback items deferred from MVP launch (18 items prioritized) | P1-P3 |
+
+## User Experience & Platform Features
+
+| Document | Description | Priority |
+|----------|-------------|----------|
+| [user-dashboard-communication-hub-backlog.md](user-dashboard-communication-hub-backlog.md) | User Dashboard, Communication Hub, Admin Operations | High - Post Data Ingestion |
+
 ## Phase 4B — Ingestion Architecture
 
 | Document | Description |

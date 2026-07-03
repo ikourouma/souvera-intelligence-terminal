@@ -11,10 +11,12 @@ import type { CountryIntelligenceResponse } from '@/types/country-intelligence';
 import { buildCountryTabHref, getTradeBenefitsTarget } from '@/lib/intelligence/navigation';
 import { exportCardToPNG } from '@/lib/intelligence/export-png';
 import { countryExportContext } from '@/lib/intelligence/export-branding';
-import { getOverviewContent } from '@/lib/intelligence/country-overview-content';
+import { getOverviewContent, buildEconomicMomentumAnalysis } from '@/lib/intelligence/country-overview-content';
 import { hydrateOverviewContent } from '@/lib/intelligence/hydrate-intelligence-content';
 import { buildOverviewMarketAccessItems } from '@/lib/intelligence/market-access-overview';
 import { CountryAnalysisSection } from '../CountryAnalysisSection';
+import { EstimateBadge } from '@/components/intelligence/EstimateBadge';
+import { isMetricEstimate } from '@/lib/intelligence/metric-estimate-flags';
 
 interface OverviewTabV2Props {
   data: CountryIntelligenceResponse;
@@ -59,12 +61,19 @@ export function OverviewTabV2({ data, userEntitlements, onNavigateToTab }: Overv
   const showKeySectors = iso3Upper === 'NGA';
   const exportCtx = countryExportContext(data.country);
 
-  const handleExport = (elementId: string, fileName: string, cardTitle: string, sourceAttribution?: string) =>
+  const handleExport = (
+    elementId: string,
+    fileName: string,
+    cardTitle: string,
+    sourceAttribution?: string,
+    curatedAnalysis?: string
+  ) =>
     exportCardToPNG({
       elementId,
       fileName,
       cardTitle,
       sourceAttribution,
+      curatedAnalysis,
       dataAsOf: updatedAt,
       disclaimer: 'Intelligence snapshot — not investment advice. Verify against official sources.',
       ...exportCtx,
@@ -76,24 +85,26 @@ export function OverviewTabV2({ data, userEntitlements, onNavigateToTab }: Overv
       <div className="lg:col-span-2 space-y-5">
       
       {/* Country Snapshot Card */}
-      <div id="country-snapshot-card" className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4">
-        {/* Header with Export */}
+      <div id="country-snapshot-card" className="exportable-card group relative bg-zinc-900/50 border border-zinc-800 rounded-xl p-4">
+        {/* Hover-activated PNG download button */}
+        {canExport && (
+          <button
+            type="button"
+            onClick={() => handleExport('country-snapshot-card', `${iso3}-country-snapshot`, 'Country Snapshot')}
+            className="export-btn absolute top-2 right-2 p-1.5 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+            title="Download Country Snapshot as PNG"
+            aria-label="Download Country Snapshot as PNG"
+            data-export-exclude
+          >
+            <Download className="w-4 h-4 text-zinc-300" />
+          </button>
+        )}
+        
+        {/* Header */}
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
             Country Snapshot
           </h3>
-          {canExport && (
-            <button
-              type="button"
-              onClick={() => handleExport('country-snapshot-card', `${iso3}-country-snapshot`, 'Country Snapshot')}
-              className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors"
-              title="Export as PNG (Professional+)"
-              data-export-exclude
-            >
-              <Download className="w-3 h-3" />
-              PNG
-            </button>
-          )}
         </div>
         
         {/* Content */}
@@ -119,6 +130,7 @@ export function OverviewTabV2({ data, userEntitlements, onNavigateToTab }: Overv
                     <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
                       {metric.label}
                     </h4>
+                    {isMetricEstimate(metric.label, data.metricEstimates) && <EstimateBadge />}
                   </div>
                   <div className="mb-2">
                     <p className="text-2xl font-bold text-white">{metric.value}</p>
@@ -233,22 +245,39 @@ export function OverviewTabV2({ data, userEntitlements, onNavigateToTab }: Overv
       </div>
       
       {/* Economic Momentum Card */}
-      <div id="economic-momentum-card" className="bg-emerald-950/10 border border-emerald-900/30 rounded-xl p-4">
+      <div id="economic-momentum-card" className="exportable-card group relative bg-emerald-950/10 border border-emerald-900/30 rounded-xl p-4">
+        {/* Hover-activated PNG download button */}
+        {canExport && (
+          <button
+            type="button"
+            onClick={() =>
+              handleExport(
+                'economic-momentum-card',
+                `${iso3}-economic-momentum`,
+                'Economic Momentum',
+                overview.momentumFooterSources,
+                buildEconomicMomentumAnalysis(
+                  countryName,
+                  overview,
+                  data.momentum?.economicMomentum,
+                  data.momentum?.investorReadiness,
+                  updatedAt
+                )
+              )
+            }
+            className="export-btn absolute top-2 right-2 p-1.5 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+            title="Download Economic Momentum as PNG"
+            aria-label="Download Economic Momentum as PNG"
+            data-export-exclude
+          >
+            <Download className="w-4 h-4 text-emerald-300" />
+          </button>
+        )}
+        
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
             Economic Momentum
           </h3>
-          {canExport && (
-            <button
-              type="button"
-              onClick={() => handleExport('economic-momentum-card', `${iso3}-economic-momentum`, 'Economic Momentum')}
-              className="text-xs text-emerald-400 hover:text-emerald-300 flex items-center gap-1 transition-colors"
-              data-export-exclude
-            >
-              <Download className="w-3 h-3" />
-              PNG
-            </button>
-          )}
         </div>
         
         <p className="text-sm text-zinc-300 mb-4 leading-relaxed">
@@ -266,6 +295,7 @@ export function OverviewTabV2({ data, userEntitlements, onNavigateToTab }: Overv
                 <h4 className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
                   {metric.label}
                 </h4>
+                {isMetricEstimate(metric.label, data.metricEstimates) && <EstimateBadge />}
               </div>
               <div className="mb-2">
                 <p className="text-2xl font-bold text-white">{metric.value}</p>
@@ -297,22 +327,25 @@ export function OverviewTabV2({ data, userEntitlements, onNavigateToTab }: Overv
       </div>
       
       {/* Why Now Card */}
-      <div id="why-now-card" className="bg-blue-950/10 border border-blue-900/30 rounded-xl p-4">
+      <div id="why-now-card" className="exportable-card group relative bg-blue-950/10 border border-blue-900/30 rounded-xl p-4">
+        {/* Hover-activated PNG download button */}
+        {canExport && (
+          <button
+            type="button"
+            onClick={() => handleExport('why-now-card', `${iso3}-why-now`, 'Why Now')}
+            className="export-btn absolute top-2 right-2 p-1.5 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+            title="Download Why Now as PNG"
+            aria-label="Download Why Now as PNG"
+            data-export-exclude
+          >
+            <Download className="w-4 h-4 text-blue-300" />
+          </button>
+        )}
+        
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-xs font-bold text-blue-400 uppercase tracking-wider">
             Why Now
           </h3>
-          {canExport && (
-            <button
-              type="button"
-              onClick={() => handleExport('why-now-card', `${iso3}-why-now`, 'Why Now')}
-              className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors"
-              data-export-exclude
-            >
-              <Download className="w-3 h-3" />
-              PNG
-            </button>
-          )}
         </div>
         
         <p className="text-sm text-zinc-400 mb-4">
@@ -348,22 +381,25 @@ export function OverviewTabV2({ data, userEntitlements, onNavigateToTab }: Overv
       </div>
       
       {/* Market Access Card (AGOA-Focused) */}
-      <div id="market-access-card" className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4">
+      <div id="market-access-card" className="exportable-card group relative bg-zinc-900/50 border border-zinc-800 rounded-xl p-4">
+        {/* Hover-activated PNG download button */}
+        {canExport && (
+          <button
+            type="button"
+            onClick={() => handleExport('market-access-card', `${iso3}-market-access`, 'Market Access')}
+            className="export-btn absolute top-2 right-2 p-1.5 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+            title="Download Market Access as PNG"
+            aria-label="Download Market Access as PNG"
+            data-export-exclude
+          >
+            <Download className="w-4 h-4 text-zinc-300" />
+          </button>
+        )}
+        
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
             Market Access & Trade Benefits
           </h3>
-          {canExport && (
-            <button
-              type="button"
-              onClick={() => handleExport('market-access-card', `${iso3}-market-access`, 'Market Access')}
-              className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors"
-              data-export-exclude
-            >
-              <Download className="w-3 h-3" />
-              PNG
-            </button>
-          )}
         </div>
         
         <ul className="space-y-3 text-sm text-zinc-300">

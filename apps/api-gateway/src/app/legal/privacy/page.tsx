@@ -1,24 +1,28 @@
-'use client';
-import React from 'react';
+import type { Metadata } from 'next';
 import { ComplianceLayout } from '@/components/layout/ComplianceLayout';
+import { PRIVACY_SECTIONS } from './sections';
 
-const CONTENT = `
-Last Updated: April 2026
-
-At Souvera, we are committed to protecting your sovereign data and personal privacy. This policy outlines how we collect, use, and safeguard your information across our intelligence terminal and marketing gateway.
-
-1. DATA COLLECTION
-We collect information necessary to provide institutional-grade intelligence services, including identity nodes, professional affiliations, and platform interaction signals.
-
-2. SOVEREIGN DATA PROTECTION
-All macroeconomic and fiscal data processed by Souvera is subject to our "Sovereign-Grade" security protocols, ensuring data integrity and non-repudiation.
-
-3. THIRD-PARTY DISCLOSURE
-We do not sell your personal data. Information may be shared with institutional partners (IMF, World Bank) only as required for signal validation or platform maintenance.
-
-For more information, please contact our Compliance Office at compliance@souvera.com.
-`;
+export const metadata: Metadata = {
+  title: 'Privacy Policy | Souvera',
+  description:
+    'How Souvera collects, uses, and protects personal information for users of the intelligence terminal and marketing platform.',
+  openGraph: {
+    title: 'Privacy Policy | Souvera',
+    description: 'Privacy policy for Souvera Intelligence platform users.',
+    url: 'https://souvera.vercel.app/legal/privacy',
+  },
+  alternates: {
+    canonical: 'https://souvera.vercel.app/legal/privacy',
+  },
+};
 
 export default function PrivacyPolicyPage() {
-  return <ComplianceLayout title="Privacy Policy" content={CONTENT} />;
+  return (
+    <ComplianceLayout
+      title="Privacy Policy"
+      description="How we collect, use, store, and protect personal information when you use Souvera Intelligence."
+      lastUpdated="July 2026"
+      sections={PRIVACY_SECTIONS}
+    />
+  );
 }

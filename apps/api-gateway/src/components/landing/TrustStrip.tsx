@@ -1,6 +1,8 @@
-import React from 'react';
+'use client';
 
-const SOURCES = [
+import React, { useState, useEffect } from 'react';
+
+const FALLBACK_SOURCES = [
   { name: 'World Bank', abbr: 'WB', color: '#2563EB', note: 'Macro · Weekly' },
   { name: 'Intl Monetary Fund', abbr: 'IMF', color: '#16A34A', note: 'Forecasts · Monthly' },
   { name: 'UN Comtrade', abbr: 'UNC', color: '#7C3AED', note: 'Trade · Monthly' },
@@ -11,7 +13,7 @@ const SOURCES = [
   { name: 'Intl Energy Agency', abbr: 'IEA', color: '#4F46E5', note: 'Energy · Monthly' },
 ];
 
-const KPIS = [
+const FALLBACK_KPIS = [
   { value: '74', label: 'Sovereign Markets' },
   { value: '8+', label: 'Data Sources' },
   { value: '<45ms', label: 'Avg Latency' },
@@ -19,7 +21,42 @@ const KPIS = [
   { value: '2026', label: 'IMF Projections' },
 ];
 
+type Source = typeof FALLBACK_SOURCES[0];
+type KPI = typeof FALLBACK_KPIS[0];
+
+function transformCMSLogo(cmsLogo: Record<string, unknown>): Source {
+  return {
+    name: (cmsLogo.name as string) || '',
+    abbr: (cmsLogo.abbreviation as string) || '',
+    color: (cmsLogo.color as string) || '#2563EB',
+    note: (cmsLogo.note as string) || '',
+  };
+}
+
 export function TrustStrip() {
+  const [sources, setSources] = useState<Source[]>(FALLBACK_SOURCES);
+  const [kpis, setKpis] = useState<KPI[]>(FALLBACK_KPIS);
+
+  useEffect(() => {
+    async function fetchLogos() {
+      try {
+        const response = await fetch('/api/v1/marketing/trust-logos');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.logos && data.logos.length > 0) {
+            setSources(data.logos.map(transformCMSLogo));
+          }
+          if (data.kpis && data.kpis.length > 0) {
+            setKpis(data.kpis);
+          }
+        }
+      } catch (err) {
+        console.error('[TrustStrip] Failed to fetch CMS logos:', err);
+      }
+    }
+    fetchLogos();
+  }, []);
+
   return (
     <section className="py-20" style={{ background: '#121821', borderTop: '1px solid #1F2A37' }}>
       <div className="max-w-[1600px] mx-auto px-6 lg:px-12">
@@ -35,7 +72,7 @@ export function TrustStrip() {
 
         {/* KPI strip */}
         <div className="grid grid-cols-3 md:grid-cols-5 gap-4 mb-12">
-          {KPIS.map((kpi) => (
+          {kpis.map((kpi) => (
             <div key={kpi.label} className="text-center py-4 px-3 rounded-sm" style={{ background: '#161D26', border: '1px solid #1F2A37' }}>
               <div className="data-value text-xl mb-1">{kpi.value}</div>
               <div className="section-label">{kpi.label}</div>
@@ -45,7 +82,7 @@ export function TrustStrip() {
 
         {/* Source badges */}
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
-          {SOURCES.map((s) => (
+          {sources.map((s) => (
             <div key={s.name + s.note} className="flex flex-col items-center justify-center p-4 rounded-sm transition-all duration-300 group" style={{ background: '#0B0F14', border: '1px solid #1F2A37' }} title={s.name}>
               <div className="w-10 h-10 rounded-sm flex items-center justify-center mb-2 font-bold text-[11px] tracking-widest font-mono" style={{ background: `${s.color}15`, color: s.color, border: `1px solid ${s.color}25` }}>
                 {s.abbr}

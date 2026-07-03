@@ -1,29 +1,28 @@
-'use client';
-import React from 'react';
+import type { Metadata } from 'next';
 import { ComplianceLayout } from '@/components/layout/ComplianceLayout';
+import { TERMS_SECTIONS } from './sections';
 
-const TERMS = `
-1. ACCEPTANCE OF TERMS
-By accessing the Souvera Intelligence Terminal, you agree to comply with these Institutional Terms of Service.
-
-2. LICENSING
-Souvera grants a limited, non-exclusive license to access and utilize macroeconomic signals for institutional research and strategic planning.
-
-3. DATA PROPRIETARY RIGHTS
-All signal synthesis, ranking logic, and geospatial visualizations are the intellectual property of Souvera and its partners.
-`;
-
-const COOKIES = `
-Souvera utilizes technical cookies to maintain your session node and preferences. These tools are essential for the operation of the Intelligence Terminal.
-
-By using the platform, you agree to our use of these session-management tools.
-`;
-
-const ACCESS = `
-Souvera is committed to ensuring that our sovereign intelligence is accessible to all institutional stakeholders. We adhere to WCAG 2.1 Level AA standards for our digital interfaces.
-`;
+export const metadata: Metadata = {
+  title: 'Terms of Service | Souvera',
+  description:
+    'Terms and conditions for using the Souvera Intelligence Terminal, including Explorer free tier, paid access tiers, and acceptable use.',
+  openGraph: {
+    title: 'Terms of Service | Souvera',
+    description: 'Terms of service for Souvera Intelligence platform users.',
+    url: 'https://souvera.vercel.app/legal/terms',
+  },
+  alternates: {
+    canonical: 'https://souvera.vercel.app/legal/terms',
+  },
+};
 
 export default function TermsPage() {
-  return <ComplianceLayout title="Terms of Service" content={TERMS} />;
+  return (
+    <ComplianceLayout
+      title="Terms of Service"
+      description="Terms and conditions governing your use of Souvera Intelligence and related services."
+      lastUpdated="July 2026"
+      sections={TERMS_SECTIONS}
+    />
+  );
 }
-// Note: In a real app, these would be separate files. I will create them now.

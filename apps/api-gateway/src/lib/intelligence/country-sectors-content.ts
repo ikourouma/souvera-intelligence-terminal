@@ -17,8 +17,8 @@ export interface SectorTradeOpportunityCopy {
 const AFRICA_TRADE: SectorTradeOpportunityCopy = {
   sectionEmoji: '🇺🇸',
   sectionTitle: 'AGOA Restoration Opportunity',
-  potentialLabel: '2030 Potential (AGOA)',
-  currentExportLabel: 'Current Exports (2025)',
+  potentialLabel: 'Restoration Upside',
+  currentExportLabel: 'Current Bilateral Exports to U.S.',
   lockedTitle: 'Unlock AGOA Trade Intelligence',
   lockedBody: 'Access detailed AGOA opportunities with Business or higher subscription',
 };
@@ -26,8 +26,8 @@ const AFRICA_TRADE: SectorTradeOpportunityCopy = {
 const CARIBBEAN_TRADE: SectorTradeOpportunityCopy = {
   sectionEmoji: '🇺🇸',
   sectionTitle: 'CBI Export Opportunity',
-  potentialLabel: '2030 Potential (CBI)',
-  currentExportLabel: 'Current CBI Exports (2025)',
+  potentialLabel: 'CBI Export Upside',
+  currentExportLabel: 'Current Bilateral Exports to U.S.',
   lockedTitle: 'Unlock CBI Trade Intelligence',
   lockedBody: 'Access detailed CBI/CARICOM export opportunities with Business or higher subscription',
 };

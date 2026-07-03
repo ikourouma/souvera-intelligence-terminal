@@ -416,10 +416,77 @@ export const AGOA_COUNTRY_TRADE_DATA: AgoaCountryTradeData[] = [
 ];
 
 /**
- * Get trade data for a specific country
+ * Get trade data for a specific country (legacy hardcoded — prefer aggregateAgoaTradeFromFlowRows).
  */
 export function getAgoaCountryTradeData(iso3: string): AgoaCountryTradeData | undefined {
   return AGOA_COUNTRY_TRADE_DATA.find(d => d.iso3 === iso3.toUpperCase());
+}
+
+/** Flow row shape from /api/v1/trade/agoa/flows */
+export interface AgoaFlowRowLike {
+  category_group: string;
+  category_label: string;
+  total_exports_to_us_usd: number | null;
+  agoa_exports_usd: number | null;
+  agoa_share_pct: number | null;
+  yoy_growth_pct: number | null;
+  data_quality_tier?: string | null;
+  top_products?: Array<{ hsCode: string; description: string; valueUsd: number; sharePct: number }>;
+}
+
+/** Build tracker trade KPIs from DB-backed flow rows (single source of truth). */
+export function aggregateAgoaTradeFromFlowRows(
+  iso3: string,
+  rows: AgoaFlowRowLike[],
+  agoaEligible: boolean
+): AgoaCountryTradeData | undefined {
+  const hasTierAFlows = rows.some((r) => r.data_quality_tier === 'A');
+  if (!rows.length) return getAgoaCountryTradeData(iso3);
+  const totalExportsToUSUSD = rows.reduce((s, r) => s + (r.total_exports_to_us_usd ?? 0), 0);
+  if (totalExportsToUSUSD <= 0) {
+    return hasTierAFlows ? undefined : getAgoaCountryTradeData(iso3);
+  }
+  const agoaTotal = rows.reduce((s, r) => s + (r.agoa_exports_usd ?? 0), 0);
+  const avgYoy =
+    rows.filter((r) => r.yoy_growth_pct != null).reduce((s, r) => s + (r.yoy_growth_pct ?? 0), 0) /
+    Math.max(1, rows.filter((r) => r.yoy_growth_pct != null).length);
+  const sorted = [...rows].sort(
+    (a, b) => (b.total_exports_to_us_usd ?? 0) - (a.total_exports_to_us_usd ?? 0)
+  );
+  const topProducts: AgoaCountryTradeProduct[] = sorted.slice(0, 3).flatMap((r) => {
+    const top = r.top_products?.[0];
+    if (top) {
+      return [{
+        hsCode: top.hsCode,
+        description: top.description,
+        exportValueUSD: top.valueUsd,
+        shareOfTotal: top.sharePct,
+        yoyGrowthPct: r.yoy_growth_pct ?? 0,
+      }];
+    }
+    const val = r.total_exports_to_us_usd ?? 0;
+    return [{
+      hsCode: r.category_group,
+      description: r.category_label,
+      exportValueUSD: val,
+      shareOfTotal: totalExportsToUSUSD > 0 ? (val / totalExportsToUSUSD) * 100 : 0,
+      yoyGrowthPct: r.yoy_growth_pct ?? 0,
+    }];
+  });
+  return {
+    iso3: iso3.toUpperCase(),
+    totalExportsToUSUSD,
+    totalImportsFromUSUSD: 0,
+    agoaUtilizationPct: agoaEligible && totalExportsToUSUSD > 0
+      ? Math.round((agoaTotal / totalExportsToUSUSD) * 100)
+      : 0,
+    yoyGrowthPct: Math.round(avgYoy * 10) / 10,
+    topProducts,
+    topSectors: sorted.slice(0, 3).map((r) => r.category_label),
+    narrative: agoaEligible
+      ? undefined
+      : 'Exports face standard MFN tariff rates while AGOA benefits are suspended.',
+  };
 }
 
 /**

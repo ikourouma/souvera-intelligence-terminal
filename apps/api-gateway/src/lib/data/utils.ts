@@ -97,11 +97,15 @@ export function getSourceTypeBadgeColor(type: SourceType): string {
 // Format date for display
 export function formatDisplayDate(dateString: string | Date | null | undefined): string {
   if (!dateString) return 'Unknown';
-  const date = new Date(dateString);
+  const s = String(dateString).trim();
+  // Integer year only (e.g. eligibility_since from trade flows)
+  if (/^\d{4}$/.test(s)) return s;
+  const date = new Date(s);
+  if (Number.isNaN(date.getTime())) return s;
   return date.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
-    day: 'numeric'
+    day: 'numeric',
   });
 }
 

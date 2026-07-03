@@ -9,6 +9,7 @@ import { useScrollDirection } from '@/hooks/useScrollDirection';
 import { CountryHeaderBar } from './CountryHeaderBar';
 import { LimitedCoverageBanner } from './LimitedCoverageBanner';
 import { MetricCardV2 } from './MetricCardV2';
+import { ExportableCard } from './ExportableCard';
 import { SignalMomentumRow } from './SignalMomentumRow';
 import { getStructuralDataGap } from '@/lib/market-coverage/structural-data-gaps';
 import { EconomyTab } from './tabs/EconomyTab';
@@ -54,7 +55,7 @@ function Breadcrumb({
   return (
     <nav className="flex items-center gap-2 text-xs text-zinc-500 px-6 py-3 border-b border-zinc-800/50 bg-zinc-950/50">
       <Link 
-        href="/dashboard" 
+        href="/intelligence" 
         className="hover:text-emerald-400 transition-colors flex items-center gap-1"
       >
         <Home className="w-3 h-3" />
@@ -359,18 +360,47 @@ export function CountryIntelligencePanelV2({
             const hasNavTarget = METRIC_NAV_MAP[metric.key] !== undefined;
             const canNavigate = hasNavTarget && !isLocked && value !== null && value !== undefined;
             
+            const date = new Date().toISOString().split('T')[0];
+
+            // FX Rate unit must reflect each country's own currency, not the static default.
+            // USD-denominated markets (e.g. PRI, VGB, TCA) show "USD" rather than a nonsensical
+            // "USD/USD" pair.
+            const fxCode = data.country?.currencyCode?.trim().toUpperCase();
+            const metricForCard =
+              metric.key === 'fx_rate_usd'
+                ? {
+                    ...metric,
+                    unit: !fxCode ? 'Local/USD' : fxCode === 'USD' ? 'USD' : `${fxCode}/USD`,
+                  }
+                : metric;
+
             return (
-              <MetricCardV2
+              <ExportableCard
                 key={metric.key}
-                metric={metric}
-                value={value}
-                isLocked={isLocked}
-                isLoading={false}
-                isStale={data.freshness?.updatedAt ? isStale(data.freshness.updatedAt) : false}
-                userEntitlements={userEntitlements}
-                clickable={canNavigate}
-                onClick={() => canNavigate && handleMetricClick(metric.key)}
-              />
+                exportConfig={{
+                  fileName: `souvera-${iso3.toLowerCase()}-${metric.key}-${date}.png`,
+                  cardTitle: metric.label,
+                  countryName: data.country?.name,
+                  iso2: data.country?.iso2,
+                  flagUrl: data.country?.flagUrl,
+                  sourceAttribution: 'World Bank · SOUVERA Intelligence',
+                  dataAsOf: data.freshness?.updatedAt 
+                    ? new Date(data.freshness.updatedAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+                    : undefined,
+                }}
+                disableExport={isLocked || value === null || value === undefined}
+              >
+                <MetricCardV2
+                  metric={metricForCard}
+                  value={value}
+                  isLocked={isLocked}
+                  isLoading={false}
+                  isStale={data.freshness?.updatedAt ? isStale(data.freshness.updatedAt) : false}
+                  userEntitlements={userEntitlements}
+                  clickable={canNavigate}
+                  onClick={() => canNavigate && handleMetricClick(metric.key)}
+                />
+              </ExportableCard>
             );
           })}
         </div>
@@ -383,6 +413,8 @@ export function CountryIntelligencePanelV2({
             signal={data.signal ?? { level: 'stable', investmentScore: null, confidenceScore: null }}
             momentum={data.momentum ?? { economicMomentum: null, investorReadiness: null }}
             newsPulse={data.newsPulse ?? { sentimentScore: null, riskIntensity: null, opportunityIntensity: null, pending: true }}
+            countryName={data.country?.name}
+            iso3={data.country?.iso3?.toLowerCase()}
             onMomentumClick={() => navigateToTab('overview', 'economic-momentum-card')}
           />
         </div>

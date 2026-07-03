@@ -7,7 +7,7 @@ import { DemandSignalMatrix } from './DemandSignalMatrix';
 export const metadata: Metadata = {
   title: 'African Import Demand Intelligence | Souvera',
   description:
-    'US export opportunity sizing by product category across Africa and the Caribbean. Quantifies African demand for US goods to support AGOA reauthorization briefings.',
+    'US export opportunity sizing by product category across all 54 African markets. Quantifies African demand for US goods to support AGOA reauthorization briefings.',
 };
 
 export default async function DemandIntelligencePage() {

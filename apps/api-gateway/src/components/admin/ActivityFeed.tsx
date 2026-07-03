@@ -85,26 +85,37 @@ export function ActivityFeed() {
   }
 
   return (
-    <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-6">
-      <div className="space-y-4">
-        {activities.map((activity) => {
+    <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-5">
+      <div className="space-y-2">
+        {activities.slice(0, 6).map((activity, index) => {
           const Icon = activityIcons[activity.type];
           const colorClass = activityColors[activity.type];
+          const bgClass = activity.type === 'error' ? 'bg-red-500/10 border-red-500/20' :
+                          activity.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/20' :
+                          activity.type === 'upload' ? 'bg-blue-500/10 border-blue-500/20' :
+                          activity.type === 'ingestion' ? 'bg-purple-500/10 border-purple-500/20' :
+                          'bg-zinc-800/50 border-zinc-700/50';
 
           return (
-            <div key={activity.id} className="flex items-start gap-4 pb-4 border-b border-zinc-800 last:border-b-0 last:pb-0">
-              <div className="bg-zinc-800/50 rounded-lg p-2.5 flex-shrink-0">
-                <Icon className={`w-5 h-5 ${colorClass}`} />
+            <div 
+              key={activity.id} 
+              className="flex items-start gap-3 p-3 bg-zinc-800/30 rounded-lg border border-zinc-800/50 hover:bg-zinc-800/50 transition-colors"
+              style={{ animationDelay: `${index * 50}ms` }}
+            >
+              <div className={`${bgClass} border rounded-lg p-2 flex-shrink-0`}>
+                <Icon className={`w-4 h-4 ${colorClass}`} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-white mb-1">{activity.message}</p>
-                <div className="flex items-center gap-3 text-xs text-zinc-500">
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
-                    {new Date(activity.timestamp).toLocaleString()}
+                <p className="text-sm text-white leading-tight">{activity.message}</p>
+                <div className="flex items-center gap-2 mt-1.5">
+                  <span className="text-xs text-zinc-500">
+                    {formatRelativeTime(new Date(activity.timestamp))}
                   </span>
                   {activity.user && (
-                    <span>by {activity.user}</span>
+                    <>
+                      <span className="text-zinc-700">•</span>
+                      <span className="text-xs text-zinc-500">{activity.user}</span>
+                    </>
                   )}
                 </div>
               </div>
@@ -114,4 +125,16 @@ export function ActivityFeed() {
       </div>
     </div>
   );
+}
+
+function formatRelativeTime(date: Date): string {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  return date.toLocaleDateString();
 }

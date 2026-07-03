@@ -159,6 +159,18 @@ export const AGOA_CURATED_OVERRIDES: AgoaCountryRecord[] = [
     agoa_last_reviewed_at: '2026-01-15T00:00:00Z',
   },
   {
+    country_iso3: 'ZWE',
+    country_name: 'Zimbabwe',
+    agoa_status: 'suspended',
+    agoa_apparel_eligible: false,
+    agoa_suspension_date: '2001-01-01',
+    agoa_notes:
+      'Suspended from AGOA since 2001 due to governance concerns. Restoration would unlock duty-free access for processed minerals, agriculture, and textiles.',
+    agoa_source_url: AGOA_SOURCE_URL,
+    agoa_as_of_date: '2026-01-15',
+    agoa_last_reviewed_at: '2026-01-15T00:00:00Z',
+  },
+  {
     country_iso3: 'UGA',
     country_name: 'Uganda',
     agoa_status: 'eligible',

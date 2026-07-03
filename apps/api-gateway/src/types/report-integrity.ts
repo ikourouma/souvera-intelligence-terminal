@@ -26,6 +26,8 @@ export interface PolicyStatusRecord {
   sourceDisplayName?: string | null;
   /** Client PDF — e.g. 2025 list, Jan 15, 2026. */
   lastReviewedDisplay?: string | null;
+  /** Raw status_effective_date from Evidence Vault (ISO date or year). */
+  statusEffectiveDate?: string | null;
   /** Client PDF status column — never Verified/Unverified. */
   clientStatusLabel?: string;
   /** Evidence Vault artifact (internal). */

@@ -49,11 +49,13 @@ Apply: `infra/supabase/migrations/create-external-reference-links.sql`
 |-----|---------|
 | Snapshot program anchors + directory | `npx tsx services/ingestion/run.ts capture:ustr:anchors` |
 | Parse Africa directory → link table | `npx tsx services/ingestion/run.ts parse:ustr:africa_directory` |
+| Parse USTR country trade summaries | `npx tsx services/ingestion/run.ts parse:ustr:africa_country_summaries` |
 | Coverage audit vs 54 Africa ISO3 | `npx tsx scripts/audit-ustr-africa-coverage.ts` |
+| USTR vs Census corroboration | `npx tsx apps/api-gateway/scripts/audit-ustr-vs-census.ts` |
 
-Tables: `souvera_external_reference_links` (`ref_type = USTR_COUNTRY_PAGE`)
+Tables: `souvera_external_reference_links` (`ref_type = USTR_COUNTRY_PAGE`), `souvera_ustr_trade_summaries`
 
-USTR program anchors are **citations only**; AGOA/CBI eligibility still comes from year-specific list artifacts (`verify:ustr:agoa`, `verify:ustr:cbi`). Africa directory links are **UI-only** (map tooltip + country panel), not PDF URLs.
+USTR program anchors are **citations only**; AGOA/CBI eligibility still comes from year-specific list artifacts (`verify:ustr:agoa`, `verify:ustr:cbi`). Africa directory links are **UI-only** (Overview + Trade tab). Parsed USTR trade summaries are **tertiary corroboration** — Census/USITC remain primary KPIs.
 
 Reports read policy from Evidence Vault via `policy-status-db.ts` (fallback: Under review).
 

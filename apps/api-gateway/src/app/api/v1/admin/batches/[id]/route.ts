@@ -13,6 +13,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { createServerClient } from '@/lib/supabase/server';
 import type { BatchStatus } from '@/lib/data/types';
+import { publishBatchToTarget } from '@/lib/ingestion/publish-targets';
 
 function getServiceClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -40,7 +41,7 @@ async function verifyAdminAccess(): Promise<{ isAdmin: boolean; userId?: string;
       .from('souvera_organization_members')
       .select('role')
       .eq('user_id', user.id)
-      .in('role', ['org_admin', 'platform_admin'])
+      .in('role', ['org_admin', 'platform_admin', 'super_admin'])
       .limit(1);
 
     if (memberData && memberData.length > 0) {
@@ -256,17 +257,41 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: 'Failed to update batch' }, { status: 500 });
     }
 
-    // If publishing, trigger the publication process (simplified for now)
+    // If publishing, commit the validated rows into the destination table.
+    let publishSummary: { published: number; skipped: number; errors: string[] } | undefined;
     if (action === 'publish') {
-      // Update batch to published after "publishing" would complete
-      // In production, this would be an async job
+      let template: { target_table: string; column_mappings?: { source: string; target: string }[] } | null = null;
+      if (batch.mapping_template_id) {
+        const { data: tpl } = await supabase
+          .from('souvera_source_ingestion_templates')
+          .select('target_table, column_mappings')
+          .eq('id', batch.mapping_template_id)
+          .single();
+        template = tpl;
+      }
+
+      publishSummary = await publishBatchToTarget(supabase, { id }, template);
+
+      if (publishSummary.errors.length > 0 && publishSummary.published === 0) {
+        // Publication failed — roll batch back to approved so the admin can retry.
+        await supabase
+          .from('souvera_source_file_ingestion_batches')
+          .update({ status: 'approved', error_message: publishSummary.errors.join('; ') })
+          .eq('id', id);
+        return NextResponse.json(
+          { success: false, action, error: 'Publish failed', details: publishSummary.errors },
+          { status: 422 }
+        );
+      }
+
       await supabase
         .from('souvera_source_file_ingestion_batches')
-        .update({ 
+        .update({
           status: 'published',
-          published_at: new Date().toISOString()
+          published_at: new Date().toISOString(),
         })
         .eq('id', id);
+      newStatus = 'published';
     }
 
     return NextResponse.json({
@@ -275,6 +300,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       previous_status: currentStatus,
       new_status: newStatus,
       batch: updatedBatch,
+      ...(publishSummary ? { publish: publishSummary } : {}),
     });
 
   } catch (err) {

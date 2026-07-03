@@ -120,7 +120,19 @@ export default function OpportunityTab({ data, userEntitlements }: IntelligenceT
         </div>
       </div>
 
-      <div id="investment-entry-points-card" className="bg-gradient-to-br from-zinc-900/90 to-zinc-800/50 border border-zinc-700/50 rounded-xl p-6 lg:p-8">
+      <div id="investment-entry-points-card" className="exportable-card group relative bg-gradient-to-br from-zinc-900/90 to-zinc-800/50 border border-zinc-700/50 rounded-xl p-6 lg:p-8">
+        {/* Hover-activated PNG download button */}
+        <button
+          type="button"
+          onClick={() => handleExport('investment-entry-points-card', `${iso3Lower}-investment-entry-points`, 'Investment Entry Points')}
+          data-export-exclude
+          className="export-btn absolute top-2 right-2 p-1.5 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+          title="Download Investment Entry Points as PNG"
+          aria-label="Download Investment Entry Points as PNG"
+        >
+          <Download className="w-4 h-4 text-blue-300" />
+        </button>
+        
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-blue-500/20 to-emerald-500/20 rounded-lg flex items-center justify-center">
@@ -128,18 +140,7 @@ export default function OpportunityTab({ data, userEntitlements }: IntelligenceT
             </div>
             <h3 className="text-xl font-bold text-white">Investment Entry Points</h3>
           </div>
-          <div className="flex items-center gap-2">
-            <HelpTooltip term="investment_entry_points" />
-            <button
-              type="button"
-              onClick={() => handleExport('investment-entry-points-card', `${iso3Lower}-investment-entry-points`, 'Investment Entry Points')}
-              data-export-exclude
-              className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">PNG</span>
-            </button>
-          </div>
+          <HelpTooltip term="investment_entry_points" />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -150,18 +151,21 @@ export default function OpportunityTab({ data, userEntitlements }: IntelligenceT
       </div>
 
       {computedMetrics.length > 0 && (
-        <div id="live-market-signals-card" className="bg-zinc-900/40 border border-zinc-800 rounded-xl p-6">
+        <div id="live-market-signals-card" className="exportable-card group relative bg-zinc-900/40 border border-zinc-800 rounded-xl p-6">
+          {/* Hover-activated PNG download button */}
+          <button
+            type="button"
+            onClick={() => handleExport('live-market-signals-card', `${iso3Lower}-live-market-signals`, 'Live Market Signals')}
+            data-export-exclude
+            className="export-btn absolute top-2 right-2 p-1.5 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+            title="Download Live Market Signals as PNG"
+            aria-label="Download Live Market Signals as PNG"
+          >
+            <Download className="w-4 h-4 text-blue-300" />
+          </button>
+          
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-wider">Live Market Signals</h3>
-            <button
-              type="button"
-              onClick={() => handleExport('live-market-signals-card', `${iso3Lower}-live-market-signals`, 'Live Market Signals')}
-              data-export-exclude
-              className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">PNG</span>
-            </button>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {computedMetrics.map((adv) => (
@@ -171,7 +175,19 @@ export default function OpportunityTab({ data, userEntitlements }: IntelligenceT
         </div>
       )}
 
-      <div id="regional-advantages-card" className="bg-gradient-to-br from-zinc-900/90 to-zinc-800/50 border border-zinc-700/50 rounded-xl p-6 lg:p-8">
+      <div id="regional-advantages-card" className="exportable-card group relative bg-gradient-to-br from-zinc-900/90 to-zinc-800/50 border border-zinc-700/50 rounded-xl p-6 lg:p-8">
+        {/* Hover-activated PNG download button */}
+        <button
+          type="button"
+          onClick={() => handleExport('regional-advantages-card', `${iso3Lower}-regional-advantages`, 'Regional Market Advantages')}
+          data-export-exclude
+          className="export-btn absolute top-2 right-2 p-1.5 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+          title="Download Regional Market Advantages as PNG"
+          aria-label="Download Regional Market Advantages as PNG"
+        >
+          <Download className="w-4 h-4 text-emerald-300" />
+        </button>
+        
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-emerald-500/20 to-blue-500/20 rounded-lg flex items-center justify-center">
@@ -179,18 +195,7 @@ export default function OpportunityTab({ data, userEntitlements }: IntelligenceT
             </div>
             <h3 className="text-xl font-bold text-white">Regional Market Advantages</h3>
           </div>
-          <div className="flex items-center gap-2">
-            <HelpTooltip term="regional_advantages" />
-            <button
-              type="button"
-              onClick={() => handleExport('regional-advantages-card', `${iso3Lower}-regional-advantages`, 'Regional Market Advantages')}
-              data-export-exclude
-              className="text-xs text-emerald-400 hover:text-emerald-300 flex items-center gap-1 transition-colors"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">PNG</span>
-            </button>
-          </div>
+          <HelpTooltip term="regional_advantages" />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -234,8 +239,20 @@ function PillarCard({
   return (
     <div
       id={pillar.exportId}
-      className={`bg-gradient-to-br from-zinc-900/90 to-zinc-800/50 border border-zinc-700/50 rounded-xl p-6 transition-all duration-300 ${pillar.borderHover}`}
+      className={`exportable-card group relative bg-gradient-to-br from-zinc-900/90 to-zinc-800/50 border border-zinc-700/50 rounded-xl p-6 transition-all duration-300 ${pillar.borderHover}`}
     >
+      {/* Hover-activated PNG download button */}
+      <button
+        type="button"
+        onClick={onExport}
+        data-export-exclude
+        className={`export-btn absolute top-2 right-2 p-1.5 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10`}
+        title={`Download ${pillar.title} as PNG`}
+        aria-label={`Download ${pillar.title} as PNG`}
+      >
+        <Download className="w-4 h-4 text-zinc-300" />
+      </button>
+      
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-start gap-4 flex-1">
           <div className={`w-12 h-12 bg-gradient-to-br ${iconBg} rounded-lg flex items-center justify-center flex-shrink-0`}>
@@ -249,15 +266,6 @@ function PillarCard({
             <p className={`text-sm font-semibold mb-3 ${pillar.accentClass}`}>{pillar.subtitle}</p>
           </div>
         </div>
-        <button
-          type="button"
-          onClick={onExport}
-          data-export-exclude
-          className={`shrink-0 text-xs ${pillar.accentClass} hover:opacity-80 flex items-center gap-1 transition-colors`}
-        >
-          <Download className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">PNG</span>
-        </button>
       </div>
 
       <div className="space-y-4">

@@ -16,6 +16,7 @@ import {
   type MitigationStrategy,
 } from '@/lib/intelligence/country-risk-content';
 import { hydrateRiskContent } from '@/lib/intelligence/hydrate-intelligence-content';
+import { DataPendingState } from '@/components/intelligence/DataPendingState';
 import type { IntelligenceTabProps } from '@/types/country-intelligence';
 
 const MITIGATION_ICONS = {
@@ -48,7 +49,13 @@ function AnalysisBullets({ bullets }: { bullets: string[] }) {
   );
 }
 
-function RiskScorecard({ signal }: { signal: IntelligenceTabProps['data']['signal'] }) {
+function RiskScorecard({ 
+  signal, 
+  onExport 
+}: { 
+  signal: IntelligenceTabProps['data']['signal'];
+  onExport: () => void;
+}) {
   const score = signal?.investmentScore;
   const level = signal?.level ?? 'stable';
   const rows = [
@@ -61,10 +68,26 @@ function RiskScorecard({ signal }: { signal: IntelligenceTabProps['data']['signa
     l === 'Low' ? 'text-emerald-400' : l === 'Moderate' ? 'text-amber-400' : 'text-red-400';
 
   return (
-    <div id="risk-scorecard" className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6">
+    <div id="risk-scorecard" className="exportable-card group relative bg-zinc-900/50 border border-zinc-800 rounded-xl p-6">
+      {/* Hover-activated PNG download button */}
+      <button
+        type="button"
+        onClick={onExport}
+        data-export-exclude
+        className="export-btn absolute top-2 right-2 p-1.5 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+        title="Download Risk Scorecard as PNG"
+        aria-label="Download Risk Scorecard as PNG"
+      >
+        <Download className="w-4 h-4 text-zinc-300" />
+      </button>
+      
       <h3 className="text-lg font-bold text-white mb-4">Risk Scorecard</h3>
       {score == null ? (
-        <p className="text-sm text-zinc-500">Risk scores pending — check back after next data refresh.</p>
+        <DataPendingState
+          variant="pending"
+          message="Risk scores are awaiting verified signal model inputs from macro, governance, and news sources."
+          className="border-0 bg-transparent p-0"
+        />
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {rows.map((r) => (
@@ -100,8 +123,20 @@ function RiskCategoryCard({
   return (
     <div
       id={category.exportId}
-      className={`bg-gradient-to-br from-zinc-900/90 to-zinc-800/50 border border-zinc-700/50 rounded-xl p-6 transition-all duration-300 ${hoverBorder}`}
+      className={`exportable-card group relative bg-gradient-to-br from-zinc-900/90 to-zinc-800/50 border border-zinc-700/50 rounded-xl p-6 transition-all duration-300 ${hoverBorder}`}
     >
+      {/* Hover-activated PNG download button */}
+      <button
+        type="button"
+        onClick={onExport}
+        data-export-exclude
+        className="export-btn absolute top-2 right-2 p-1.5 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+        title={`Download ${category.title} as PNG`}
+        aria-label={`Download ${category.title} as PNG`}
+      >
+        <Download className="w-4 h-4 text-zinc-300" />
+      </button>
+      
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-start gap-4 flex-1">
           <div className={`w-12 h-12 bg-gradient-to-br ${iconBg} rounded-lg flex items-center justify-center flex-shrink-0`}>
@@ -115,15 +150,6 @@ function RiskCategoryCard({
             <p className={`text-sm font-semibold mb-3 ${accentClass}`}>{category.subtitle}</p>
           </div>
         </div>
-        <button
-          type="button"
-          onClick={onExport}
-          data-export-exclude
-          className={`shrink-0 text-xs ${accentClass} hover:opacity-80 flex items-center gap-1 transition-colors`}
-        >
-          <Download className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">PNG</span>
-        </button>
       </div>
 
       <div className="space-y-4">
@@ -264,7 +290,10 @@ export default function RiskTab({ data, userEntitlements }: IntelligenceTabProps
         </div>
       </div>
 
-      <RiskScorecard signal={data.signal} />
+      <RiskScorecard 
+        signal={data.signal} 
+        onExport={() => handleExport('risk-scorecard', `${iso3Lower}-risk-scorecard`, 'Risk Scorecard')} 
+      />
 
       <div className="space-y-6">
         <h3 className="text-xl font-bold text-white flex items-center gap-2">
@@ -288,7 +317,19 @@ export default function RiskTab({ data, userEntitlements }: IntelligenceTabProps
         </div>
       </div>
 
-      <div id="risk-mitigation-card" className="bg-gradient-to-br from-zinc-900/90 to-zinc-800/50 border border-zinc-700/50 rounded-xl p-6 lg:p-8">
+      <div id="risk-mitigation-card" className="exportable-card group relative bg-gradient-to-br from-zinc-900/90 to-zinc-800/50 border border-zinc-700/50 rounded-xl p-6 lg:p-8">
+        {/* Hover-activated PNG download button */}
+        <button
+          type="button"
+          onClick={() => handleExport('risk-mitigation-card', `${iso3Lower}-risk-mitigation`, 'Risk Mitigation Strategies')}
+          data-export-exclude
+          className="export-btn absolute top-2 right-2 p-1.5 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+          title="Download Risk Mitigation Strategies as PNG"
+          aria-label="Download Risk Mitigation Strategies as PNG"
+        >
+          <Download className="w-4 h-4 text-zinc-300" />
+        </button>
+        
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-emerald-500/20 to-blue-500/20 rounded-lg flex items-center justify-center">
@@ -296,18 +337,7 @@ export default function RiskTab({ data, userEntitlements }: IntelligenceTabProps
             </div>
             <h3 className="text-xl font-bold text-white">Risk Mitigation Strategies</h3>
           </div>
-          <div className="flex items-center gap-2">
-            <HelpTooltip term="risk_mitigation" />
-            <button
-              type="button"
-              onClick={() => handleExport('risk-mitigation-card', `${iso3Lower}-risk-mitigation`, 'Risk Mitigation Strategies')}
-              data-export-exclude
-              className="text-xs text-emerald-400 hover:text-emerald-300 flex items-center gap-1 transition-colors"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">PNG</span>
-            </button>
-          </div>
+          <HelpTooltip term="risk_mitigation" />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -318,21 +348,24 @@ export default function RiskTab({ data, userEntitlements }: IntelligenceTabProps
         <AnalysisBullets bullets={content.mitigationBullets} />
       </div>
 
-      <div id="risk-adjusted-returns-card" className="bg-gradient-to-br from-emerald-900/20 to-blue-900/20 border border-emerald-500/20 rounded-xl p-6 lg:p-8">
+      <div id="risk-adjusted-returns-card" className="exportable-card group relative bg-gradient-to-br from-emerald-900/20 to-blue-900/20 border border-emerald-500/20 rounded-xl p-6 lg:p-8">
+        {/* Hover-activated PNG download button */}
+        <button
+          type="button"
+          onClick={() => handleExport('risk-adjusted-returns-card', `${iso3Lower}-risk-adjusted-returns`, 'Risk-Adjusted Returns')}
+          data-export-exclude
+          className="export-btn absolute top-2 right-2 p-1.5 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+          title="Download Risk-Adjusted Returns as PNG"
+          aria-label="Download Risk-Adjusted Returns as PNG"
+        >
+          <Download className="w-4 h-4 text-zinc-300" />
+        </button>
+        
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <CheckCircle2 className="w-6 h-6 text-emerald-400" />
             <h3 className="text-xl font-bold text-white">Risk-Adjusted Returns</h3>
           </div>
-          <button
-            type="button"
-            onClick={() => handleExport('risk-adjusted-returns-card', `${iso3Lower}-risk-adjusted-returns`, 'Risk-Adjusted Returns')}
-            data-export-exclude
-            className="text-xs text-emerald-400 hover:text-emerald-300 flex items-center gap-1 transition-colors"
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">PNG</span>
-          </button>
         </div>
 
         <p className="text-base text-zinc-300 leading-relaxed mb-4">{content.riskAdjustedNarrative}</p>

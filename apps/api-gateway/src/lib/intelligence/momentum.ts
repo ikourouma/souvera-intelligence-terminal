@@ -25,6 +25,47 @@ function parseNumeric(value: string | number | null | undefined): number | null 
   return Number.isFinite(n) ? n : null;
 }
 
+/**
+ * Curated profile fields store qualitative bands (e.g. "improving", "low"), not numbers.
+ * Map them to representative band midpoints so the Momentum card renders the curated
+ * assessment instead of "Pending". These are deterministic band representatives — not
+ * fabricated precision — and align with getMomentumBand() thresholds.
+ */
+const MOMENTUM_LABEL_SCORES: Record<string, number> = {
+  improving: 45,
+  accelerating: 55,
+  strong: 60,
+  stable: 12,
+  steady: 12,
+  flat: 5,
+  slowing: -20,
+  declining: -25,
+  decelerating: -40,
+  weak: -45,
+};
+
+const READINESS_LABEL_SCORES: Record<string, number> = {
+  high: 78,
+  'very high': 88,
+  strong: 78,
+  moderate: 55,
+  medium: 55,
+  developing: 45,
+  low: 32,
+  'very low': 20,
+  weak: 25,
+};
+
+function labelToScore(
+  value: string | number | null | undefined,
+  table: Record<string, number>
+): number | null {
+  if (value == null) return null;
+  if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+  const key = String(value).trim().toLowerCase();
+  return key in table ? table[key] : null;
+}
+
 /** Map GDP growth % to momentum index roughly in [-100, 100]. */
 function gdpGrowthToMomentum(gdpGrowthPct: number): number {
   // Baseline ~3% global EM growth → 0; each +1% ≈ +12 points
@@ -32,17 +73,23 @@ function gdpGrowthToMomentum(gdpGrowthPct: number): number {
 }
 
 export function resolveMomentum(inputs: MomentumInputs): ResolvedMomentum {
+  // Economic momentum: explicit numeric → GDP-growth-derived → curated qualitative label.
   let economicMomentum = parseNumeric(inputs.profileMomentum ?? null);
-  let investorReadiness = parseNumeric(inputs.profileReadiness ?? null);
-
   if (economicMomentum == null && inputs.gdpGrowthPct != null) {
     economicMomentum = gdpGrowthToMomentum(inputs.gdpGrowthPct);
   }
+  if (economicMomentum == null) {
+    economicMomentum = labelToScore(inputs.profileMomentum ?? null, MOMENTUM_LABEL_SCORES);
+  }
 
+  // Investor readiness: explicit numeric → curated qualitative label → analytic score fallbacks.
+  let investorReadiness = parseNumeric(inputs.profileReadiness ?? null);
+  if (investorReadiness == null) {
+    investorReadiness = labelToScore(inputs.profileReadiness ?? null, READINESS_LABEL_SCORES);
+  }
   if (investorReadiness == null && inputs.investmentScore != null) {
     investorReadiness = Math.round(inputs.investmentScore);
   }
-
   if (investorReadiness == null && inputs.growthScore != null) {
     investorReadiness = Math.round(inputs.growthScore);
   }

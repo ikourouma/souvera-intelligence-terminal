@@ -12,23 +12,23 @@ export type DataQualityTier = 'A' | 'B' | 'C';
 
 // GDP-based scaling factors (2023 estimates, billions USD)
 export const AFRICAN_GDP_DATA: Record<string, { gdp: number; tier: DataQualityTier; name: string; subRegion: string }> = {
-  // Tier A - Original 8 with high-quality curated data
+  // Tier A - High-quality curated data (elevated North African economies for trade completeness)
   NGA: { gdp: 477, tier: 'A', name: 'Nigeria', subRegion: 'Western Africa' },
   ZAF: { gdp: 399, tier: 'A', name: 'South Africa', subRegion: 'Southern Africa' },
-  EGY: { gdp: 387, tier: 'B', name: 'Egypt', subRegion: 'Northern Africa' }, // Note: Tier B as not in original demand
+  EGY: { gdp: 387, tier: 'A', name: 'Egypt', subRegion: 'Northern Africa' }, // Elevated to Tier A - major trade partner
   KEN: { gdp: 113, tier: 'A', name: 'Kenya', subRegion: 'Eastern Africa' },
   ETH: { gdp: 156, tier: 'A', name: 'Ethiopia', subRegion: 'Eastern Africa' },
   GHA: { gdp: 76, tier: 'A', name: 'Ghana', subRegion: 'Western Africa' },
   CIV: { gdp: 70, tier: 'A', name: "Côte d'Ivoire", subRegion: 'Western Africa' },
   TZA: { gdp: 75, tier: 'A', name: 'Tanzania', subRegion: 'Eastern Africa' },
   SEN: { gdp: 28, tier: 'A', name: 'Senegal', subRegion: 'Western Africa' },
+  MAR: { gdp: 134, tier: 'A', name: 'Morocco', subRegion: 'Northern Africa' }, // Elevated to Tier A - FTA partner
+  DZA: { gdp: 195, tier: 'A', name: 'Algeria', subRegion: 'Northern Africa' }, // Elevated to Tier A - energy partner
+  TUN: { gdp: 46, tier: 'A', name: 'Tunisia', subRegion: 'Northern Africa' }, // Elevated to Tier A - nearshoring hub
   
   // Tier B - Major economies with regional benchmarks
-  DZA: { gdp: 195, tier: 'B', name: 'Algeria', subRegion: 'Northern Africa' },
-  MAR: { gdp: 134, tier: 'B', name: 'Morocco', subRegion: 'Northern Africa' },
   AGO: { gdp: 117, tier: 'B', name: 'Angola', subRegion: 'Southern Africa' },
   SDN: { gdp: 51, tier: 'B', name: 'Sudan', subRegion: 'Northern Africa' },
-  TUN: { gdp: 46, tier: 'B', name: 'Tunisia', subRegion: 'Northern Africa' },
   LBY: { gdp: 45, tier: 'B', name: 'Libya', subRegion: 'Northern Africa' },
   COD: { gdp: 64, tier: 'B', name: 'DR Congo', subRegion: 'Central Africa' },
   CMR: { gdp: 45, tier: 'B', name: 'Cameroon', subRegion: 'Central Africa' },

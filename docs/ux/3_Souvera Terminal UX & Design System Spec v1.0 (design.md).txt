@@ -554,3 +554,81 @@ This will define:
 Say:
 
 **“Proceed Data Governance Spec”**
+
+---
+
+# 16. 📦 COMPONENT CATALOG (Phase 6 — June 2026)
+
+Live inventory mapping design system patterns to code. All intelligence export surfaces follow the **CollapsibleAnalysis export contract** (see §16.4).
+
+## 16.1 Intelligence — Analysis & Export
+
+| Component | Path | Purpose | Export behavior |
+|-----------|------|---------|-----------------|
+| `CollapsibleAnalysis` | `components/intelligence/CollapsibleAnalysis.tsx` | 3-paragraph progressive disclosure | Wrap live-only in `data-export-hide-analysis`; expand via `data-export-expand` |
+| `HighlightedText` | `components/intelligence/HighlightedText.tsx` | Emerald $B+, blue %, amber risk | Live UI only; PNG uses `highlightAnalysisHtml` in `export-png.ts` |
+| `ExportableSection` | `components/intelligence/ExportableSection.tsx` | Card shell + download button | Button: `data-export-exclude` |
+| `export-png` | `lib/intelligence/export-png.ts` | Clone → rasterize pipeline | `prepareCloneForCapture`: solid `#27272a`, inline text colors |
+
+## 16.2 Intelligence — Metric Tiles
+
+| Pattern | Usage | Style |
+|---------|-------|-------|
+| Economy Overview tiles | `EconomyTab.tsx` EconomyHeroNarrative | Inline `style={{ color, backgroundColor }}` for PNG survival |
+| Overview momentum tiles | `OverviewTabV2.tsx` | Tailwind + export footer `curatedAnalysis` |
+| Stat values | Emerald `$B+`, blue `%`, amber inflation | Consistent across Terminal + PNG footer |
+
+## 16.3 Dashboard Widgets (Phase 9)
+
+| Component | Path | Personas |
+|-----------|------|----------|
+| `DashboardHeader` | `components/dashboard/shared/DashboardWidgets.tsx` | All |
+| `StatCard` | same | All |
+| `QuickLaunchGrid` | same | Business, Investor, Institutional |
+| `WatchlistWidget` | same | Professional, Investor, Business |
+| `ActivityFeed` | same | All |
+| `ReportQuotaWidget` | same | Explorer–Institutional |
+| `UpgradeCard` | same | Explorer, Professional, Business |
+
+Persona dashboards: `ExplorerDashboard`, `ProfessionalDashboard`, `BusinessDashboard`, `InvestorDashboard`, `InstitutionalDashboard` in `components/dashboard/`.
+
+## 16.4 CollapsibleAnalysis Export Contract
+
+| Context | Pattern |
+|---------|---------|
+| Flow modules (Trade, AGOA, Demand) | Analysis in `data-export-hide-analysis`; PNG narrative = `curatedAnalysis` footer |
+| Economy Overview hero | Export-visible metric tiles in body; analysis live-only + footer |
+| Export button | Always `data-export-exclude` |
+
+## 16.5 Executive Analysis Voice (Phase 8)
+
+| Paragraph | Purpose | Required elements |
+|-----------|---------|-------------------|
+| P1 | Strategic framing | GDP scale, region, SOUVERA 74-market hook |
+| P2 | Trajectory | Growth, FDI, inflation, named structural drivers, ≥3 quantified values |
+| P3 | Investor read | Regional levers, policy frame, data vintage, disclaimer |
+
+Reference: `lib/intelligence/executive-analysis-voice.ts`, `economy-regional-frames.ts`, gold standard `us-trade-card-analysis.ts`.
+
+## 16.6 Admin Components
+
+| Component | Path |
+|-----------|------|
+| `AdminSidebar` | `components/admin/AdminSidebar.tsx` |
+| `AdminHeader` | `components/admin/AdminHeader.tsx` |
+| Billing clients | `components/admin/billing/*` |
+| Marketing CMS | `components/admin/marketing/*` |
+
+## 16.7 Canonical Color Tokens (reconciled)
+
+| Role | Live (Tailwind) | Export (inline) |
+|------|-----------------|-----------------|
+| Background | `zinc-950` / `zinc-900` | `#09090b` / `#27272a` |
+| Body text | `zinc-300` | `#d4d4d8` |
+| Heading accent | `blue-400` | `#60a5fa` |
+| Currency / scale | `emerald-400` | `#6ee7b7` |
+| Risk / inflation | `amber-400` | `#fbbf24` |
+| Muted | `zinc-500` | `#71717a` |
+
+Audit log: `docs/ux/platform-ui-audit-findings.md`
+

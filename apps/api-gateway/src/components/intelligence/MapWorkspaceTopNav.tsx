@@ -2,13 +2,14 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { ChevronRight, Database, Lock, ChevronDown } from 'lucide-react';
+import { ChevronRight, Database, ChevronDown } from 'lucide-react';
 import { DATA_STATUS_LABELS } from '@/lib/map-constants';
 import { type RegionFilter, getRegionLabel } from '@/lib/market-coverage';
+import { SmartAccessButton } from './SmartAccessButton';
 
 interface MapWorkspaceTopNavProps {
   workspaceLabel?: string;
-  showRequestAccess?: boolean;
+  showAccessButton?: boolean;
   region?: RegionFilter;
   onRegionChange?: (region: RegionFilter) => void;
   showRegionFilter?: boolean;
@@ -16,7 +17,7 @@ interface MapWorkspaceTopNavProps {
 
 export function MapWorkspaceTopNav({
   workspaceLabel = 'Africa Intelligence Terminal',
-  showRequestAccess = true,
+  showAccessButton = true,
   region = 'africa',
   onRegionChange,
   showRegionFilter = false,
@@ -133,15 +134,11 @@ export function MapWorkspaceTopNav({
               </span>
             </div>
 
-            {/* Request Access CTA */}
-            {showRequestAccess && (
-              <Link
-                href="/access/request-access"
-                className="hidden sm:inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold uppercase tracking-wider rounded-sm transition-colors"
-              >
-                <Lock className="w-3 h-3" />
-                Request Access
-              </Link>
+            {/* Smart Access CTA - shows different states based on user access */}
+            {showAccessButton && (
+              <div className="hidden sm:block">
+                <SmartAccessButton variant="compact" requiredLevel="professional" />
+              </div>
             )}
           </div>
         </div>

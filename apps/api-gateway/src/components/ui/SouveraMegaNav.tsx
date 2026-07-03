@@ -277,13 +277,33 @@ export function SouveraMegaNav() {
                         <ul className="space-y-2.5">
                           {section.links.map((link) => (
                             <li key={link.name}>
-                              <Link
-                                href={link.href}
-                                className="text-[13px] font-medium transition-colors block hover:text-souvera-blue"
-                                style={{ color: '#D1D5DB' }}
-                              >
-                                {link.name}
-                              </Link>
+                              {link.featured ? (
+                                <Link
+                                  href={link.href}
+                                  className="group relative flex items-center gap-2 text-[13px] font-semibold transition-all block rounded-lg px-3.5 py-2.5 -mx-3 bg-gradient-to-r from-violet-600/20 via-fuchsia-500/15 to-teal-500/15 border border-fuchsia-500/40 hover:border-fuchsia-400/70 hover:from-violet-600/30 hover:via-fuchsia-500/25 hover:to-teal-500/20 shadow-[0_0_20px_rgba(217,70,239,0.12)] hover:shadow-[0_0_28px_rgba(217,70,239,0.22)]"
+                                >
+                                  <span className="relative flex h-2 w-2 shrink-0">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-fuchsia-400 opacity-80" />
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-gradient-to-br from-violet-400 via-fuchsia-400 to-teal-400 ring-1 ring-white/20" />
+                                  </span>
+                                  <span className="bg-gradient-to-r from-violet-200 via-fuchsia-200 to-teal-200 bg-clip-text text-transparent group-hover:from-white group-hover:via-fuchsia-100 group-hover:to-teal-100">
+                                    {link.name}
+                                  </span>
+                                  {link.badge && (
+                                    <span className="ml-auto shrink-0 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider uppercase bg-gradient-to-r from-fuchsia-500/30 to-violet-500/30 text-fuchsia-100 border border-fuchsia-400/50 shadow-sm">
+                                      {link.badge}
+                                    </span>
+                                  )}
+                                </Link>
+                              ) : (
+                                <Link
+                                  href={link.href}
+                                  className="text-[13px] font-medium transition-colors block hover:text-souvera-blue"
+                                  style={{ color: '#D1D5DB' }}
+                                >
+                                  {link.name}
+                                </Link>
+                              )}
                             </li>
                           ))}
                         </ul>
@@ -365,8 +385,30 @@ export function SouveraMegaNav() {
                           <ul className="space-y-2">
                             {section.links.map((link) => (
                               <li key={link.name}>
-                                <Link href={link.href} onClick={() => setMobileOpen(false)} className="text-[13px] block py-0.5 transition-colors hover:text-souvera-blue" style={{ color: '#9CA3AF' }}>
-                                  {link.name}
+                                <Link
+                                  href={link.href}
+                                  onClick={() => setMobileOpen(false)}
+                                  className={`text-[13px] block py-2 px-3 -mx-3 rounded-lg transition-colors ${
+                                    link.featured
+                                      ? 'font-semibold bg-gradient-to-r from-violet-600/20 via-fuchsia-500/15 to-teal-500/15 border border-fuchsia-500/40'
+                                      : 'hover:text-souvera-blue py-1 px-0 mx-0 border-0 bg-transparent'
+                                  }`}
+                                  style={link.featured ? undefined : { color: '#9CA3AF' }}
+                                >
+                                  <span
+                                    className={
+                                      link.featured
+                                        ? 'bg-gradient-to-r from-violet-300 via-fuchsia-300 to-teal-300 bg-clip-text text-transparent'
+                                        : undefined
+                                    }
+                                  >
+                                    {link.name}
+                                  </span>
+                                  {link.badge && (
+                                    <span className="ml-2 text-[9px] font-bold tracking-wider uppercase text-fuchsia-300 not-italic">
+                                      {link.badge}
+                                    </span>
+                                  )}
                                 </Link>
                               </li>
                             ))}

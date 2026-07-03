@@ -1,18 +1,22 @@
 'use client';
 
 import Link from 'next/link';
-import { Map, GitCompare, Scale, Landmark, Palmtree, TrendingUp, Database, Shield, ArrowRight, Users, Zap } from 'lucide-react';
+import { Map, GitCompare, Scale, Landmark, Palmtree, TrendingUp, Database, Shield, ArrowRight, UserPlus, Layers } from 'lucide-react';
 import { TrustSourceLayer } from '@/components/regional/TrustSourceLayer';
-import { AccessCTABlock } from '@/components/regional/AccessCTABlock';
+import { TrustStrip } from '@/components/landing/TrustStrip';
 import { IntelligenceMapPreview } from '@/components/intelligence/IntelligenceMapPreview';
-import { DATA_STATUS_LABELS } from '@/lib/map-constants';
+import { TradeIntelligenceSpotlight } from '@/components/marketing/traction/TradeIntelligenceSpotlight';
+import { AuditProofCallout } from '@/components/marketing/traction/AuditProofCallout';
+import { StickyConversionBar } from '@/components/marketing/traction/StickyConversionBar';
+import { TractionConversionCta } from '@/components/marketing/traction/TractionConversionCta';
+import { PlatformAccessTierStrip } from '@/components/marketing/PlatformAccessTierStrip';
 
 // Market coverage stats
 const COVERAGE_STATS = [
   { value: '54', label: 'African Nations', color: 'text-blue-500' },
   { value: '20', label: 'Caribbean Territories', color: 'text-teal-500' },
   { value: '$3.4T', label: 'Combined GDP', color: 'text-emerald-500' },
-  { value: '6', label: 'Key Sectors', color: 'text-amber-500' },
+  { value: '8', label: 'Key Sectors', color: 'text-amber-500' },
 ];
 
 // Regional command cards
@@ -113,7 +117,7 @@ export function IntelligenceHub() {
             <p className="text-xl text-zinc-400 leading-relaxed mb-8">
               Institutional-grade intelligence for Africa and the Caribbean. Country profiles, economic indicators, sector analysis, and strategic context for governments, investors, and enterprises.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-4">
               <Link
                 href="/intelligence/africa"
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-sm font-semibold transition-colors"
@@ -127,6 +131,20 @@ export function IntelligenceHub() {
               >
                 <Palmtree className="w-5 h-5" />
                 Explore Caribbean
+              </Link>
+              <Link
+                href="/signup"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-sm font-semibold transition-colors"
+              >
+                <UserPlus className="w-5 h-5" />
+                Create free account
+              </Link>
+              <Link
+                href="/platform"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-zinc-900 border border-zinc-700 hover:border-zinc-600 text-white rounded-sm font-semibold transition-colors"
+              >
+                <Layers className="w-5 h-5" />
+                About the platform
               </Link>
             </div>
           </div>
@@ -285,29 +303,33 @@ export function IntelligenceHub() {
         </div>
       </section>
 
+      <TradeIntelligenceSpotlight />
+
       {/* Intelligence Map Preview */}
       <section className="py-16 border-b border-zinc-800 bg-zinc-900/30">
         <div className="max-w-[1600px] mx-auto px-6 lg:px-12">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <div className="text-[10px] font-bold tracking-[0.2em] uppercase text-blue-500 mb-4">
-                Intelligence Map
+              <div className="text-[10px] font-bold tracking-[0.2em] uppercase text-teal-500 mb-4">
+                Regional Exploration
               </div>
               <h2
                 className="text-3xl md:text-4xl font-bold tracking-tight mb-6"
                 style={{ fontFamily: 'Space Grotesk, sans-serif' }}
               >
-                Markets at a Glance
+                Navigate Africa & Caribbean by region
               </h2>
               <p className="text-lg text-zinc-400 leading-relaxed mb-6">
-                The Souvera Intelligence Map provides a visual overview of African and Caribbean markets. Explore country profiles, economic indicators, and growth signals across 74 countries.
+                Start from the intelligence map to compare markets across two continents. Filter by
+                region, sector, or trade corridor — then drill into country command centers for macro,
+                trade, and sector context.
               </p>
               <ul className="space-y-3 mb-8">
                 {[
-                  'Search and filter by country, region, or sector',
-                  'Click any country for detailed economic profile',
-                  'View GDP, population, and growth indicators',
-                  'Identify high-growth and emerging markets',
+                  'Africa and Caribbean regional hubs with theme tags (AfCFTA, nearshoring)',
+                  'Side-by-side country comparison across 74 markets',
+                  'Jump from map to Trade Intelligence — SDM, AGOA, AfCETA corridors',
+                  'Free Explorer tier — save views and unlock compare after signup',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-3">
                     <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 shrink-0" />
@@ -367,37 +389,19 @@ export function IntelligenceHub() {
               );
             })}
           </div>
-
-          {/* Live & Curated Data Notice */}
-          <div className="mt-8 p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-sm">
-            <div className="flex items-start gap-4">
-              <Shield className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-              <div>
-                <h4 className="text-sm font-bold text-emerald-400 mb-2">
-                  {DATA_STATUS_LABELS.previewData}
-                </h4>
-                <p className="text-sm text-emerald-400/80 leading-relaxed">
-                  Souvera combines live institutional feeds (World Bank, IMF, GDELT News Pulse) with
-                  editorially curated country profiles for pilot markets. Nigeria and Jamaica
-                  terminals are fully populated; regional coverage expands on a governed rollout
-                  schedule. Every metric is source-attributed and tier-gated.
-                </p>
-                <p className="text-xs text-emerald-400/60 mt-2">{DATA_STATUS_LABELS.pilotNote}</p>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
-      {/* Trust Source Layer */}
+      <TrustStrip />
       <TrustSourceLayer title="Data Sources & Attribution" />
-
-      {/* Executive CTA Block */}
-      <AccessCTABlock
-        region="africa"
-        headline="Get Started with Souvera Intelligence"
-        subheadline="From market screening to investment memos — institutional-grade intelligence for Africa and the Caribbean."
-      />
+      <section className="py-8 border-b border-zinc-800">
+        <div className="max-w-[1600px] mx-auto px-6 lg:px-12">
+          <AuditProofCallout />
+        </div>
+      </section>
+      <PlatformAccessTierStrip />
+      <TractionConversionCta />
+      <StickyConversionBar />
     </div>
   );
 }

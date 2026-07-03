@@ -54,25 +54,32 @@ export function DataFreshnessWidget() {
   }
 
   return (
-    <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-6">
-      <h3 className="text-lg font-semibold text-white mb-4">Data Freshness</h3>
-      <div className="space-y-3">
-        {sources.map((source) => {
+    <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-5">
+      <div className="space-y-2">
+        {sources.slice(0, 6).map((source) => {
           const isFresh = source.status === 'fresh';
           const isStale = source.status === 'stale';
           const isMissing = source.status === 'missing';
 
           return (
-            <div key={source.source_key} className="flex items-center justify-between">
+            <div key={source.source_key} className="flex items-center justify-between p-3 bg-zinc-800/30 rounded-lg border border-zinc-800/50 hover:bg-zinc-800/50 transition-colors">
               <div className="flex items-center gap-3">
-                {isFresh && <CheckCircle className="w-5 h-5 text-emerald-400" />}
-                {isStale && <Clock className="w-5 h-5 text-amber-400" />}
-                {isMissing && <AlertCircle className="w-5 h-5 text-red-400" />}
+                <div className={`p-1.5 rounded-lg ${
+                  isFresh ? 'bg-emerald-500/10 border border-emerald-500/20' :
+                  isStale ? 'bg-amber-500/10 border border-amber-500/20' :
+                  'bg-red-500/10 border border-red-500/20'
+                }`}>
+                  {isFresh && <CheckCircle className="w-4 h-4 text-emerald-400" />}
+                  {isStale && <Clock className="w-4 h-4 text-amber-400" />}
+                  {isMissing && <AlertCircle className="w-4 h-4 text-red-400" />}
+                </div>
                 <span className="text-sm text-white">{source.label}</span>
               </div>
-              <span className="text-xs text-zinc-500">
+              <span className={`text-xs font-medium ${
+                isFresh ? 'text-emerald-400' : isStale ? 'text-amber-400' : 'text-red-400'
+              }`}>
                 {source.last_updated
-                  ? new Date(source.last_updated).toLocaleDateString()
+                  ? formatRelativeTime(new Date(source.last_updated))
                   : 'Never'}
               </span>
             </div>
@@ -81,4 +88,17 @@ export function DataFreshnessWidget() {
       </div>
     </div>
   );
+}
+
+function formatRelativeTime(date: Date): string {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffHours / 24);
+  
+  if (diffHours < 1) return 'Just now';
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
+  return date.toLocaleDateString();
 }

@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { User, LogOut, ChevronDown, Map, CreditCard } from 'lucide-react';
+import { User, LogOut, ChevronDown, Map, CreditCard, LayoutDashboard, Gauge } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { managePlanHref } from '@/lib/intelligence/routing';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
@@ -17,6 +17,8 @@ export function AccountMenu({ user }: AccountMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [plan, setPlan] = useState<string>('Explorer');
   const [fullName, setFullName] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [planId, setPlanId] = useState<string>('explorer');
   const [isSigningOut, setIsSigningOut] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const supabase = createClient(); // Still needed for sign out
@@ -44,9 +46,19 @@ export function AccountMenu({ user }: AccountMenuProps) {
         // Set plan label from API
         setPlan(data.access.planLabel.replace(' Plan', ''));
         
+        // Set plan ID for dashboard access check
+        if (data.access.planId) {
+          setPlanId(data.access.planId);
+        }
+        
         // Set full name from profile
         if (data.user?.fullName) {
           setFullName(data.user.fullName);
+        }
+
+        // Set admin status
+        if (data.role?.isAdmin) {
+          setIsAdmin(true);
         }
       } catch (error) {
         console.error('[AccountMenu] Error fetching account info:', error);
@@ -190,6 +202,26 @@ export function AccountMenu({ user }: AccountMenuProps) {
               <User className="w-4 h-4" />
               Account Settings
             </Link>
+            {(planId === 'business' || planId === 'investor' || planId === 'institutional') && (
+              <Link
+                href="/dashboard"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-3 px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors"
+              >
+                <Gauge className="w-4 h-4" />
+                My Dashboard
+              </Link>
+            )}
+            {isAdmin && (
+              <Link
+                href="/admin"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-3 px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors"
+              >
+                <LayoutDashboard className="w-4 h-4" />
+                Admin Dashboard
+              </Link>
+            )}
             <Link
               href={managePlanHref(true)}
               onClick={() => setIsOpen(false)}

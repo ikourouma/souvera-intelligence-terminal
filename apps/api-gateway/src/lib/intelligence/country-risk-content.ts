@@ -3,6 +3,8 @@
  * @see docs/execution/country-terminal-sprint-plan.md
  */
 
+import { regionalRiskContent } from './country-regional-content';
+
 export interface RiskItem {
   title: string;
   severity: string;
@@ -287,7 +289,7 @@ function jamaicaRisk(countryName: string): CountryRiskContent {
       { value: 'Attractive', label: 'Risk-Adjusted Returns', sublabel: 'Caribbean gateway premium', accentClass: 'text-emerald-400' },
     ],
     returnsBullets: [
-      '$19B economy with CARICOM/CBI market access',
+      'Caribbean economy with CARICOM/CBI market access',
       'Tourism recovery + digital nearshoring diversification',
       'IMF program supports fiscal anchor through 2027',
     ],
@@ -399,7 +401,7 @@ function kenyaRisk(countryName: string): CountryRiskContent {
       { value: 'Attractive', label: 'Risk-Adjusted Returns', sublabel: 'East Africa gateway premium', accentClass: 'text-emerald-400' },
     ],
     returnsBullets: [
-      '$115B economy with AGOA duty-free U.S. market access',
+      'East African economy with AGOA duty-free U.S. market access',
       'M-Pesa ecosystem + EAC payment interoperability scaling',
       'Renewable energy leadership supports long-duration IPP returns',
     ],
@@ -543,7 +545,7 @@ function trinidadRisk(countryName: string): CountryRiskContent {
       { value: '4-6 Years', label: 'Investment Horizon', sublabel: 'Industrial/energy cycle', accentClass: 'text-blue-400' },
       { value: 'Attractive', label: 'Risk-Adjusted Returns', sublabel: 'Energy hub premium', accentClass: 'text-emerald-400' },
     ],
-    returnsBullets: ['$28B economy with CARICOM/CBI access', 'LNG and petrochemical export scale', 'Guyana corridor logistics upside'],
+    returnsBullets: ['CARICOM/CBI market access', 'LNG and petrochemical export scale', 'Guyana corridor logistics upside'],
   };
 }
 
@@ -715,7 +717,7 @@ function bahamasRisk(countryName: string): CountryRiskContent {
       { value: '4-6 Years', label: 'Investment Horizon', sublabel: 'Tourism/real estate', accentClass: 'text-blue-400' },
       { value: 'Attractive', label: 'Risk-Adjusted Returns', sublabel: 'USD-stable gateway', accentClass: 'text-emerald-400' },
     ],
-    returnsBullets: ['$14B economy with BSD/USD peg', 'CBI preferential U.S. export access', 'IFS and Freeport diversification'],
+    returnsBullets: ['BSD/USD currency peg', 'CBI preferential U.S. export access', 'IFS and Freeport diversification'],
   };
 }
 
@@ -727,33 +729,56 @@ export function getRiskContent(iso3: string, countryName: string): CountryRiskCo
   if (key === 'TTO') return trinidadRisk(countryName);
   if (key === 'BRB') return barbadosRisk(countryName);
   if (key === 'BHS') return bahamasRisk(countryName);
-  if (['GHA', 'ZAF', 'ETH', 'SEN', 'CIV', 'TZA'].includes(key)) return wave1AfricaRisk(key, countryName);
+  if (['GHA', 'ZAF', 'ETH', 'SEN', 'CIV', 'TZA', 'ZWE'].includes(key)) return wave1AfricaRisk(key, countryName);
+  const regional = regionalRiskContent(key, countryName);
+  if (regional) return regional;
   return defaultRisk(countryName);
 }
 
 function wave1AfricaRisk(iso3: string, countryName: string): CountryRiskContent {
   const profiles: Record<string, { subtitle: string; fallback: string; riskLevel: string; horizon: string; returns: string; narrative: string; bullets: string[] }> = {
-    GHA: { subtitle: 'West Africa risk profile with BoG anchor and AGOA export mitigants', fallback: `${countryName} requires balanced assessment of cedi volatility, debt levels, and infrastructure gaps — manageable through export revenue hedges and IMF program oversight.`, riskLevel: 'Manageable', horizon: '4-6 Years', returns: 'Attractive', narrative: `${countryName}'s risk-adjusted returns are attractive for investors with 4-6 year horizons who can navigate currency cycles and leverage AGOA/ECOWAS market access.`, bullets: ['$83B economy with AGOA duty-free U.S. access', 'Gold and cocoa export USD revenue hedges', 'Stable democratic institutions'] },
-    ZAF: { subtitle: 'Industrial economy with energy transition and coalition governance watchpoints', fallback: `${countryName}'s investment landscape balances deep capital markets and industrial scale against load-shedding, rand volatility, and policy uncertainty.`, riskLevel: 'Moderate', horizon: '5-7 Years', returns: 'Compelling', narrative: `${countryName}'s risk-adjusted returns favor patient capital with 5-7 year horizons leveraging JSE liquidity, AGOA manufacturing access, and renewable IPP diversification.`, bullets: ['$380B economy with deep capital markets', 'AGOA automotive and PGM export corridors', 'Renewable IPP rollout reducing grid risk'] },
-    ETH: { subtitle: 'High-growth manufacturing economy with AGOA suspension and forex watchpoints', fallback: `${countryName} offers compelling growth but requires careful navigation of AGOA suspension, forex constraints, and regulatory evolution.`, riskLevel: 'Elevated', horizon: '5-8 Years', returns: 'High Potential', narrative: `${countryName}'s risk-adjusted returns reward patient capital accepting AGOA restoration uncertainty in exchange for EPZ scale, coffee export corridors, and 128M domestic market access.`, bullets: ['$156B economy with 6%+ growth trajectory', '$680M+ AGOA restoration potential', 'EPZ apparel manufacturing scale'] },
-    SEN: { subtitle: 'West Africa stability anchor with CFA peg and energy diversification mitigants', fallback: `${countryName} combines political stability and CFA currency anchor with moderate infrastructure and energy diversification requirements.`, riskLevel: 'Low-Moderate', horizon: '3-5 Years', returns: 'Attractive', narrative: `${countryName}'s risk-adjusted returns suit investors seeking stable West African exposure with 3-5 year horizons leveraging AGOA access and Sangomar energy production.`, bullets: ['$31B stable democracy with CFA peg', 'AGOA-eligible phosphate and fisheries exports', 'Diamniadio industrial zone pipeline'] },
-    CIV: { subtitle: 'Fast-growing West Africa economy with strong macro and port logistics mitigants', fallback: `${countryName} offers strong growth with manageable political and infrastructure risks mitigated by CFA peg and Abidjan port investment.`, riskLevel: 'Manageable', horizon: '4-6 Years', returns: 'Compelling', narrative: `${countryName}'s risk-adjusted returns are compelling for investors with 4-6 year horizons capturing West Africa's fastest major economy growth under AGOA cocoa export access.`, bullets: ['$87B economy — West Africa growth leader', 'World\'s largest cocoa producer with AGOA access', 'Abidjan port regional hub advantage'] },
-    TZA: { subtitle: 'East Africa resource economy with regulatory evolution and AGOA EPZ mitigants', fallback: `${countryName} balances mining and EPZ apparel opportunity against infrastructure gaps and regulatory evolution outside Dar es Salaam.`, riskLevel: 'Moderate', horizon: '4-6 Years', returns: 'Attractive', narrative: `${countryName}'s risk-adjusted returns attract investors with 4-6 year horizons leveraging AGOA EPZ apparel access, gold mining scale, and EAC market integration.`, bullets: ['$86B economy with EAC single market access', 'AGOA-eligible EPZ apparel exports', 'Gold mining and cashew export corridors'] },
+    GHA: { subtitle: 'West Africa risk profile with BoG anchor and AGOA export mitigants', fallback: `${countryName} requires balanced assessment of cedi volatility, debt levels, and infrastructure gaps — manageable through export revenue hedges and IMF program oversight.`, riskLevel: 'Manageable', horizon: '4-6 Years', returns: 'Attractive', narrative: `${countryName}'s risk-adjusted returns are attractive for investors with 4-6 year horizons who can navigate currency cycles and leverage AGOA/ECOWAS market access.`, bullets: ['West Africa economy with AGOA duty-free U.S. access', 'Gold and cocoa export USD revenue hedges', 'Stable democratic institutions'] },
+    ZAF: { subtitle: 'Industrial economy with energy transition and coalition governance watchpoints', fallback: `${countryName}'s investment landscape balances deep capital markets and industrial scale against load-shedding, rand volatility, and policy uncertainty.`, riskLevel: 'Moderate', horizon: '5-7 Years', returns: 'Compelling', narrative: `${countryName}'s risk-adjusted returns favor patient capital with 5-7 year horizons leveraging JSE liquidity, AGOA manufacturing access, and renewable IPP diversification.`, bullets: ['Industrial economy with deep capital markets', 'AGOA automotive and PGM export corridors', 'Renewable IPP rollout reducing grid risk'] },
+    ETH: { subtitle: 'High-growth manufacturing economy with AGOA suspension and forex watchpoints', fallback: `${countryName} offers compelling growth but requires careful navigation of AGOA suspension, forex constraints, and regulatory evolution.`, riskLevel: 'Elevated', horizon: '5-8 Years', returns: 'High Potential', narrative: `${countryName}'s risk-adjusted returns reward patient capital accepting AGOA restoration uncertainty in exchange for EPZ scale, coffee export corridors, and large domestic market access.`, bullets: ['High-growth economy with manufacturing scale', 'AGOA restoration watch — suspended since 2022', 'EPZ apparel manufacturing scale'] },
+    SEN: { subtitle: 'West Africa stability anchor with CFA peg and energy diversification mitigants', fallback: `${countryName} combines political stability and CFA currency anchor with moderate infrastructure and energy diversification requirements.`, riskLevel: 'Low-Moderate', horizon: '3-5 Years', returns: 'Attractive', narrative: `${countryName}'s risk-adjusted returns suit investors seeking stable West African exposure with 3-5 year horizons leveraging AGOA access and Sangomar energy production.`, bullets: ['Stable democracy with CFA peg', 'AGOA-eligible phosphate and fisheries exports', 'Diamniadio industrial zone pipeline'] },
+    CIV: { subtitle: 'Fast-growing West Africa economy with strong macro and port logistics mitigants', fallback: `${countryName} offers strong growth with manageable political and infrastructure risks mitigated by CFA peg and Abidjan port investment.`, riskLevel: 'Manageable', horizon: '4-6 Years', returns: 'Compelling', narrative: `${countryName}'s risk-adjusted returns are compelling for investors with 4-6 year horizons capturing West Africa's fastest major economy growth under AGOA cocoa export access.`, bullets: ['West Africa growth leader', 'World\'s largest cocoa producer with AGOA access', 'Abidjan port regional hub advantage'] },
+    TZA: { subtitle: 'East Africa resource economy with regulatory evolution and AGOA EPZ mitigants', fallback: `${countryName} balances mining and EPZ apparel opportunity against infrastructure gaps and regulatory evolution outside Dar es Salaam.`, riskLevel: 'Moderate', horizon: '4-6 Years', returns: 'Attractive', narrative: `${countryName}'s risk-adjusted returns attract investors with 4-6 year horizons leveraging AGOA EPZ apparel access, gold mining scale, and EAC market integration.`, bullets: ['East African economy with EAC single market access', 'AGOA-eligible EPZ apparel exports', 'Gold mining and cashew export corridors'] },
+    ZWE: { subtitle: 'Southern Africa mineral economy with currency and AGOA restoration watchpoints', fallback: `${countryName} offers mineral-led upside but requires careful navigation of currency volatility, AGOA suspension since 2001, and power reliability constraints — mitigated by USD-linked mining revenue and SADC/COMESA access.`, riskLevel: 'Elevated', horizon: '5-8 Years', returns: 'High Potential', narrative: `${countryName}'s risk-adjusted returns reward patient capital accepting currency and AGOA-restoration uncertainty in exchange for platinum, lithium, and chrome export scale and SADC/COMESA market positioning.`, bullets: ['Mineral-led economy with platinum, lithium, and chrome reserves', 'USD-linked mining export revenue as natural FX hedge', 'SADC and COMESA regional market access'] },
   };
   const p = profiles[iso3] ?? profiles.GHA;
   return {
     heroSubtitle: p.subtitle,
     heroFallback: p.fallback,
-    macro: { exportId: 'inflation', exportTitle: 'Macro Risks', exportFileSlug: 'macro-risks', title: 'Macro Risks', subtitle: 'Currency, Inflation, Debt', icon: 'macro', items: [{ title: 'Currency & Inflation', severity: 'MODERATE', severityTone: 'amber', body: `Monitor exchange rate trends and CPI in the Economy tab for ${countryName}.`, mitigants: ['Export USD revenue where applicable', 'Regional trade frameworks'] }] },
-    political: { exportId: 'political-risks-card', exportTitle: 'Political Risks', exportFileSlug: 'political-risks', title: 'Political Risks', subtitle: 'Governance, Stability', icon: 'political', items: [{ title: 'Governance & Stability', severity: 'LOW-MODERATE', severityTone: 'emerald', body: `Assess institutional quality and policy continuity for ${countryName}.`, mitigants: ['Due diligence on local partners'] }] },
-    operational: { exportId: 'operational-risks-card', exportTitle: 'Operational Risks', exportFileSlug: 'operational-risks', title: 'Operational Risks', subtitle: 'Infrastructure, Logistics', icon: 'operational', items: [{ title: 'Infrastructure', severity: 'MODERATE', severityTone: 'amber', body: 'Evaluate power, transport, and connectivity for your sector.', mitigants: ['PPP options may apply'] }] },
+    macro: {
+      exportId: 'inflation', exportTitle: 'Macro Risks', exportFileSlug: 'macro-risks', title: 'Macro Risks', subtitle: 'Currency, Inflation, Debt', icon: 'macro',
+      items: [
+        { title: 'Currency Volatility', severity: 'MODERATE', severityTone: 'amber', body: `Exchange rate at {{FX}} ({{MACRO_ASOF_YEAR}}); monitor against latest central bank releases. ${countryName}'s currency exposure is partially offset where export revenues are USD-denominated.`, mitigants: ['USD-denominated export revenue', 'Hedging instruments where available'] },
+        { title: 'Inflation', severity: 'MODERATE', severityTone: 'amber', body: `Inflation at {{INFLATION}} ({{MACRO_ASOF_YEAR}}); verify against central bank policy updates. Monetary policy response and import-price pass-through shape the trajectory.`, mitigants: ['Monetary tightening cycle', 'Diversified import sourcing'] },
+        { title: 'External & Fiscal Balance', severity: 'LOW-MODERATE', severityTone: 'emerald', body: `Debt and external balances should be verified against IMF/World Bank sovereign updates; treat ratios as estimates until tied to structured fiscal series.`, mitigants: ['IMF/World Bank program oversight where applicable', 'Export earnings support reserves'] },
+      ],
+    },
+    political: {
+      exportId: 'political-risks-card', exportTitle: 'Political Risks', exportFileSlug: 'political-risks', title: 'Political Risks', subtitle: 'Governance, Policy Continuity', icon: 'political',
+      items: [
+        { title: 'Governance & Stability', severity: 'LOW-MODERATE', severityTone: 'emerald', body: `Assess institutional quality, electoral cycles, and policy continuity for ${countryName}. Regional bodies and development-partner programs support reform momentum.`, mitigants: ['Regional bloc accountability frameworks', 'Development partner engagement'] },
+        { title: 'Regulatory Predictability', severity: 'MODERATE', severityTone: 'amber', body: `Sector regulation, licensing, and local-content rules can shift; engage early with regulators and secure written approvals before capital commitment.`, mitigants: ['Local legal counsel and partners', 'Phased, milestone-based deployment'] },
+      ],
+    },
+    operational: {
+      exportId: 'operational-risks-card', exportTitle: 'Operational Risks', exportFileSlug: 'operational-risks', title: 'Operational Risks', subtitle: 'Power, Logistics, Talent', icon: 'operational',
+      items: [
+        { title: 'Power Reliability', severity: 'MODERATE', severityTone: 'amber', body: `Grid reliability varies; many operators budget for self-generation. Captive solar and backup capacity reduce downtime risk for ${countryName} operations.`, mitigants: ['Captive solar / backup generation', 'Energy-efficiency investment'] },
+        { title: 'Logistics & Infrastructure', severity: 'MODERATE', severityTone: 'amber', body: `Port, corridor, and last-mile logistics add cost and lead time. Plan around principal trade corridors and bonded-warehouse options.`, mitigants: ['Established freight forwarders', 'Bonded warehousing and corridor planning'] },
+        { title: 'Talent & Skills', severity: 'LOW-MODERATE', severityTone: 'emerald', body: `Skilled-labor availability varies by sector; emigration of professionals can tighten supply. Training pipelines and diaspora engagement mitigate gaps.`, mitigants: ['Workforce training programs', 'Diaspora and regional talent pools'] },
+      ],
+    },
     mitigationStrategies: [
-      { icon: 'users', title: 'Local Partnerships', body: `Partner with established operators in ${countryName} for market entry.`, borderClass: 'border-emerald-500/10' },
+      { icon: 'users', title: 'Local Partnerships', body: `Partner with established operators in ${countryName} for market entry and regulatory navigation.`, borderClass: 'border-emerald-500/10' },
       { icon: 'shield', title: 'Insurance', body: 'Political risk and credit insurance from MIGA, DFC, or private markets.', borderClass: 'border-blue-500/10' },
-      { icon: 'dollar', title: 'Diversification', body: 'Balance domestic and AGOA export revenue streams.', borderClass: 'border-amber-500/10' },
-      { icon: 'check', title: 'Phased Deployment', body: 'Pilot before full-scale capital commitment.', borderClass: 'border-cyan-500/10' },
+      { icon: 'dollar', title: 'Diversification', body: 'Balance domestic and export revenue streams; prioritize USD-linked corridors.', borderClass: 'border-amber-500/10' },
+      { icon: 'check', title: 'Phased Deployment', body: 'Pilot before full-scale capital commitment to validate assumptions.', borderClass: 'border-cyan-500/10' },
     ],
-    mitigationBullets: ['Local partners reduce friction', 'AGOA export revenue hedges FX exposure', 'Phased deployment recommended'],
+    mitigationBullets: ['Local partners reduce friction', 'Export revenue hedges FX exposure', 'Phased deployment recommended'],
     riskAdjustedNarrative: p.narrative,
     riskAdjustedStats: [
       { value: p.riskLevel, label: 'Risk Level', sublabel: 'With proper mitigation', accentClass: 'text-emerald-400' },

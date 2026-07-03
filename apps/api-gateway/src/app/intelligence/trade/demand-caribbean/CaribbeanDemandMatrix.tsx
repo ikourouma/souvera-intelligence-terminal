@@ -8,8 +8,10 @@ import {
   X, Filter, AlertTriangle, Building2, Users, Search, Info, Ship,
 } from 'lucide-react';
 import { exportElementToPNG } from '@/lib/intelligence/export-png';
-import { iso3ToIso2 } from '@/lib/intelligence/export-branding';
+import { iso3ToIso2, formatTradeCountryLabel, tradeCountryMatchesSearch } from '@/lib/intelligence/export-branding';
 import { HighlightedText } from '@/components/intelligence/HighlightedText';
+import { Top10Card } from '@/components/intelligence/Top10Card';
+import { ProductDemandDrawer, ProductDemandRow } from '@/components/intelligence/ProductDemandDrawer';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -47,6 +49,14 @@ interface DemandResponse {
       imports_from_us_usd: number;
       us_export_potential_usd: number;
       country_count: number;
+    }>;
+    top_products?: Array<{
+      group: string;
+      label: string;
+      usExports: number;
+      potential: number;
+      gap: number;
+      markets: number;
     }>;
     data_vintage: string;
   };
@@ -136,8 +146,8 @@ function generateSouveraAnalysis(row: DemandRow): string {
   const potential = usdB(row.us_export_potential_usd ?? 0);
 
   const gapText = gap > 0
-    ? `The US currently captures ${pct(share)} of ${row.country_name}'s ${row.category_label.toLowerCase()} imports (${usShare}/yr). Reaching the benchmark share of ${pct(benchmark)} would unlock an additional ${usdB(gap)}/yr in US export revenue.`
-    : `The US already exceeds the benchmark share in ${row.country_name} for ${row.category_label.toLowerCase()} — a strong competitive position to defend under CBTPA.`;
+    ? `The US currently captures ${pct(share)} of ${formatTradeCountryLabel(row.iso3, row.country_name)}'s ${row.category_label.toLowerCase()} imports (${usShare}/yr). Reaching the benchmark share of ${pct(benchmark)} would unlock an additional ${usdB(gap)}/yr in US export revenue.`
+    : `The US already exceeds the benchmark share in ${formatTradeCountryLabel(row.iso3, row.country_name)} for ${row.category_label.toLowerCase()} — a strong competitive position to defend under CBTPA.`;
 
   const competitorText = topSupplier && !isUsTopSupplier
     ? ` ${topSupplier.country} currently leads with ${pct(topSupplier.sharePct)} market share — US exporters should target this gap through DFC financing and bilateral investment programs.`
@@ -608,14 +618,16 @@ function CategoryCard({ group, rows, onCountryClick }: {
                     key={r.id}
                     onClick={() => onCountryClick({ iso3: r.iso3, name: r.country_name }, group)}
                     className="border-b border-zinc-800/60 hover:bg-zinc-800/50 cursor-pointer transition-colors group"
-                    title={`Click for ${r.country_name} full demand profile`}
+                    title={`Click for ${formatTradeCountryLabel(r.iso3, r.country_name)} full demand profile`}
                   >
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <Users className="w-3 h-3 text-zinc-600 group-hover:text-cyan-400 transition-colors shrink-0" />
                         <div>
-                          <p className="text-white font-medium text-xs group-hover:text-cyan-300 transition-colors">{r.country_name}</p>
-                          <p className="text-zinc-500 text-[10px]">{r.iso3} · {r.sub_region || r.region}</p>
+                          <p className="text-white font-medium text-xs group-hover:text-cyan-300 transition-colors">{formatTradeCountryLabel(r.iso3, r.country_name)}</p>
+                          {(r.sub_region || r.region) ? (
+                            <p className="text-zinc-500 text-[10px]">{r.sub_region || r.region}</p>
+                          ) : null}
                         </div>
                       </div>
                     </td>
@@ -685,6 +697,7 @@ export function CaribbeanDemandMatrix() {
   const [groupFilter, setGroupFilter] = useState('');
   const [regionFilter, setRegionFilter] = useState('');
   const [countrySearch, setCountrySearch] = useState('');
+  const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -700,10 +713,9 @@ export function CaribbeanDemandMatrix() {
   const byGroup = useMemo(() => {
     if (!data?.rows) return {};
     const grouped: Record<string, DemandRow[]> = {};
-    const searchLower = countrySearch.toLowerCase().trim();
     for (const r of data.rows) {
       if (regionFilter && r.region !== regionFilter && r.sub_region !== regionFilter) continue;
-      if (searchLower && !r.country_name.toLowerCase().includes(searchLower) && !r.iso3.toLowerCase().includes(searchLower)) continue;
+      if (!tradeCountryMatchesSearch(r.iso3, r.country_name, countrySearch)) continue;
       if (!grouped[r.category_group]) grouped[r.category_group] = [];
       grouped[r.category_group].push(r);
     }
@@ -731,8 +743,30 @@ export function CaribbeanDemandMatrix() {
     return [...s].sort();
   }, [data]);
 
+  // Get rows for selected product category
+  const productRows = useMemo(() => {
+    if (!selectedProduct || !data?.rows) return [];
+    return data.rows.filter((r) => r.category_group === selectedProduct);
+  }, [selectedProduct, data]);
+
   return (
     <div className="min-h-screen bg-zinc-950">
+      {/* Product Demand Drawer */}
+      {selectedProduct && productRows.length > 0 && CATEGORY_META[selectedProduct] && (
+        <ProductDemandDrawer
+          categoryGroup={selectedProduct}
+          categoryMeta={CATEGORY_META[selectedProduct]}
+          rows={productRows as ProductDemandRow[]}
+          region="Caribbean"
+          onClose={() => setSelectedProduct(null)}
+          onCountryClick={(country) => {
+            setSelectedProduct(null);
+            setSelectedCountry(country);
+          }}
+          colorScheme="cyan"
+        />
+      )}
+
       {selectedCountry && countryRows.length > 0 && (
         <CountryDemandDrawer
           rows={countryRows}
@@ -808,6 +842,28 @@ export function CaribbeanDemandMatrix() {
             </p>
           </div>
         </div>
+
+        {/* Top 10 Products by Export Potential */}
+        {data?.summary?.top_products && data.summary.top_products.length > 0 && (
+          <Top10Card
+            title="Top 10 Demanded Product Categories"
+            items={data.summary.top_products.map((p) => ({
+              id: p.group,
+              label: p.label || CATEGORY_META[p.group]?.label || p.group,
+              sublabel: `${p.markets} markets`,
+              value: p.potential,
+              secondaryValue: p.potential > 0 ? ((p.potential - p.gap) / p.potential) * 100 : 0,
+              secondaryLabel: 'US share',
+            }))}
+            onItemClick={(item) => setSelectedProduct(item.id)}
+            colorScheme="cyan"
+            exportFileName={`souvera-caribbean-demand-top-products-${new Date().toISOString().slice(0, 10)}`}
+            exportTitle="Top 10 Caribbean Import Demand Categories"
+            sourceAttribution="ITC Trade Data Monitor · UN Comtrade · BEA"
+            dataAsOf="2023"
+            columns={5}
+          />
+        )}
 
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-3">
@@ -901,11 +957,11 @@ export function CaribbeanDemandMatrix() {
           <Link href="/intelligence/trade/demand" className="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors">
             African Import Demand <ArrowRight className="w-3.5 h-3.5" />
           </Link>
-          <Link href="/intelligence/trade/agoa/products" className="inline-flex items-center gap-1 text-violet-400 hover:text-violet-300 transition-colors">
-            AGOA Product Finder <ArrowRight className="w-3.5 h-3.5" />
+          <Link href="/intelligence/trade/cbtpa/flows" className="inline-flex items-center gap-1 text-cyan-400 hover:text-cyan-300 transition-colors">
+            CBTPA Trade Flows <ArrowRight className="w-3.5 h-3.5" />
           </Link>
-          <Link href="/intelligence/trade/agoa" className="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors">
-            AGOA Eligibility Tracker <ArrowRight className="w-3.5 h-3.5" />
+          <Link href="/intelligence/trade/cbtpa" className="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors">
+            CBI Eligibility Tracker <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
       </section>

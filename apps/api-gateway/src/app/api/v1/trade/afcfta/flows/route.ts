@@ -140,6 +140,20 @@ export async function GET(request: NextRequest) {
       categoryGroupTotals[r.category_group].country_count += 1;
     }
 
+    // Top traders by country (aggregate across categories)
+    const countryTotals: Record<string, { name: string; intraAfrica: number; total: number }> = {};
+    for (const r of rows) {
+      if (!countryTotals[r.iso3]) {
+        countryTotals[r.iso3] = { name: r.country_name, intraAfrica: 0, total: 0 };
+      }
+      countryTotals[r.iso3].intraAfrica += r.intra_africa_trade_usd ?? 0;
+      countryTotals[r.iso3].total += r.total_trade_usd ?? 0;
+    }
+    const topTraders = Object.entries(countryTotals)
+      .sort(([, a], [, b]) => b.intraAfrica - a.intraAfrica)
+      .slice(0, 10)
+      .map(([iso3, data]) => ({ iso3, ...data }));
+
     return NextResponse.json({
       rows,
       summary: {
@@ -149,6 +163,7 @@ export async function GET(request: NextRequest) {
         intra_africa_share_pct: totalTrade > 0 ? Math.round((totalIntraAfricaTrade / totalTrade) * 1000) / 10 : 0,
         markets_covered: marketsCount,
         category_group_totals: categoryGroupTotals,
+        top_traders: topTraders,
         data_vintage: `${yearFilter}`,
         direction,
       },

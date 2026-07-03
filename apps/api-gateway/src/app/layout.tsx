@@ -4,6 +4,7 @@ import "./globals.css";
 import { LanguageProvider } from "@/lib/LanguageContext";
 
 import { ComplianceBanner } from "@/components/ui/ComplianceBanner";
+import { GlobalLoadingIndicator } from "@/components/ui/GlobalLoadingIndicator";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -46,6 +47,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en" className="h-full">
       <body className={`${inter.className} min-h-screen antialiased bg-zinc-925 text-white`}>
         <LanguageProvider>
+          <GlobalLoadingIndicator />
           {children}
           <ComplianceBanner />
         </LanguageProvider>

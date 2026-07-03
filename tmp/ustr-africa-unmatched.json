@@ -1,34 +1,8 @@
 {
-  "generatedAt": "2026-06-04T01:08:14.461Z",
+  "generatedAt": "2026-06-29T09:20:28.018Z",
   "parsedCount": 15,
-  "matchedCount": 10,
-  "unmatched": [
-    {
-      "slug": "cameroon",
-      "label": "Cameroon",
-      "url": "https://ustr.gov/countries-regions/africa/cameroon"
-    },
-    {
-      "slug": "madagascar",
-      "label": "Madagascar",
-      "url": "https://ustr.gov/countries-regions/africa/madagascar"
-    },
-    {
-      "slug": "malawi",
-      "label": "Malawi",
-      "url": "https://ustr.gov/countries-regions/africa/malawi"
-    },
-    {
-      "slug": "mali",
-      "label": "Mali",
-      "url": "https://ustr.gov/countries-regions/africa/mali"
-    },
-    {
-      "slug": "mauritania",
-      "label": "Mauritania",
-      "url": "https://ustr.gov/countries-regions/africa/mauritania"
-    }
-  ],
+  "matchedCount": 15,
+  "unmatched": [],
   "missingInUstr": [
     "MAR",
     "DZA",
@@ -37,18 +11,15 @@
     "EGY",
     "SDN",
     "GHA",
-    "MLI",
     "BFA",
     "NER",
     "GIN",
-    "LBR",
     "CIV",
     "TGO",
     "BEN",
     "GMB",
     "GNB",
     "CPV",
-    "MRT",
     "ETH",
     "KEN",
     "TZA",
@@ -56,10 +27,9 @@
     "BDI",
     "SOM",
     "DJI",
-    "MDG",
+    "ERI",
     "COM",
     "SYC",
-    "CMR",
     "CAF",
     "COD",
     "COG",
@@ -72,8 +42,7 @@
     "LSO",
     "SWZ",
     "ZWE",
-    "ZMB",
-    "MWI"
+    "ZMB"
   ],
   "extraInUstrNotInSouvera": []
 }

@@ -1,13 +1,15 @@
 'use client';
 
 import { Download, ChevronDown, ChevronUp } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import type { EntitlementKey } from '@souvera/entitlements';
 import { HelpTooltip } from '@/components/shared/HelpTooltip';
 import { sanitizeHtml } from '@/lib/intelligence/markdown';
-import { exportCardToPNG } from '@/lib/intelligence/export-png';
+import { exportElementToPNG } from '@/lib/intelligence/export-png';
 import { countryExportContext } from '@/lib/intelligence/export-branding';
 import { getSectorTradeCopy } from '@/lib/intelligence/country-sectors-content';
+import { PetroleumExclusionFootnote } from '@/components/intelligence/PetroleumExclusionFootnote';
+import { isPetroleumOrEnergySector, petroleumSectorNote } from '@/lib/intelligence/preferential-trade-policy';
 
 interface SectorData {
   sectorKey: string;
@@ -75,9 +77,43 @@ export function SectorsTab({ data, userEntitlements }: SectorsTabProps) {
   const iso3 = data.country?.iso3?.toLowerCase() ?? 'country';
   const exportCtx = countryExportContext(data.country);
   const tradeCopy = getSectorTradeCopy(data.country?.iso3 ?? '');
+  
+  // Ref for key sectors panel export
+  const keySectorsPanelRef = useRef<HTMLDivElement>(null);
+  const [isExporting, setIsExporting] = useState(false);
 
-  const handleExport = (elementId: string, fileName: string, cardTitle: string) =>
-    exportCardToPNG({ elementId, fileName, cardTitle, ...exportCtx });
+  const handleExportPanel = async () => {
+    if (!keySectorsPanelRef.current || isExporting) return;
+    
+    setIsExporting(true);
+    try {
+      const date = new Date().toISOString().split('T')[0];
+      await exportElementToPNG({
+        element: keySectorsPanelRef.current,
+        fileName: `souvera-${iso3}-key-sectors-${date}.png`,
+        cardTitle: 'Key Sectors',
+        countryName: data.country?.name,
+        iso2: data.country?.iso3?.substring(0, 2),
+        sourceAttribution: 'SOUVERA Intelligence',
+      });
+    } catch (err) {
+      console.error('Failed to export Key Sectors panel:', err);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleExport = (elementId: string, fileName: string, cardTitle: string) => {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+    
+    exportElementToPNG({
+      element,
+      fileName: `souvera-${fileName}-${new Date().toISOString().split('T')[0]}.png`,
+      cardTitle,
+      ...exportCtx,
+    });
+  };
 
   // Toggle sector accordion (collapse/expand)
   const toggleSector = (sectorKey: string) => {
@@ -135,23 +171,40 @@ export function SectorsTab({ data, userEntitlements }: SectorsTabProps) {
         </span>
       </div>
 
+      <div ref={keySectorsPanelRef} id="key-sectors-panel" className="exportable-card group relative">
+        {/* Hover-activated PNG download button */}
+        {canExport && (
+          <button
+            onClick={handleExportPanel}
+            disabled={isExporting}
+            className="export-btn absolute top-2 right-2 p-1.5 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+            data-export-exclude
+            title="Download Key Sectors as PNG"
+            aria-label="Download Key Sectors as PNG"
+          >
+            <Download className={`w-4 h-4 text-zinc-300 ${isExporting ? 'animate-pulse' : ''}`} />
+          </button>
+        )}
+        
       {/* Sector comparison matrix */}
       {hasScoreAccess && (
-        <div id="sector-comparison-card" className="overflow-x-auto bg-zinc-900/50 border border-zinc-800 rounded-xl p-4">
+        <div id="sector-comparison-card" className="exportable-card group relative overflow-x-auto bg-zinc-900/50 border border-zinc-800 rounded-xl p-4">
+          {/* Hover-activated PNG download button */}
+          {canExport && (
+            <button
+              type="button"
+              onClick={() => handleExport('sector-comparison-card', `${iso3}-sector-comparison`, 'Sector Comparison')}
+              data-export-exclude
+              className="export-btn absolute top-2 right-2 p-1.5 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+              title="Download Sector Comparison as PNG"
+              aria-label="Download Sector Comparison as PNG"
+            >
+              <Download className="w-4 h-4 text-zinc-300" />
+            </button>
+          )}
+          
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider">Sector Comparison</h3>
-            {canExport && (
-              <button
-                type="button"
-                onClick={() => handleExport('sector-comparison-card', `${iso3}-sector-comparison`, 'Sector Comparison')}
-                data-export-exclude
-                className="shrink-0 text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors"
-                title="Export sector comparison as PNG"
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">PNG</span>
-              </button>
-            )}
           </div>
           <table className="w-full text-sm">
             <thead>
@@ -177,7 +230,7 @@ export function SectorsTab({ data, userEntitlements }: SectorsTabProps) {
       )}
 
       {/* Sector Cards */}
-      <div className="space-y-4">
+      <div className={`space-y-4 ${hasScoreAccess ? 'mt-8' : ''}`}>
         {data.sectors.map((sector) => {
           const isExpanded = expandedSector === sector.sectorKey;
           const isNarrativeExpanded = expandedNarratives.has(sector.sectorKey);
@@ -190,12 +243,12 @@ export function SectorsTab({ data, userEntitlements }: SectorsTabProps) {
                 isExpanded ? 'border-blue-500/50 shadow-lg shadow-blue-500/10' : 'border-zinc-800 hover:border-zinc-700'
               }`}
             >
-              {/* Clickable Header + Export Button */}
+              {/* Clickable Header */}
               <div className="flex items-start justify-between p-6">
                 {/* Clickable Accordion Trigger */}
                 <button
                   onClick={() => toggleSector(sector.sectorKey)}
-                  className="flex-1 flex items-center gap-3 text-left group mr-4"
+                  className="flex-1 flex items-center gap-3 text-left group"
                 >
                   <span className="text-3xl sm:text-4xl transition-transform duration-300 group-hover:scale-110">
                     {sector.iconEmoji}
@@ -217,28 +270,27 @@ export function SectorsTab({ data, userEntitlements }: SectorsTabProps) {
                     </p>
                   </div>
                 </button>
-                
-                {/* Export Button (Separate, not nested) */}
-                {canExport && isExpanded && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleExport(`sector-${sector.sectorKey}-card`, `${iso3}-${sector.sectorKey}-sector`, sector.sectorLabel);
-                    }}
-                    data-export-exclude
-                    className="shrink-0 text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors self-start"
-                    title="Export sector card as PNG"
-                  >
-                    <Download className="w-3 h-3" />
-                    <span className="hidden sm:inline">PNG</span>
-                  </button>
-                )}
               </div>
 
               {/* Expandable Content */}
               {isExpanded && (
-                <div id={`sector-${sector.sectorKey}-card`} className="px-6 pb-6 space-y-6 animate-in slide-in-from-top-2 duration-300">
+                <div id={`sector-${sector.sectorKey}-card`} className="exportable-card group relative px-6 pb-6 space-y-6 animate-in slide-in-from-top-2 duration-300">
+                  {/* Hover-activated PNG download button */}
+                  {canExport && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleExport(`sector-${sector.sectorKey}-card`, `${iso3}-${sector.sectorKey}-sector`, sector.sectorLabel);
+                      }}
+                      data-export-exclude
+                      className="export-btn absolute top-2 right-2 p-1.5 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+                      title={`Download ${sector.sectorLabel} as PNG`}
+                      aria-label={`Download ${sector.sectorLabel} as PNG`}
+                    >
+                      <Download className="w-4 h-4 text-zinc-300" />
+                    </button>
+                  )}
 
                 {/* Sector Scores (Professional+ Access) */}
                 {hasScoreAccess && (
@@ -468,6 +520,14 @@ export function SectorsTab({ data, userEntitlements }: SectorsTabProps) {
                         </div>
                       </div>
                     )}
+                    {isPetroleumOrEnergySector(sector.sectorKey, sector.sectorLabel) && (
+                      <>
+                        <p className="text-xs text-amber-400/90 mt-3 leading-relaxed">
+                          {petroleumSectorNote(data.country?.iso3 ?? '')}
+                        </p>
+                        <PetroleumExclusionFootnote iso3={data.country?.iso3 ?? ''} compact className="mt-3" />
+                      </>
+                    )}
                   </div>
                 )}
 
@@ -500,6 +560,7 @@ export function SectorsTab({ data, userEntitlements }: SectorsTabProps) {
             </div>
           );
         })}
+      </div>
       </div>
     </div>
   );

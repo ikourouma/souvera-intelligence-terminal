@@ -30,6 +30,10 @@ interface MeResponse {
     rank: number;
     entitlements: string[];
   };
+  role?: {
+    isAdmin: boolean;
+    isSuperAdmin: boolean;
+  };
 }
 
 export async function GET() {
@@ -55,6 +59,31 @@ export async function GET() {
       .eq('id', user.id)
       .single();
 
+    // Check admin status - must have either admin plan OR admin org role
+    const ADMIN_PLANS = ['platform_admin', 'super_admin'];
+    const ADMIN_ROLES = ['platform_admin', 'super_admin'];
+
+    // Check if user has an admin subscription plan
+    const hasAdminPlan = access.planId && ADMIN_PLANS.includes(access.planId);
+
+    // Check organization membership for admin role
+    const { data: membership } = await supabase
+      .from('souvera_organization_members')
+      .select('role')
+      .eq('user_id', user.id)
+      .in('role', ADMIN_ROLES)
+      .maybeSingle();
+
+    const hasAdminRole = !!membership;
+
+    // User is admin if they have EITHER admin plan OR admin org role
+    const isAdmin = hasAdminPlan || hasAdminRole;
+    
+    // Determine super admin status
+    const isSuperAdmin = 
+      membership?.role === 'super_admin' || 
+      access.planId === 'super_admin';
+
     // Build plan label
     const planLabel = access.planId
       ? access.planId.charAt(0).toUpperCase() + access.planId.slice(1) + ' Plan'
@@ -73,6 +102,10 @@ export async function GET() {
         planLabel,
         rank: access.planRank,
         entitlements: access.entitlements,
+      },
+      role: {
+        isAdmin,
+        isSuperAdmin,
       },
     };
 

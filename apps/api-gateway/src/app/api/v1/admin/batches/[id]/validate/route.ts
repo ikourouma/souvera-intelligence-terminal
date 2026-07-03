@@ -17,8 +17,10 @@ import {
   validateRow, 
   validateAGOAStatus, 
   validateAfCFTAStatus,
+  validateAgoaTradeFlowRow,
   validateDate 
 } from '@/lib/ingestion/validators';
+import { mapRowWithTemplate } from '@/lib/ingestion/publish-targets';
 import type { ValidationError } from '@/lib/data/types';
 
 function getServiceClient() {
@@ -47,7 +49,7 @@ async function verifyAdminAccess(): Promise<{ isAdmin: boolean; userId?: string;
       .from('souvera_organization_members')
       .select('role')
       .eq('user_id', user.id)
-      .in('role', ['org_admin', 'platform_admin'])
+      .in('role', ['org_admin', 'platform_admin', 'super_admin'])
       .limit(1);
 
     if (memberData && memberData.length > 0) {
@@ -155,9 +157,21 @@ export async function POST(request: NextRequest, context: RouteContext) {
       let warningCount = 0;
       let excludedCount = 0;
 
+      // Column mappings from the template (source CSV header → target table column).
+      const templateMappings = (batch.template?.column_mappings as
+        | { source: string; target: string; transform?: 'uppercase' | 'lowercase' | 'number' | 'boolean' }[]
+        | undefined) ?? [];
+
       // Validate each row
       for (const row of rows) {
-        const data = row.mapped_data || row.raw_data;
+        // For trade-flow style datasets we map raw → target columns up front so the
+        // same mapped_data is validated AND reused at publish time.
+        const mappedFromTemplate =
+          config.dataType === 'agoa_trade_flows' && templateMappings.length > 0
+            ? mapRowWithTemplate(row.raw_data as Record<string, unknown>, templateMappings)
+            : null;
+
+        const data = mappedFromTemplate || row.mapped_data || row.raw_data;
         const errors: ValidationError[] = [];
         const warnings: ValidationError[] = [];
 
@@ -197,6 +211,10 @@ export async function POST(request: NextRequest, context: RouteContext) {
           if (depositedDateError) errors.push(depositedDateError);
         }
 
+        if (config.dataType === 'agoa_trade_flows') {
+          errors.push(...validateAgoaTradeFlowRow(data as Record<string, unknown>));
+        }
+
         // Determine status
         let newStatus: string;
         if (basicValidation.is_excluded) {
@@ -214,12 +232,14 @@ export async function POST(request: NextRequest, context: RouteContext) {
           validCount++;
         }
 
-        // Update row
+        // Update row (persist mapped_data when we mapped from a template so the
+        // publish step can upsert clean target-column values).
         await supabase
           .from('souvera_source_file_ingestion_rows')
           .update({
             status: newStatus,
             mapped_iso3: basicValidation.mapped_iso3,
+            ...(mappedFromTemplate ? { mapped_data: mappedFromTemplate } : {}),
             validation_errors: errors.length > 0 ? errors : null,
             validation_warnings: warnings.length > 0 ? warnings : null,
             is_excluded: basicValidation.is_excluded,

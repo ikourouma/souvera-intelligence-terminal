@@ -3,9 +3,12 @@
  */
 
 import type { EconomyYearPoint } from '@/lib/intelligence/country-economy-content';
+import { formatPopulation } from '@/lib/intelligence-entitlements';
 
 export interface EconomyIndicatorRow {
   label: string;
+  /** Headline metrics shown before "Expand" on the Economy tab. */
+  primary?: boolean;
   getValue: (year: EconomyYearPoint) => number | undefined;
   format: (value: number) => string;
   tone?: (value: number) => string;
@@ -18,36 +21,44 @@ function hasAny(years: EconomyYearPoint[], getter: (y: EconomyYearPoint) => numb
 const ROW_DEFS: EconomyIndicatorRow[] = [
   {
     label: 'GDP ($B)',
+    primary: true,
     getValue: (y) => (y.gdp_current_usd != null ? y.gdp_current_usd / 1e9 : undefined),
     format: (v) => v.toFixed(1),
     tone: () => 'text-emerald-400',
   },
   {
     label: 'GDP per capita ($)',
+    primary: true,
     getValue: (y) => y.gdp_per_capita_usd,
     format: (v) => v.toLocaleString('en-US', { maximumFractionDigits: 0 }),
     tone: () => 'text-emerald-300',
   },
   {
     label: 'Growth (%)',
+    primary: true,
     getValue: (y) => y.gdp_growth_pct,
     format: (v) => v.toFixed(1),
     tone: (v) => (v < 0 ? 'text-red-400' : v > 5 ? 'text-emerald-400' : 'text-blue-400'),
   },
   {
-    label: 'Population (M)',
-    getValue: (y) => (y.population_total != null ? y.population_total / 1e6 : undefined),
-    format: (v) => v.toFixed(1),
+    // Adaptive units: populations span 46K (St Kitts) → 223M (Nigeria), so a fixed
+    // "(M)" column renders "0.0" for small nations. formatPopulation picks K/M/B.
+    label: 'Population',
+    primary: true,
+    getValue: (y) => y.population_total,
+    format: (v) => formatPopulation(v),
     tone: () => 'text-zinc-300',
   },
   {
     label: 'FDI ($M)',
+    primary: true,
     getValue: (y) => (y.fdi_net_inflows_usd != null ? y.fdi_net_inflows_usd / 1e6 : undefined),
     format: (v) => v.toLocaleString('en-US', { maximumFractionDigits: 0 }),
     tone: () => 'text-blue-300',
   },
   {
     label: 'Inflation (%)',
+    primary: true,
     getValue: (y) => y.inflation_cpi_pct,
     format: (v) => v.toFixed(1),
     tone: (v) => (v > 20 ? 'text-red-400' : v > 15 ? 'text-amber-400' : 'text-blue-400'),
@@ -126,6 +137,13 @@ const ROW_DEFS: EconomyIndicatorRow[] = [
   },
 ];
 
-export function economyIndicatorRowsForYears(years: EconomyYearPoint[]): EconomyIndicatorRow[] {
-  return ROW_DEFS.filter((row) => hasAny(years, row.getValue));
+export function economyIndicatorRowsForYears(
+  years: EconomyYearPoint[],
+  fxPairLabel?: string
+): EconomyIndicatorRow[] {
+  return ROW_DEFS.filter((row) => hasAny(years, row.getValue)).map((row) =>
+    fxPairLabel && row.label === 'FX (LCU/USD)'
+      ? { ...row, label: `FX (${fxPairLabel})` }
+      : row
+  );
 }

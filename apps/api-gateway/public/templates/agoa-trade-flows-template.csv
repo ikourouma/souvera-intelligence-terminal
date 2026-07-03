@@ -1,0 +1,4 @@
+iso3,year,category_group,category_label,hs_chapter,total_exports_to_us_usd,agoa_exports_usd,agoa_share_pct,mfn_tariff_pct,tariff_savings_usd,agoa_eligible,agoa_status,eligibility_since,country_name,region,sub_region,source_notes,data_quality_tier
+KEN,2023,textiles_apparel,Textiles & Apparel,61,510000000,480000000,94.1,16.5,79200000,true,eligible,2000,Kenya,Africa,East Africa,USITC DataWeb / agoa.info,A
+KEN,2023,agriculture,Agriculture,09,180000000,95000000,52.8,3.2,3040000,true,eligible,2000,Kenya,Africa,East Africa,USITC DataWeb / agoa.info,A
+LSO,2023,textiles_apparel,Textiles & Apparel,61,420000000,398000000,94.8,17.0,67660000,true,eligible,2001,Lesotho,Africa,Southern Africa,USITC DataWeb / agoa.info,A

@@ -11,7 +11,9 @@
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
+dotenv.config({ path: path.resolve(__dirname, '../../apps/api-gateway/.env.local') });
 
 type IngestFn = () => Promise<void>;
 
@@ -24,6 +26,7 @@ const ADAPTER_LOADERS: Record<string, () => Promise<IngestFn>> = {
   'curated-eccu-macro-fill': async () => (await import('./curated-eccu-macro-fill')).ingestCuratedEccuMacroFill,
   'imf-rollout-gap-fill': async () => (await import('./imf-rollout-gap-fill')).ingestImfRolloutGapFill,
   'imf-gap74-fill': async () => (await import('./imf-gap74-fill')).ingestImfGap74Fill,
+  'imf-macro-backfill': async () => (await import('./imf-macro-backfill')).ingestImfMacroBackfill,
   'imf-fiscal': async () => (await import('./imf-fiscal-sdmx')).ingestImfFiscalSdmx,
   'imf-areaer-fx': async () => (await import('./imf-areaer-fx')).ingestImfAreaerFx,
   'worldbank-wgi': async () => (await import('./worldbank-wgi')).ingestWorldBankWgi,
@@ -36,6 +39,8 @@ const ADAPTER_LOADERS: Record<string, () => Promise<IngestFn>> = {
   'capture:ustr:anchors': async () => (await import('./capture-ustr-anchors')).captureUstrAnchors,
   'parse:ustr:africa_directory': async () =>
     (await import('./parse-ustr-africa-directory')).parseUstrAfricaDirectory,
+  'parse:ustr:africa_country_summaries': async () =>
+    (await import('./parse-ustr-africa-country-summaries')).parseUstrAfricaCountrySummaries,
   'static-trade-migration': async () =>
     (await import('./static-trade-migration')).ingestStaticTradeMigration,
   'seed:t2-profiles': async () =>
@@ -46,6 +51,28 @@ const ADAPTER_LOADERS: Record<string, () => Promise<IngestFn>> = {
     (await import('./ingest-afcfta-flows')).ingestAfCFTAFlows,
   'ingest-cbtpa-flows': async () =>
     (await import('./ingest-cbtpa-flows')).ingestCBTPAFlows,
+  'ingest-agoa-flows': async () =>
+    (await import('./ingest-agoa-flows')).ingestAGOAFlows,
+  'ingest-comtrade-agoa': async () =>
+    (await import('./ingest-comtrade-agoa')).ingestComtradeAgoa,
+  'ingest-usitc-agoa': async () =>
+    (await import('./ingest-usitc-agoa')).ingestUsitcAgoa,
+  'ingest-census-trade': async () =>
+    (await import('./census_ftp')).ingestCensusTradeData,
+  'seed-census-crosswalk-74': async () => {
+    const { seedCensusCrosswalk74 } = await import('../../apps/api-gateway/scripts/seed-census-crosswalk-74');
+    await seedCensusCrosswalk74();
+  },
+  'ingest-supply-demand-matrix': async () =>
+    (await import('./ingest-supply-demand-matrix')).ingestSupplyDemandMatrix,
+  'verify:supply-demand': async () =>
+    (await import('./verify-supply-demand-matrix')).verifySupplyDemandMatrix,
+  'ingest-trade-snapshots-74': async () =>
+    (await import('./ingest-country-trade-snapshots-74')).ingestTradeSnapshots74,
+  'ingest-country-narratives-74': async () =>
+    (await import('./ingest-country-narratives-74')).ingestCountryNarratives74,
+  'ingest-agoa-products': async () =>
+    (await import('./ingest-agoa-products')).ingestAgoaProducts,
 };
 
 const VERIFY_ALL_NAMES = ['verify:ustr:agoa', 'verify:ustr:cbi', 'verify:regional', 'verify:caricom'] as const;

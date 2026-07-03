@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-This document summarizes the implementation of Supabase Auth for Souvera with invite-only institutional access, organization-based accounts, and server-enforced entitlement system.
+This document summarizes the implementation of Supabase Auth for Souvera with **hybrid access**: self-serve **Explorer** (free) signup plus invite-assisted provisioning for Professional, Business, and Institutional tiers. Organization-based accounts and server-enforced entitlements apply to all tiers.
 
 ---
 
@@ -21,6 +21,7 @@ This document summarizes the implementation of Supabase Auth for Souvera with in
 | Supabase SSR Integration | ✅ Complete | `package.json`, `lib/supabase/*` |
 | Session Management | ✅ Complete | `proxy.ts` |
 | Login/Logout | ✅ Complete | `(auth)/login/page.tsx` |
+| Explorer self-serve signup | ✅ Complete | `(auth)/signup/page.tsx`, `(auth)/signup/check-email/page.tsx` |
 | Magic Link Auth | ✅ Complete | `auth/callback/route.ts` |
 | Email Verification | ✅ Complete | `auth/confirm/route.ts` |
 | Password Reset | ✅ Complete | `auth/forgot-password`, `auth/reset-password` |
@@ -77,16 +78,14 @@ This document summarizes the implementation of Supabase Auth for Souvera with in
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                      PUBLIC ACCESS                               │
-│  Landing → Access Plans → Request Access (lead capture)          │
+│              EXPLORER SELF-SERVE (free tier)                     │
+│  /login → Create free account → /signup → email confirm          │
+│  → auth/confirm → profile + explorer subscription (DB triggers)  │
 └──────────────────────────┬──────────────────────────────────────┘
                            │
-                    Admin Reviews Lead
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    INVITE FLOW                                   │
-│  Admin → Create Invitation → Send Magic Link → User Accepts      │
+┌──────────────────────────┴──────────────────────────────────────┐
+│              PAID / INSTITUTIONAL (invite-assisted)              │
+│  Landing → Request Access (lead) → Admin invite → magic link     │
 └──────────────────────────┬──────────────────────────────────────┘
                            │
               Trigger: Profile + Subscription Created
@@ -104,6 +103,13 @@ This document summarizes the implementation of Supabase Auth for Souvera with in
 └─────────────────────────────────────────────────────────────────┘
 ```
 
+**Explorer signup details:**
+- Route: `/signup` (public); `/register` remains reserved / redirects to request-access for institutional leads.
+- Client: `supabase.auth.signUp()` with `user_metadata: { full_name, plan_id: 'explorer' }`.
+- Email confirmation required before first login (`emailRedirectTo` → `/auth/confirm`).
+- DB triggers (`handle_new_user`, `process_invitation_on_signup`) create `souvera_profiles` + default `explorer` subscription when no pending invitation exists.
+- Ops checklist: `docs/ops/supabase-explorer-signup-checklist.md`.
+
 ---
 
 ## 5. Route Protection
@@ -112,6 +118,7 @@ This document summarizes the implementation of Supabase Auth for Souvera with in
 - `/` - Homepage
 - `/about`, `/contact`, `/status`
 - `/access/*` - Access plans and request access
+- `/login`, `/signup`, `/signup/check-email` - Auth entry (Explorer self-serve + login)
 - `/platform/*`, `/intelligence/*`, `/sectors/*` - Marketing pages
 - `/insights/*`, `/resources/*` - Content pages
 - `/auth/*` - Auth flows

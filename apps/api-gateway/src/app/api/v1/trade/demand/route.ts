@@ -129,6 +129,28 @@ export async function GET(request: NextRequest) {
     const totalUsExports = rows.reduce((s, r) => s + (r.imports_from_us_usd ?? 0), 0);
     const totalUsPotential = rows.reduce((s, r) => s + (r.us_export_potential_usd ?? 0), 0);
 
+    // Top 10 product categories by US export potential
+    const categoryTotals: Record<string, { label: string; usExports: number; potential: number; gap: number; markets: number }> = {};
+    for (const r of rows) {
+      if (!categoryTotals[r.category_group]) {
+        categoryTotals[r.category_group] = { label: r.category_label, usExports: 0, potential: 0, gap: 0, markets: 0 };
+      }
+      categoryTotals[r.category_group].usExports += r.imports_from_us_usd ?? 0;
+      categoryTotals[r.category_group].potential += r.us_export_potential_usd ?? 0;
+      categoryTotals[r.category_group].markets++;
+    }
+    const topProducts = Object.entries(categoryTotals)
+      .map(([group, data]) => ({
+        group,
+        label: data.label,
+        usExports: data.usExports,
+        potential: data.potential,
+        gap: data.potential - data.usExports,
+        markets: data.markets,
+      }))
+      .sort((a, b) => b.potential - a.potential)
+      .slice(0, 10);
+
     return NextResponse.json({
       rows,
       summary: {
@@ -138,6 +160,7 @@ export async function GET(request: NextRequest) {
         potential_gap_usd: totalUsPotential - totalUsExports,
         markets_covered: [...new Set(rows.map((r) => r.iso3))].length,
         category_group_totals: groupTotals,
+        top_products: topProducts,
         data_vintage: '2023 (curated estimate — ITC TDM · UN Comtrade · BEA)',
       },
       attribution: {

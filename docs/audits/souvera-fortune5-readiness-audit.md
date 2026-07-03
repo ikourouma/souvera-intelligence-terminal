@@ -147,7 +147,7 @@ The Souvera Intelligence Terminal presents a visually compelling dark terminal a
 | Access | API Documentation | `/api-documentation` | OK | Placeholder content | Keep | Keep | Needs real docs | P1 |
 | Access | Enterprise Solutions | `/solutions` | OK | None | Keep | Keep | Exists | - |
 | Access | Sign In to Terminal | `/login` | OK | Form not functional | Keep | Keep | Wire auth | P0 |
-| Access | Create Free Account | `/login` | ISSUE | Same as Sign In | Create Account | `/register` | Use register route | P1 |
+| Access | Create Free Account | `/signup` | **RESOLVED (2026-06-28)** | Self-serve Explorer signup; login links to `/signup` | Create Account | `/signup` | Implemented Task 15 | — |
 | Access | Request Demo | `/contact` | OK | Form not functional | Keep | Keep | Wire form | P0 |
 | Resources | Data Sources & Methodology | `/Data-Sources-&-Methodology` | OK | Bad URL format | Data Sources | `/methodology` | Consolidate or redirect | P1 |
 | Resources | Institutional Signal Ledger | `/source-registry` | OK | None | Keep | Keep | Exists | - |
@@ -211,7 +211,7 @@ The Souvera Intelligence Terminal presents a visually compelling dark terminal a
 | Hero Slide 3 | Request Demo | `https://afdec-nc.vercel.app/contact` | EXTERNAL | Routes to AfDEC | Change to `/contact` | P0 |
 | CommandCenters | Open Africa Terminal | `/terminal/africa` | BROKEN | 404 | Change to `/terminal/map` | P0 |
 | CommandCenters | Open Caribbean Terminal | `/terminal/caribbean` | OK | None | Keep | - |
-| Pricing | Create Free Account | `/login` | OK | Form not functional | Keep, wire auth | P0 |
+| Pricing | Create Free Account | `/signup` | OK | Self-serve Explorer signup (Task 15) | Keep | — |
 | Pricing | View Professional Plan | `/subscriptions` | BROKEN | 404 | Create page or `/contact` | P0 |
 | Pricing | View Business Plan | `/subscriptions` | BROKEN | 404 | Create page or `/contact` | P0 |
 | Pricing | Contact for Demo | `https://afdec-nc.vercel.app/contact` | EXTERNAL | Routes to AfDEC | Change to `/contact` | P0 |

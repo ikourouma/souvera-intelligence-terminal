@@ -16,6 +16,9 @@ import { APPROVED_AFRICA_ISO3 } from '../../apps/api-gateway/src/lib/market-cove
 
 const NOT_APPLICABLE_AGOA = new Set(['MAR', 'DZA', 'TUN', 'LBY', 'EGY']);
 
+/** Long-term USTR ineligible countries — always suspended regardless of PDF parse edge cases. */
+const FORCE_SUSPENDED_AGOA = new Set(['ZWE']);
+
 export async function verifyUstrAgoa(): Promise<void> {
   console.log('\n[verify:ustr:agoa] Starting USTR AGOA reconciliation...\n');
   const { jobId, sourceId } = await createIngestionJob('ustr', 'verify_ustr_agoa');
@@ -107,7 +110,7 @@ export async function verifyUstrAgoa(): Promise<void> {
       let status: string;
       if (NOT_APPLICABLE_AGOA.has(iso3)) {
         status = 'not_applicable';
-      } else if (ineligible.has(iso3)) {
+      } else if (FORCE_SUSPENDED_AGOA.has(iso3) || ineligible.has(iso3)) {
         status = 'suspended';
       } else if (eligible.has(iso3)) {
         status = 'eligible';

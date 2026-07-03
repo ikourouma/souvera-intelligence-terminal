@@ -67,6 +67,39 @@ export function buildEconomyYearsFromObservations(
   return Array.from(yearMap.values()).sort((a, b) => a.year - b.year);
 }
 
+/**
+ * Pick the most informative recent year for the Economy/Overview hero.
+ *
+ * The previous rule required growth + FDI + inflation in the SAME year, which broke
+ * for the ~8 covered markets that World Bank never reports CPI for (e.g. DR Congo,
+ * Cuba, Eritrea): no year qualified, so it blindly returned the last array element —
+ * which can be a sparse 2025 bucket with only population, hiding GDP/growth/FDI that
+ * exist a year earlier. We now degrade gracefully through progressively looser tiers
+ * so the hero always lands on the richest available recent year.
+ */
+export function getLatestCompleteMacroYear(years: EconomyYearPoint[]): EconomyYearPoint {
+  if (!years.length) return { year: new Date().getFullYear() };
+
+  const findLatest = (pred: (y: EconomyYearPoint) => boolean): EconomyYearPoint | undefined => {
+    for (let i = years.length - 1; i >= 0; i--) {
+      if (pred(years[i])) return years[i];
+    }
+    return undefined;
+  };
+
+  return (
+    // Ideal: full macro picture in one year.
+    findLatest((y) => y.gdp_growth_pct != null && y.fdi_net_inflows_usd != null && y.inflation_cpi_pct != null) ??
+    // Inflation-less markets: growth + FDI is still a strong, complete-feeling hero.
+    findLatest((y) => y.gdp_current_usd != null && y.gdp_growth_pct != null && y.fdi_net_inflows_usd != null) ??
+    // Otherwise the latest year with the core public pair (GDP + growth).
+    findLatest((y) => y.gdp_current_usd != null && y.gdp_growth_pct != null) ??
+    // Otherwise any year carrying nominal GDP (avoids a population-only bucket).
+    findLatest((y) => y.gdp_current_usd != null) ??
+    years[years.length - 1]
+  );
+}
+
 /** Keys we expect in rollout macro coverage audits. */
 export const ROLLOUT_MACRO_COVERAGE_KEYS = [
   ...TOP20_INDICATORS.map((i) => i.indicatorKey),

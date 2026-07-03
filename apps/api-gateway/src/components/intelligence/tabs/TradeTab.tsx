@@ -8,7 +8,8 @@ import {
 } from 'lucide-react';
 import { formatCurrency } from '@/lib/intelligence-entitlements';
 import { exportCardToPNG } from '@/lib/intelligence/export-png';
-import { countryExportContext } from '@/lib/intelligence/export-branding';
+import { countryExportContext, flagUrlFromIso3 } from '@/lib/intelligence/export-branding';
+import type { CardAnalysisInput } from '@/lib/intelligence/generate-card-analysis';
 import { HelpTooltip } from '@/components/shared/HelpTooltip';
 import { getTradeTabCopy, getIntraRegionalTrade } from '@/lib/intelligence/country-trade-content';
 import { getCountryRegion } from '@/lib/intelligence/country-overview-content';
@@ -18,6 +19,8 @@ import type {
   IntelligenceTabProps,
   CountryTrade,
   TradePartner,
+  OfficialReferenceLink,
+  UstrTradeSummaryPayload,
 } from '@/types/country-intelligence';
 import {
   enrichCompositionWithUsd,
@@ -26,6 +29,21 @@ import {
   normalizeCompositionSlots,
   type SectorCompositionItem,
 } from '@/lib/intelligence/trade-composition';
+import {
+  buildTradeTabCardAnalysis,
+  buildUsTradeCardAnalysis,
+} from '@/lib/intelligence/us-trade-card-analysis';
+import { DataPendingState } from '@/components/intelligence/DataPendingState';
+import { CollapsibleAnalysis } from '@/components/intelligence/CollapsibleAnalysis';
+import { HighlightedText } from '@/components/intelligence/HighlightedText';
+import { PetroleumExclusionFootnote } from '@/components/intelligence/PetroleumExclusionFootnote';
+import { preferentialFrameworkLabel } from '@/lib/intelligence/preferential-trade-policy';
+import {
+  TradeSourceReconciliationBanner,
+  TradeMetricSourceLabel,
+} from '@/components/intelligence/TradeSourceReconciliationBanner';
+import { OfficialTradeReferences } from '@/components/intelligence/OfficialTradeReferences';
+import { UstrTradeSummaryPanel } from '@/components/intelligence/UstrTradeSummaryPanel';
 
 function formatBillions(value?: number): string {
   if (value == null) return 'N/A';
@@ -48,8 +66,21 @@ export default function TradeTab({ data, userEntitlements }: IntelligenceTabProp
     ? 'Unlock comprehensive bilateral trade data, CBI/CARICOM analysis, export/import breakdowns, and intra-Caribbean trade intelligence.'
     : 'Unlock comprehensive bilateral trade data, AGOA restoration analysis, export/import breakdowns, and intra-African trade intelligence.';
 
-  const handleExport = (elementId: string, fileName: string, cardTitle: string) =>
-    exportCardToPNG({ elementId, fileName, cardTitle, ...exportCtx });
+  const handleExport = (
+    elementId: string,
+    fileName: string,
+    cardTitle: string,
+    curatedAnalysis?: string,
+    aiAnalysisConfig?: CardAnalysisInput
+  ) =>
+    exportCardToPNG({
+      elementId,
+      fileName,
+      cardTitle,
+      curatedAnalysis,
+      aiAnalysisConfig,
+      ...exportCtx,
+    });
 
   if (!hasBusinessAccess) {
     return (
@@ -73,8 +104,11 @@ export default function TradeTab({ data, userEntitlements }: IntelligenceTabProp
 
   if (!trade || trade.pending) {
     return (
-      <div className="flex items-center justify-center min-h-[300px]">
-        <p className="text-zinc-500">Trade data pending for {countryName}</p>
+      <div className="flex items-center justify-center min-h-[300px] px-4">
+        <DataPendingState
+          variant="pending"
+          message={`Bilateral and preferential trade data for ${countryName} is awaiting verified ingestion from U.S. Census / USITC sources.`}
+        />
       </div>
     );
   }
@@ -88,23 +122,84 @@ export default function TradeTab({ data, userEntitlements }: IntelligenceTabProp
         iso3={iso3}
         exportCtx={exportCtx}
         agoaPolicy={data.agoaPolicy}
+        officialReferences={data.officialReferences}
+        ustrTradeSummary={data.ustrTradeSummary}
       />
-      <IntraRegionalSection trade={trade} copy={tradeCopy} canExport={canExport} iso3Lower={iso3Lower} onExport={() => handleExport('intra-regional-trade-card', `${iso3Lower}-intra-regional-trade`, tradeCopy.intraRegionalTitle)} />
-      <TopPartnersSection trade={trade} canExport={canExport} iso3Lower={iso3Lower} onExport={() => handleExport('top-trade-partners-card', `${iso3Lower}-top-trade-partners`, 'Top Trade Partners')} />
-      <RegionalAgreementsSection agreements={tradeCopy.regionalAgreements} canExport={canExport} iso3Lower={iso3Lower} onExport={() => handleExport('regional-trade-agreements-card', `${iso3Lower}-regional-agreements`, 'Regional Trade Agreements')} />
+      <IntraRegionalSection
+        trade={trade}
+        copy={tradeCopy}
+        canExport={canExport}
+        iso3Lower={iso3Lower}
+        countryName={countryName}
+        onExport={(analysis) =>
+          handleExport(
+            'intra-regional-trade-card',
+            `${iso3Lower}-intra-regional-trade`,
+            tradeCopy.intraRegionalTitle,
+            analysis
+          )
+        }
+      />
+      <TopPartnersSection
+        trade={trade}
+        canExport={canExport}
+        iso3Lower={iso3Lower}
+        countryName={countryName}
+        onExport={(analysis) =>
+          handleExport('top-trade-partners-card', `${iso3Lower}-top-trade-partners`, 'Top Trade Partners', analysis)
+        }
+      />
+      <RegionalAgreementsSection
+        agreements={tradeCopy.regionalAgreements}
+        canExport={canExport}
+        iso3Lower={iso3Lower}
+        countryName={countryName}
+        onExport={(analysis) =>
+          handleExport(
+            'regional-trade-agreements-card',
+            `${iso3Lower}-regional-agreements`,
+            'Regional Trade Agreements',
+            analysis
+          )
+        }
+      />
       <ExportBreakdownSection
         trade={trade}
         canExport={canExport}
         iso3Lower={iso3Lower}
-        onExport={() => handleExport('export-breakdown-card', `${iso3Lower}-export-breakdown`, 'Export Breakdown by Sector')}
+        countryName={countryName}
+        onExport={(analysis) =>
+          handleExport(
+            'export-breakdown-card',
+            `${iso3Lower}-export-breakdown`,
+            'Export Breakdown by Sector',
+            analysis
+          )
+        }
       />
       <ImportBreakdownSection
         trade={trade}
         canExport={canExport}
         iso3Lower={iso3Lower}
-        onExport={() => handleExport('import-breakdown-card', `${iso3Lower}-import-breakdown`, 'Import Breakdown by Sector')}
+        countryName={countryName}
+        onExport={(analysis) =>
+          handleExport(
+            'import-breakdown-card',
+            `${iso3Lower}-import-breakdown`,
+            'Import Breakdown by Sector',
+            analysis
+          )
+        }
       />
-      <TradeFinanceSection copy={tradeCopy} canExport={canExport} iso3Lower={iso3Lower} onExport={() => handleExport('trade-finance-mapping-card', `${iso3Lower}-trade-finance`, tradeCopy.financeTitle)} />
+      <TradeFinanceSection
+        copy={tradeCopy}
+        canExport={canExport}
+        iso3Lower={iso3Lower}
+        countryName={countryName}
+        onExport={(analysis) =>
+          handleExport('trade-finance-mapping-card', `${iso3Lower}-trade-finance`, tradeCopy.financeTitle, analysis)
+        }
+      />
       <div className="bg-gradient-to-br from-cyan-900/30 to-blue-900/30 border border-cyan-500/30 rounded-xl p-6 text-center">
         <h4 className="text-lg font-bold text-white mb-2">Need Detailed Trade Intelligence?</h4>
         <p className="text-sm text-zinc-300 mb-4">
@@ -126,13 +221,13 @@ export default function TradeTab({ data, userEntitlements }: IntelligenceTabProp
 function AnalysisBullets({ bullets }: { bullets: string[] }) {
   if (!bullets.length) return null;
   return (
-    <div className="mt-4 pt-3 border-t border-zinc-800">
+    <div className="mt-4 pt-3 border-t border-zinc-800" data-export-hide-analysis>
       <p className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Souvera Analysis</p>
       <ul className="space-y-1 text-xs text-zinc-400">
         {bullets.map((b) => (
           <li key={b} className="flex items-start gap-2">
             <span className="text-cyan-400 mt-0.5">•</span>
-            <span>{b}</span>
+            <span><HighlightedText text={b} /></span>
           </li>
         ))}
       </ul>
@@ -140,21 +235,15 @@ function AnalysisBullets({ bullets }: { bullets: string[] }) {
   );
 }
 
-function ExportButton({ onClick }: { onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      data-export-exclude
-      className="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1 transition-colors"
-    >
-      <Download className="w-3.5 h-3.5" />
-      <span className="hidden sm:inline">PNG</span>
-    </button>
-  );
-}
-
 function TradeHero({ trade, countryName, subtitle }: { trade: CountryTrade; countryName: string; subtitle: string }) {
+  const isBilateral = trade.tradeScope === 'bilateral_us';
+  const heroSubtitle = isBilateral
+    ? `U.S. bilateral trade${trade.asOfYear ? ` · ${trade.asOfYear}` : ''}${trade.dataSource ? ` · ${trade.dataSource}` : ''}`
+    : subtitle;
+  const totalLabel = isBilateral ? 'U.S. Bilateral Trade' : 'Total Trade';
+  const exportLabel = isBilateral ? 'Exports to U.S.' : 'Total Exports';
+  const importLabel = isBilateral ? 'Imports from U.S.' : 'Total Imports';
+
   return (
     <div className="bg-gradient-to-br from-cyan-900/20 to-blue-900/20 border border-cyan-500/20 rounded-xl p-6 lg:p-8">
       <div className="flex items-start justify-between mb-4">
@@ -164,23 +253,35 @@ function TradeHero({ trade, countryName, subtitle }: { trade: CountryTrade; coun
           </div>
           <div>
             <h2 className="text-2xl font-bold text-white">{countryName} Trade & Market Access</h2>
-            <p className="text-sm text-zinc-400">{subtitle}</p>
+            <p className="text-sm text-zinc-400">{heroSubtitle}</p>
           </div>
         </div>
         <HelpTooltip term="trade_overview" />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
         <div className="bg-zinc-800/50 rounded-lg p-4 text-center">
-          <div className="text-2xl font-bold text-emerald-400 mb-1">{formatBillions(trade.totalTradeUsd)}</div>
-          <div className="text-sm text-zinc-400">Total Trade</div>
+          {trade.totalTradeUsd != null ? (
+            <div className="text-2xl font-bold text-emerald-400 mb-1">{formatBillions(trade.totalTradeUsd)}</div>
+          ) : (
+            <DataPendingState variant="pending" compact className="justify-center mb-1" message="Global trade totals pending UN Comtrade ingestion." />
+          )}
+          <div className="text-sm text-zinc-400">{totalLabel}</div>
         </div>
         <div className="bg-zinc-800/50 rounded-lg p-4 text-center">
-          <div className="text-2xl font-bold text-blue-400 mb-1">{formatBillions(trade.exportsUsd)}</div>
-          <div className="text-sm text-zinc-400">Total Exports</div>
+          {trade.exportsUsd != null ? (
+            <div className="text-2xl font-bold text-blue-400 mb-1">{formatBillions(trade.exportsUsd)}</div>
+          ) : (
+            <DataPendingState variant="pending" compact className="justify-center mb-1" message="Export totals pending verified ingestion." />
+          )}
+          <div className="text-sm text-zinc-400">{exportLabel}</div>
         </div>
         <div className="bg-zinc-800/50 rounded-lg p-4 text-center">
-          <div className="text-2xl font-bold text-amber-400 mb-1">{formatBillions(trade.importsUsd)}</div>
-          <div className="text-sm text-zinc-400">Total Imports</div>
+          {trade.importsUsd != null ? (
+            <div className="text-2xl font-bold text-amber-400 mb-1">{formatBillions(trade.importsUsd)}</div>
+          ) : (
+            <DataPendingState variant="pending" compact className="justify-center mb-1" message="Import totals pending verified ingestion." />
+          )}
+          <div className="text-sm text-zinc-400">{importLabel}</div>
         </div>
       </div>
     </div>
@@ -193,12 +294,16 @@ function USTradeSection({
   iso3,
   exportCtx,
   agoaPolicy,
+  officialReferences,
+  ustrTradeSummary,
 }: {
   trade: CountryTrade;
   countryName: string;
   iso3: string;
   exportCtx: ReturnType<typeof countryExportContext>;
   agoaPolicy?: AgoaPolicyUiSnapshot;
+  officialReferences?: OfficialReferenceLink[];
+  ustrTradeSummary?: UstrTradeSummaryPayload;
 }) {
   const agoa = trade.agoa;
   const isRestoration = agoa?.status === 'restoration_opportunity';
@@ -209,12 +314,62 @@ function USTradeSection({
     : (isRestoration ? 'AGOA Restoration Opportunity' : 'AGOA Trade Advantage');
   const preferentialSubtitle = isCaribbean
     ? 'Preferential U.S. market access under CBI/CARICOM'
-    : (isRestoration ? 'Suspended since 2015 — restoration under legislative review' : 'Duty-Free U.S. Market Access');
-  const currentExportsLabel = isCaribbean ? 'Current CBI Exports' : (isRestoration ? 'Current AGOA Exports' : 'Current AGOA Exports');
-  const potentialLabel = isRestoration ? 'Potential if Restored' : 'Export Potential';
+    : isRestoration
+      ? agoaPolicy?.suspensionSinceYear
+        ? `Suspended since ${agoaPolicy.suspensionSinceYear} — restoration under legislative review`
+        : 'AGOA benefits suspended — restoration under legislative review'
+      : 'Duty-Free U.S. Market Access';
+  const currentExportsLabel = isCaribbean ? 'Current CBI Exports' : 'Current AGOA Exports';
+  const potentialLabel = isRestoration ? 'Restoration Upside' : 'Export Potential';
+  const mfnTotalLabel = 'Category-Flow Exports (USITC)';
+  const prefFramework = preferentialFrameworkLabel(iso3);
+  const usTradeAnalysis = buildUsTradeCardAnalysis({
+    countryName,
+    iso3,
+    trade,
+    agoaPolicy,
+    ustrTradeSummary,
+  });
 
   return (
-    <div id="us-trade-card" className="bg-gradient-to-br from-zinc-900/90 to-zinc-800/50 border border-zinc-700/50 rounded-xl p-6 lg:p-8">
+    <div id="us-trade-card" className="exportable-card group relative bg-gradient-to-br from-zinc-900/90 to-zinc-800/50 border border-zinc-700/50 rounded-xl p-6 lg:p-8">
+      {/* Hover-activated PNG download button */}
+      <button
+        onClick={() =>
+          exportCardToPNG({
+            elementId: 'us-trade-card',
+            fileName: `${countryName.toLowerCase()}-us-trade`,
+            cardTitle: 'US Trade Relationship',
+            flagUrl: exportCtx.flagUrl ?? flagUrlFromIso3(iso3),
+            curatedAnalysis: usTradeAnalysis,
+            aiAnalysisConfig: {
+              cardType: 'agoa_tracker',
+              countryName,
+              iso3,
+              trade,
+              data: {
+                'Exports to US': trade.exportsToUs?.valueUsd != null ? formatBillions(trade.exportsToUs.valueUsd) : 'N/A',
+                'Imports from US': trade.importsFromUs?.valueUsd != null ? formatBillions(trade.importsFromUs.valueUsd) : 'N/A',
+                'AGOA Status': agoa?.status ?? 'N/A',
+                'Preferential Framework': prefFramework,
+                'MFN Total Exports': agoa?.totalExportsToUsUsd != null ? formatBillions(agoa.totalExportsToUsUsd) : 'N/A',
+                [`Current ${isCaribbean ? 'CBI' : 'AGOA'} Exports`]: agoa?.currentExportsUsd != null ? formatBillions(agoa.currentExportsUsd) : 'N/A',
+                'Restoration Potential': agoa?.restorationPotentialUsd != null ? formatBillions(agoa.restorationPotentialUsd) : 'N/A',
+                'Export Potential': agoa?.potentialExportsUsd != null ? formatBillions(agoa.potentialExportsUsd) : 'N/A',
+                'Data Source': agoa?.dataSource ?? trade.asOfYear?.toString() ?? 'Souvera trade flows',
+              },
+            } satisfies CardAnalysisInput,
+            ...exportCtx,
+          })
+        }
+        data-export-exclude
+        className="export-btn absolute top-2 right-2 p-1.5 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+        title="Download US Trade Relationship as PNG"
+        aria-label="Download US Trade Relationship as PNG"
+      >
+        <Download className="w-4 h-4 text-zinc-300" />
+      </button>
+      
       <div className="flex items-start justify-between mb-6">
         <div className="flex items-center gap-3">
           <Globe className="w-5 h-5 text-blue-400" />
@@ -223,24 +378,7 @@ function USTradeSection({
             <p className="text-sm text-zinc-400">{tradeCopy.usTradeSubtitle}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <HelpTooltip term="us_trade_relationship" />
-          <button
-            onClick={() =>
-              exportCardToPNG({
-                elementId: 'us-trade-card',
-                fileName: `${countryName.toLowerCase()}-us-trade`,
-                cardTitle: 'US Trade Relationship',
-                ...exportCtx,
-              })
-            }
-            data-export-exclude
-            className="shrink-0 text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1"
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">PNG</span>
-          </button>
-        </div>
+        <HelpTooltip term="us_trade_relationship" />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -250,6 +388,12 @@ function USTradeSection({
             <h4 className="text-base font-semibold text-white">Exports to U.S.</h4>
           </div>
           <div className="text-3xl font-bold text-emerald-400 mb-1">{formatBillions(trade.exportsToUs?.valueUsd)}</div>
+          {trade.exportsToUs?.source && (
+            <TradeMetricSourceLabel
+              sourceLabel={trade.exportsToUs.source.sourceLabel}
+              metricScope={trade.exportsToUs.source.metricScope}
+            />
+          )}
           {trade.exportsToUs?.yoyPct != null && (
             <p className="text-sm text-zinc-400">Up {trade.exportsToUs.yoyPct}% YoY ({trade.exportsToUs.year})</p>
           )}
@@ -260,13 +404,33 @@ function USTradeSection({
             <h4 className="text-base font-semibold text-white">Imports from U.S.</h4>
           </div>
           <div className="text-3xl font-bold text-blue-400 mb-1">{formatBillions(trade.importsFromUs?.valueUsd)}</div>
+          {trade.importsFromUs?.source && (
+            <TradeMetricSourceLabel
+              sourceLabel={trade.importsFromUs.source.sourceLabel}
+              metricScope={trade.importsFromUs.source.metricScope}
+            />
+          )}
           {trade.importsFromUs?.yoyPct != null && (
             <p className="text-sm text-zinc-400">Up {trade.importsFromUs.yoyPct}% YoY ({trade.importsFromUs.year})</p>
           )}
         </div>
       </div>
 
-      {agoa && (
+      {trade.sourceReconciliation && (
+        <TradeSourceReconciliationBanner reconciliation={trade.sourceReconciliation} />
+      )}
+
+      {officialReferences?.length ? (
+        <OfficialTradeReferences references={officialReferences} compact className="mb-4" />
+      ) : null}
+
+      {ustrTradeSummary && (
+        <UstrTradeSummaryPanel summary={ustrTradeSummary} className="mb-4" />
+      )}
+
+      <PetroleumExclusionFootnote iso3={iso3} className="mb-6" />
+
+      {agoa && agoa.status !== 'not_applicable' && agoa.status !== 'ineligible' && (
         <div className="bg-gradient-to-br from-amber-900/20 to-blue-900/20 border border-amber-500/30 rounded-xl p-6">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-3">
@@ -284,30 +448,87 @@ function USTradeSection({
             </div>
             <HelpTooltip term="agoa_detailed" />
           </div>
-          <p className="text-sm text-zinc-300 leading-relaxed mb-4">{agoa.statusNote}</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-zinc-800/50 rounded-lg p-4 text-center">
               <Package className="w-6 h-6 text-blue-400 mx-auto mb-2" />
-              <div className="text-xl font-bold text-blue-300">{agoa.eligibleCategories?.toLocaleString()}+</div>
+              <div className="text-xl font-bold text-blue-300">{agoa.eligibleCategories?.toLocaleString() ?? '—'}+</div>
               <div className="text-xs text-zinc-400">Product Categories</div>
             </div>
+            {isRestoration && agoa.totalExportsToUsUsd != null ? (
+              <div className="bg-zinc-800/50 rounded-lg p-4 text-center">
+                <TrendingUp className="w-6 h-6 text-zinc-300 mx-auto mb-2" />
+                <div className="text-xl font-bold text-zinc-200">{formatBillions(agoa.totalExportsToUsUsd)}</div>
+                <div className="text-xs text-zinc-400">{mfnTotalLabel}</div>
+                {agoa.metricsSource && (
+                  <TradeMetricSourceLabel
+                    sourceLabel={agoa.metricsSource.sourceLabel}
+                    metricScope={agoa.metricsSource.metricScope}
+                  />
+                )}
+              </div>
+            ) : (
+              <div className="bg-zinc-800/50 rounded-lg p-4 text-center">
+                <DollarSign className="w-6 h-6 text-emerald-400 mx-auto mb-2" />
+                <div className="text-xl font-bold text-emerald-300">{formatBillions(agoa.potentialExportsUsd)}</div>
+                <div className="text-xs text-zinc-400">{potentialLabel}</div>
+              </div>
+            )}
             <div className="bg-zinc-800/50 rounded-lg p-4 text-center">
-              <DollarSign className="w-6 h-6 text-emerald-400 mx-auto mb-2" />
-              <div className="text-xl font-bold text-emerald-300">{formatBillions(agoa.potentialExportsUsd)}</div>
-              <div className="text-xs text-zinc-400">{potentialLabel}</div>
-            </div>
-            <div className="bg-zinc-800/50 rounded-lg p-4 text-center">
-              <TrendingUp className="w-6 h-6 text-amber-400 mx-auto mb-2" />
-              <div className="text-xl font-bold text-amber-300">{formatBillions(agoa.currentExportsUsd)}</div>
-              <div className="text-xs text-zinc-400">{currentExportsLabel}</div>
+              {isRestoration ? (
+                <>
+                  <DollarSign className="w-6 h-6 text-amber-400 mx-auto mb-2" />
+                  <div className="text-xl font-bold text-amber-300">{formatBillions(agoa.restorationPotentialUsd ?? agoa.potentialExportsUsd)}</div>
+                  <div className="text-xs text-zinc-400">{potentialLabel}</div>
+                </>
+              ) : (
+                <>
+                  <TrendingUp className="w-6 h-6 text-amber-400 mx-auto mb-2" />
+                  <div className="text-xl font-bold text-amber-300">{formatBillions(agoa.currentExportsUsd)}</div>
+                  <div className="text-xs text-zinc-400">{currentExportsLabel}</div>
+                </>
+              )}
             </div>
           </div>
+          {agoa.dataSource && (
+            <p className="text-[10px] text-zinc-600 mt-2">
+              Trade data: {agoa.dataSource}{agoa.dataVintage ? ` · ${agoa.dataVintage}` : ''}
+            </p>
+          )}
+          <PetroleumExclusionFootnote iso3={iso3} compact className="mt-2" />
           {!isCaribbean && (
           <AgoaLegislativeTrackerStrip iso3={iso3} agoaPolicy={agoaPolicy} />
           )}
+          <div className="mt-4 pt-4 border-t border-zinc-700/50" data-export-hide-analysis>
+            <CollapsibleAnalysis
+              text={usTradeAnalysis}
+              title="Souvera Analysis"
+              titleClass="text-xs font-bold text-blue-400 uppercase tracking-wider"
+            />
+          </div>
         </div>
       )}
-      {!agoa && !isCaribbean && (
+      {agoa && (agoa.status === 'not_applicable' || agoa.status === 'ineligible') && !isCaribbean && (
+        <div className="bg-gradient-to-br from-zinc-800/50 to-zinc-900/50 border border-zinc-600/30 rounded-xl p-6">
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <Globe className="w-5 h-5 text-zinc-400" />
+              <div>
+                <h4 className="text-lg font-bold text-white">U.S. Market Access</h4>
+                <p className="text-sm font-semibold text-zinc-400">
+                  {agoa.status === 'ineligible' ? 'AGOA Ineligible' : 'AGOA Not Applicable'}
+                </p>
+              </div>
+            </div>
+            <HelpTooltip term="agoa_detailed" />
+          </div>
+          <p className="text-sm text-zinc-300 leading-relaxed">
+            {agoa.statusNote || (agoa.status === 'ineligible'
+              ? 'This country is sub-Saharan but not a current AGOA beneficiary. Exports to the U.S. operate under MFN tariff rates pending re-designation.'
+              : 'This country is outside the AGOA geographic scope. Trade with the U.S. operates under MFN tariff rates and bilateral trade agreements.')}
+          </p>
+        </div>
+      )}
+      {!agoa && !isCaribbean && agoaPolicy?.agoaStatus !== 'not_applicable' && (
         <AgoaLegislativeTrackerStrip iso3={iso3} agoaPolicy={agoaPolicy} className="mt-0" />
       )}
     </div>
@@ -358,13 +579,16 @@ function IntraRegionalSection({
   trade,
   copy,
   canExport,
+  countryName,
+  iso3Lower,
   onExport,
 }: {
   trade: CountryTrade;
   copy: ReturnType<typeof getTradeTabCopy>;
   canExport: boolean;
   iso3Lower: string;
-  onExport: () => void;
+  countryName: string;
+  onExport: (analysis: string) => void;
 }) {
   const intra = getIntraRegionalTrade(trade);
   if (!intra) return null;
@@ -375,8 +599,33 @@ function IntraRegionalSection({
     ...(intra.topPartners[0] ? [`Top partner: ${intra.topPartners[0].country} (${formatBillions(intra.topPartners[0].totalUsd)})`] : []),
   ];
 
+  const exportAnalysis = buildTradeTabCardAnalysis({
+    cardType: 'intra_regional',
+    countryName,
+    iso3: iso3Lower.toUpperCase(),
+    data: {
+      'Primary Volume': formatBillions(intra.primaryVolumeUsd),
+      'Secondary Volume': intra.secondaryVolumeUsd != null ? formatBillions(intra.secondaryVolumeUsd) : null,
+      'Top Partner': intra.topPartners[0]
+        ? `${intra.topPartners[0].country} (${formatBillions(intra.topPartners[0].totalUsd)})`
+        : 'N/A',
+    },
+  });
+
   return (
-    <div id="intra-regional-trade-card" className="bg-gradient-to-br from-emerald-900/20 to-zinc-900/50 border border-emerald-500/20 rounded-xl p-6 lg:p-8">
+    <div id="intra-regional-trade-card" className="exportable-card group relative bg-gradient-to-br from-emerald-900/20 to-zinc-900/50 border border-emerald-500/20 rounded-xl p-6 lg:p-8">
+      {/* Hover-activated PNG download button */}
+      <button
+        type="button"
+        onClick={() => onExport(exportAnalysis)}
+        data-export-exclude
+        className="export-btn absolute top-2 right-2 p-1.5 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+        title={`Download ${copy.intraRegionalTitle} as PNG`}
+        aria-label={`Download ${copy.intraRegionalTitle} as PNG`}
+      >
+        <Download className="w-4 h-4 text-zinc-300" />
+      </button>
+      
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <Globe className="w-5 h-5 text-emerald-400" />
@@ -385,7 +634,6 @@ function IntraRegionalSection({
             <p className="text-sm text-zinc-400">{copy.intraRegionalSubtitle}</p>
           </div>
         </div>
-        {canExport && <ExportButton onClick={onExport} />}
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <div className="bg-zinc-800/50 rounded-lg p-4">
@@ -456,12 +704,15 @@ function PartnerCard({ partner, rank, size }: { partner: TradePartner; rank: num
 function TopPartnersSection({
   trade,
   canExport,
+  countryName,
+  iso3Lower,
   onExport,
 }: {
   trade: CountryTrade;
   canExport: boolean;
   iso3Lower: string;
-  onExport: () => void;
+  countryName: string;
+  onExport: (analysis: string) => void;
 }) {
   const partners = trade.topPartners ?? [];
   const topTwo = partners.slice(0, 2);
@@ -470,14 +721,37 @@ function TopPartnersSection({
     `#${i + 1} ${p.country}: ${formatBillions(p.totalUsd)} total trade`
   );
 
+  const exportAnalysis = buildTradeTabCardAnalysis({
+    cardType: 'trade_partners',
+    countryName,
+    iso3: iso3Lower.toUpperCase(),
+    data: {
+      'Partner 1': partners[0] ? `${partners[0].country} (${formatBillions(partners[0].totalUsd)})` : 'N/A',
+      'Partner 2': partners[1] ? `${partners[1].country} (${formatBillions(partners[1].totalUsd)})` : 'N/A',
+      'Partner 3': partners[2] ? `${partners[2].country} (${formatBillions(partners[2].totalUsd)})` : 'N/A',
+      'Preferential Framework': getCountryRegion(iso3Lower.toUpperCase()) === 'caribbean' ? 'CBI/CARICOM' : 'AGOA',
+    },
+  });
+
   return (
-    <div id="top-trade-partners-card" className="space-y-4">
+    <div id="top-trade-partners-card" className="exportable-card group relative space-y-4">
+      {/* Hover-activated PNG download button */}
+      <button
+        type="button"
+        onClick={() => onExport(exportAnalysis)}
+        data-export-exclude
+        className="export-btn absolute top-2 right-2 p-1.5 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+        title="Download Top Trade Partners as PNG"
+        aria-label="Download Top Trade Partners as PNG"
+      >
+        <Download className="w-4 h-4 text-zinc-300" />
+      </button>
+      
       <div className="flex items-center justify-between">
         <h3 className="text-xl font-bold text-white flex items-center gap-2">
           <Globe className="w-5 h-5 text-cyan-400" />
           Top Trade Partners
         </h3>
-        {canExport && <ExportButton onClick={onExport} />}
       </div>
 
       {topTwo.length > 0 && (
@@ -504,23 +778,46 @@ function TopPartnersSection({
 function RegionalAgreementsSection({
   agreements,
   canExport,
+  countryName,
+  iso3Lower,
   onExport,
 }: {
   agreements: ReturnType<typeof getTradeTabCopy>['regionalAgreements'];
   canExport: boolean;
   iso3Lower: string;
-  onExport: () => void;
+  countryName: string;
+  onExport: (analysis: string) => void;
 }) {
   const bullets = agreements.map((a) => `${a.name}: ${a.description}`);
 
+  const exportAnalysis = buildTradeTabCardAnalysis({
+    cardType: 'regional_agreements',
+    countryName,
+    iso3: iso3Lower.toUpperCase(),
+    data: {
+      'Agreement 1': agreements[0] ? `${agreements[0].name}: ${agreements[0].description}` : 'N/A',
+      'Agreement 2': agreements[1] ? `${agreements[1].name}: ${agreements[1].description}` : 'N/A',
+      'Agreement 3': agreements[2] ? `${agreements[2].name}: ${agreements[2].description}` : 'N/A',
+    },
+  });
+
   return (
-    <div id="regional-trade-agreements-card" className="bg-zinc-900/50 border border-zinc-700/50 rounded-xl p-6">
+    <div id="regional-trade-agreements-card" className="exportable-card group relative bg-zinc-900/50 border border-zinc-700/50 rounded-xl p-6">
+      {/* Hover-activated PNG download button */}
+      <button
+        type="button"
+        onClick={() => onExport(exportAnalysis)}
+        data-export-exclude
+        className="export-btn absolute top-2 right-2 p-1.5 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+        title="Download Regional Trade Agreements as PNG"
+        aria-label="Download Regional Trade Agreements as PNG"
+      >
+        <Download className="w-4 h-4 text-zinc-300" />
+      </button>
+      
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-xl font-bold text-white">Regional Trade Agreements</h3>
-        <div className="flex items-center gap-2">
-          <HelpTooltip term="regional_trade_agreements" />
-          {canExport && <ExportButton onClick={onExport} />}
-        </div>
+        <HelpTooltip term="regional_trade_agreements" />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {agreements.map((agreement) => (
@@ -617,6 +914,9 @@ function BreakdownBySectorSection({
   composition,
   totalUsd,
   canExport,
+  countryName,
+  iso3Lower,
+  direction,
   onExport,
 }: {
   id: string;
@@ -628,7 +928,10 @@ function BreakdownBySectorSection({
   composition: SectorCompositionItem[];
   totalUsd?: number;
   canExport: boolean;
-  onExport: () => void;
+  countryName: string;
+  iso3Lower: string;
+  direction: 'Exports' | 'Imports';
+  onExport: (analysis: string) => void;
 }) {
   if (composition.length === 0) return null;
 
@@ -638,14 +941,39 @@ function BreakdownBySectorSection({
   const rest = enriched.slice(2, 5);
   const bullets = compositionBullets(enriched, 3);
 
+  const exportAnalysis = buildTradeTabCardAnalysis({
+    cardType: 'trade_composition',
+    countryName,
+    iso3: iso3Lower.toUpperCase(),
+    data: {
+      Direction: direction,
+      'Top Sector 1': enriched[0]?.sector ?? 'N/A',
+      'Top Share 1': enriched[0] ? `${enriched[0].sharePct}%` : 'N/A',
+      'Top Sector 2': enriched[1]?.sector ?? 'N/A',
+      'Top Share 2': enriched[1] ? `${enriched[1].sharePct}%` : 'N/A',
+      'Total Value': totalUsd != null ? formatBillions(totalUsd) : 'N/A',
+    },
+  });
+
   return (
-    <div id={id} className="space-y-4 bg-zinc-900/30 border border-zinc-800/80 rounded-xl p-5 lg:p-6">
+    <div id={id} className="exportable-card group relative space-y-4 bg-zinc-900/30 border border-zinc-800/80 rounded-xl p-5 lg:p-6">
+      {/* Hover-activated PNG download button */}
+      <button
+        type="button"
+        onClick={() => onExport(exportAnalysis)}
+        data-export-exclude
+        className="export-btn absolute top-2 right-2 p-1.5 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+        title={`Download ${title} as PNG`}
+        aria-label={`Download ${title} as PNG`}
+      >
+        <Download className="w-4 h-4 text-zinc-300" />
+      </button>
+      
       <div className="flex items-center justify-between">
         <h3 className="text-xl font-bold text-white flex items-center gap-2">
           <Icon className={`w-5 h-5 ${iconClass}`} />
           {title}
         </h3>
-        {canExport && <ExportButton onClick={onExport} />}
       </div>
 
       <BreakdownTotalBanner
@@ -693,12 +1021,15 @@ function BreakdownBySectorSection({
 function ExportBreakdownSection({
   trade,
   canExport,
+  countryName,
+  iso3Lower,
   onExport,
 }: {
   trade: CountryTrade;
   canExport: boolean;
   iso3Lower: string;
-  onExport: () => void;
+  countryName: string;
+  onExport: (analysis: string) => void;
 }) {
   return (
     <BreakdownBySectorSection
@@ -711,6 +1042,9 @@ function ExportBreakdownSection({
       composition={trade.exportComposition ?? []}
       totalUsd={trade.exportsUsd}
       canExport={canExport}
+      countryName={countryName}
+      iso3Lower={iso3Lower}
+      direction="Exports"
       onExport={onExport}
     />
   );
@@ -719,12 +1053,15 @@ function ExportBreakdownSection({
 function ImportBreakdownSection({
   trade,
   canExport,
+  countryName,
+  iso3Lower,
   onExport,
 }: {
   trade: CountryTrade;
   canExport: boolean;
   iso3Lower: string;
-  onExport: () => void;
+  countryName: string;
+  onExport: (analysis: string) => void;
 }) {
   return (
     <BreakdownBySectorSection
@@ -737,6 +1074,9 @@ function ImportBreakdownSection({
       composition={trade.importComposition ?? []}
       totalUsd={trade.importsUsd}
       canExport={canExport}
+      countryName={countryName}
+      iso3Lower={iso3Lower}
+      direction="Imports"
       onExport={onExport}
     />
   );
@@ -745,18 +1085,42 @@ function ImportBreakdownSection({
 function TradeFinanceSection({
   copy,
   canExport,
+  countryName,
+  iso3Lower,
   onExport,
 }: {
   copy: ReturnType<typeof getTradeTabCopy>;
   canExport: boolean;
   iso3Lower: string;
-  onExport: () => void;
+  countryName: string;
+  onExport: (analysis: string) => void;
 }) {
+  const exportAnalysis = buildTradeTabCardAnalysis({
+    cardType: 'trade_finance',
+    countryName,
+    iso3: iso3Lower.toUpperCase(),
+    data: {
+      'Product 1': copy.financeProducts[0]?.name ?? 'N/A',
+      'Product 2': copy.financeProducts[1]?.name ?? 'N/A',
+    },
+  });
+
   return (
-    <div id="trade-finance-mapping-card" className="bg-gradient-to-br from-blue-900/20 to-zinc-900/50 border border-blue-500/20 rounded-xl p-6">
+    <div id="trade-finance-mapping-card" className="exportable-card group relative bg-gradient-to-br from-blue-900/20 to-zinc-900/50 border border-blue-500/20 rounded-xl p-6">
+      {/* Hover-activated PNG download button */}
+      <button
+        type="button"
+        onClick={() => onExport(exportAnalysis)}
+        data-export-exclude
+        className="export-btn absolute top-2 right-2 p-1.5 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+        title={`Download ${copy.financeTitle} as PNG`}
+        aria-label={`Download ${copy.financeTitle} as PNG`}
+      >
+        <Download className="w-4 h-4 text-zinc-300" />
+      </button>
+      
       <div className="flex items-center justify-between mb-2">
         <h3 className="text-xl font-bold text-white">{copy.financeTitle}</h3>
-        {canExport && <ExportButton onClick={onExport} />}
       </div>
       <p className="text-sm text-zinc-400 mb-4">{copy.financeSubtitle}</p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

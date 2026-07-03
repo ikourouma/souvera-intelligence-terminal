@@ -1,9 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { TrendingUp, Target, Newspaper, Gauge, ExternalLink } from 'lucide-react';
+import { TrendingUp, Target, Newspaper, Gauge, ExternalLink, Download } from 'lucide-react';
+import { useState, useRef } from 'react';
 import { HelpTooltip } from '@/components/shared/HelpTooltip';
+import { exportElementToPNG } from '@/lib/intelligence/export-png';
 import type { NewsHeadline } from '@/types/country-intelligence';
+import type { CardAnalysisInput } from '@/lib/intelligence/generate-card-analysis';
 
 export interface SignalMomentumRowProps {
   signal: {
@@ -31,6 +34,8 @@ export interface SignalMomentumRowProps {
   };
   onMomentumClick?: () => void;
   className?: string;
+  countryName?: string;
+  iso3?: string;
 }
 
 /**
@@ -45,6 +50,8 @@ export function SignalMomentumRow({
   newsPulse,
   onMomentumClick,
   className = '',
+  countryName = 'Country',
+  iso3 = 'XXX',
 }: SignalMomentumRowProps) {
   // Format momentum color
   const getMomentumColor = (value: number) => {
@@ -79,10 +86,122 @@ export function SignalMomentumRow({
   const bandLabel = momentum.bandLabel;
   const bandClause = momentum.bandClause;
 
+  // Export handlers for each card
+  const signalCardRef = useRef<HTMLDivElement>(null);
+  const momentumCardRef = useRef<HTMLDivElement>(null);
+  const newsCardRef = useRef<HTMLDivElement>(null);
+  const [exportingSignal, setExportingSignal] = useState(false);
+  const [exportingMomentum, setExportingMomentum] = useState(false);
+  const [exportingNews, setExportingNews] = useState(false);
+
+  const handleExportSignal = async () => {
+    if (!signalCardRef.current || exportingSignal) return;
+    setExportingSignal(true);
+    try {
+      const aiConfig: CardAnalysisInput = {
+        cardType: 'signal_strength',
+        countryName,
+        iso3,
+        data: {
+          'Investment Score': invScore != null ? `${invScore}/100` : 'Pending',
+          'Confidence Score': signal.confidenceScore != null ? `${signal.confidenceScore}/100` : 'Pending',
+          'Signal Level': signal.level,
+        },
+      };
+
+      await exportElementToPNG({
+        element: signalCardRef.current,
+        fileName: `souvera-${iso3}-signal-strength-${new Date().toISOString().split('T')[0]}.png`,
+        cardTitle: 'Signal Strength',
+        countryName,
+        sourceAttribution: 'SOUVERA Intelligence',
+        aiAnalysisConfig: aiConfig,
+      });
+    } catch (err) {
+      console.error('Failed to export Signal Strength:', err);
+    } finally {
+      setExportingSignal(false);
+    }
+  };
+
+  const handleExportMomentum = async () => {
+    if (!momentumCardRef.current || exportingMomentum) return;
+    setExportingMomentum(true);
+    try {
+      const aiConfig: CardAnalysisInput = {
+        cardType: 'economic_momentum',
+        countryName,
+        iso3,
+        data: {
+          'Momentum Index': momentumValue != null ? `${momentumValue > 0 ? '+' : ''}${momentumValue}` : 'Pending',
+          'Investor Readiness': readinessValue != null ? `${readinessValue}/100` : 'Pending',
+          'Momentum Band': bandLabel || 'Pending',
+        },
+      };
+
+      await exportElementToPNG({
+        element: momentumCardRef.current,
+        fileName: `souvera-${iso3}-economic-momentum-${new Date().toISOString().split('T')[0]}.png`,
+        cardTitle: 'Economic Momentum',
+        countryName,
+        sourceAttribution: 'SOUVERA Intelligence',
+        aiAnalysisConfig: aiConfig,
+      });
+    } catch (err) {
+      console.error('Failed to export Economic Momentum:', err);
+    } finally {
+      setExportingMomentum(false);
+    }
+  };
+
+  const handleExportNews = async () => {
+    if (!newsCardRef.current || exportingNews) return;
+    setExportingNews(true);
+    try {
+      const aiConfig: CardAnalysisInput = {
+        cardType: 'news_pulse',
+        countryName,
+        iso3,
+        data: {
+          'Sentiment': sentiment.label,
+          'Sentiment Score': newsPulse.sentimentScore != null ? newsPulse.sentimentScore.toFixed(2) : 'N/A',
+          'Risk Intensity': newsPulse.riskIntensity != null ? `${newsPulse.riskIntensity}/100` : 'N/A',
+          'Opportunity Intensity': newsPulse.opportunityIntensity != null ? `${newsPulse.opportunityIntensity}/100` : 'N/A',
+          'Headlines Analyzed': newsPulse.headlineCount ?? headlines.length,
+        },
+      };
+
+      await exportElementToPNG({
+        element: newsCardRef.current,
+        fileName: `souvera-${iso3}-news-pulse-${new Date().toISOString().split('T')[0]}.png`,
+        cardTitle: 'News Pulse',
+        countryName,
+        sourceAttribution: 'SOUVERA Intelligence',
+        aiAnalysisConfig: aiConfig,
+      });
+    } catch (err) {
+      console.error('Failed to export News Pulse:', err);
+    } finally {
+      setExportingNews(false);
+    }
+  };
+
   return (
     <div className={`grid grid-cols-1 md:grid-cols-3 gap-4 ${className}`}>
       {/* Card 1: Signal Strength */}
-      <div className="bg-zinc-900/50 border border-zinc-800 rounded-sm p-4">
+      <div ref={signalCardRef} className="exportable-card group relative bg-zinc-900/50 border border-zinc-800 rounded-sm p-4">
+        {/* Hover-activated PNG download button */}
+        <button
+          onClick={handleExportSignal}
+          disabled={exportingSignal}
+          className="export-btn absolute top-2 right-2 p-1.5 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+          data-export-exclude
+          title="Download Signal Strength as PNG"
+          aria-label="Download Signal Strength as PNG"
+        >
+          <Download className={`w-4 h-4 text-zinc-300 ${exportingSignal ? 'animate-pulse' : ''}`} />
+        </button>
+        
         <div className="flex items-center gap-2 mb-3">
           <Target className="w-4 h-4 text-blue-400" />
           <h3 className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest flex items-center gap-1.5">
@@ -147,12 +266,28 @@ export function SignalMomentumRow({
 
       {/* Card 2: Economic Momentum */}
       <div
-        className={`bg-zinc-900/50 border border-zinc-800 rounded-sm p-4${onMomentumClick ? ' cursor-pointer hover:border-emerald-800/60 transition-colors' : ''}`}
+        ref={momentumCardRef}
+        className={`exportable-card group relative bg-zinc-900/50 border border-zinc-800 rounded-sm p-4${onMomentumClick ? ' cursor-pointer hover:border-emerald-800/60 transition-colors' : ''}`}
         onClick={onMomentumClick}
         onKeyDown={onMomentumClick ? (e) => e.key === 'Enter' && onMomentumClick() : undefined}
         role={onMomentumClick ? 'button' : undefined}
         tabIndex={onMomentumClick ? 0 : undefined}
       >
+        {/* Hover-activated PNG download button */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            handleExportMomentum();
+          }}
+          disabled={exportingMomentum}
+          className="export-btn absolute top-2 right-2 p-1.5 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+          data-export-exclude
+          title="Download Economic Momentum as PNG"
+          aria-label="Download Economic Momentum as PNG"
+        >
+          <Download className={`w-4 h-4 text-zinc-300 ${exportingMomentum ? 'animate-pulse' : ''}`} />
+        </button>
+        
         <div className="flex items-center gap-2 mb-3">
           <TrendingUp className="w-4 h-4 text-emerald-400" />
           <h3 className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest flex items-center gap-1.5">
@@ -223,7 +358,19 @@ export function SignalMomentumRow({
       </div>
 
       {/* Card 3: News Pulse */}
-      <div className="bg-zinc-900/50 border border-zinc-800 rounded-sm p-4">
+      <div ref={newsCardRef} className="exportable-card group relative bg-zinc-900/50 border border-zinc-800 rounded-sm p-4">
+        {/* Hover-activated PNG download button */}
+        <button
+          onClick={handleExportNews}
+          disabled={exportingNews}
+          className="export-btn absolute top-2 right-2 p-1.5 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+          data-export-exclude
+          title="Download News Pulse as PNG"
+          aria-label="Download News Pulse as PNG"
+        >
+          <Download className={`w-4 h-4 text-zinc-300 ${exportingNews ? 'animate-pulse' : ''}`} />
+        </button>
+        
         <div className="flex items-center gap-2 mb-3">
           <Newspaper className="w-4 h-4 text-amber-400" />
           <h3 className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest flex items-center gap-1.5">
@@ -319,7 +466,10 @@ export function SignalMomentumRow({
                     </a>
                     )
                   ) : (
-                    <span className="text-zinc-400 line-clamp-2">{h.title}</span>
+                    <span className="text-zinc-400 line-clamp-2 inline-flex items-start gap-1">
+                      {h.title}
+                      <span className="text-[9px] text-amber-600 uppercase tracking-wide shrink-0">(Analysis Only)</span>
+                    </span>
                   )}
                 </li>
               );})}

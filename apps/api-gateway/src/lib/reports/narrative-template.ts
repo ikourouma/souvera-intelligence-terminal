@@ -18,11 +18,14 @@ export interface NarrativeTemplateVars {
 }
 
 function fmtUsd(n?: number): string {
-  if (n == null) return 'Not covered';
-  if (n >= 1e12) return `$${(n / 1e12).toFixed(2)}T`;
-  if (n >= 1e9) return `$${(n / 1e9).toFixed(1)}B`;
-  if (n >= 1e6) return `$${(n / 1e6).toFixed(0)}M`;
-  return `$${n.toLocaleString()}`;
+  if (n == null || !Number.isFinite(n)) return 'Not covered';
+  const sign = n < 0 ? '-' : '';
+  const abs = Math.abs(n);
+  if (abs >= 1e12) return `${sign}$${(abs / 1e12).toFixed(2)}T`;
+  if (abs >= 1e9) return `${sign}$${(abs / 1e9).toFixed(1)}B`;
+  if (abs >= 1e6) return `${sign}$${(abs / 1e6).toFixed(1)}M`;
+  if (abs >= 1e3) return `${sign}$${(abs / 1e3).toFixed(1)}K`;
+  return `${sign}$${abs.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
 }
 
 function fmtPct(n?: number): string {

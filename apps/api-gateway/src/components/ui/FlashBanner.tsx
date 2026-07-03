@@ -20,9 +20,25 @@ export function FlashBanner() {
   const [announcement, setAnnouncement] = useState<Announcement>(FALLBACK_ANNOUNCEMENT);
 
   useEffect(() => {
-    // TODO: Fetch from Supabase `site_announcements` where active=true
-    // const { data } = await supabase.from('site_announcements').select('*').eq('active', true).single()
-    // if (data) setAnnouncement(data)
+    async function fetchBanner() {
+      try {
+        const response = await fetch('/api/v1/marketing/flash-banner');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.banner) {
+            setAnnouncement({
+              label: data.banner.label || 'Now Live',
+              message: data.banner.message || '',
+              cta: data.banner.link_text || 'Learn More',
+              href: data.banner.link_url || '/platform',
+            });
+          }
+        }
+      } catch (err) {
+        console.error('[FlashBanner] Failed to fetch CMS banner:', err);
+      }
+    }
+    fetchBanner();
   }, []);
 
   if (!isVisible) return null;

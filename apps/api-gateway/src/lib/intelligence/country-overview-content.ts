@@ -3,13 +3,16 @@
  * @see docs/execution/country-terminal-sprint-plan.md
  */
 
+import { APPROVED_AFRICA_ISO3, isApprovedCaribbeanMarket } from '../market-coverage';
+import { petroleumExclusionClause } from './preferential-trade-policy';
+
 export type CountryRegion = 'africa' | 'caribbean' | 'default';
 
+/** Canonical region for all 74 Souvera markets (54 Africa + 20 Caribbean). */
 export function getCountryRegion(iso3: string): CountryRegion {
-  const caribbean = new Set(['JAM', 'TTO', 'BRB', 'BHS', 'HTI', 'DOM', 'CUB']);
-  if (caribbean.has(iso3.toUpperCase())) return 'caribbean';
-  const africa = new Set(['NGA', 'ZAF', 'KEN', 'GHA', 'EGY', 'MAR', 'TZA', 'ETH', 'SEN', 'CIV']);
-  if (africa.has(iso3.toUpperCase())) return 'africa';
+  const key = iso3.toUpperCase();
+  if (isApprovedCaribbeanMarket(key)) return 'caribbean';
+  if ((APPROVED_AFRICA_ISO3 as readonly string[]).includes(key)) return 'africa';
   return 'default';
 }
 
@@ -65,10 +68,37 @@ export interface CountryOverviewContent {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
+import { formatCurrency, formatPopulation } from '@/lib/intelligence-entitlements';
+
 type Metrics = Record<string, any>;
 
+/**
+ * Honest empty-state for metrics no source (World Bank / IMF) reports for a market
+ * — e.g. CPI for territories like BVI/Cayman, or Cuba/Eritrea GDP. "Not reported"
+ * is more credible than an open-ended "Pending" that implies data is imminent.
+ */
+const NOT_REPORTED = 'Not reported';
+
 function fmtPct(v?: number) {
-  return v != null ? `${v.toFixed(1)}%` : 'Pending';
+  return v != null ? `${v.toFixed(1)}%` : NOT_REPORTED;
+}
+
+/**
+ * Canonical snapshot formatters — route every Overview metric through the shared
+ * formatters so small populations (e.g. St Kitts 46.8K) and negative FDI render
+ * correctly instead of "0.0M" / "$-12,572,108.04". `fallback` preserves curated
+ * placeholder strings when live data is missing.
+ */
+function fmtGdp(v?: number | null, fallback = NOT_REPORTED): string {
+  return v != null && Number.isFinite(v) ? formatCurrency(v) : fallback;
+}
+
+function fmtPop(v?: number | null, fallback = NOT_REPORTED): string {
+  return v != null && Number.isFinite(v) ? formatPopulation(v) : fallback;
+}
+
+function fmtFdi(v?: number | null, fallback = NOT_REPORTED): string {
+  return v != null && Number.isFinite(v) ? formatCurrency(v) : fallback;
 }
 
 export function getOverviewContent(
@@ -91,7 +121,7 @@ function wave1AfricaOverview(iso3: string, countryName: string, m: Metrics): Cou
   const profiles: Record<string, { title: string; intro: string; hub: string; hubLabel: string; hubNarrative: string; sources: string; agoaTitle: string; agoaTone: 'amber' | 'emerald'; agoaStatus: string; regionalTitle: string }> = {
     GHA: { title: 'West Africa Mining & Cocoa Hub', intro: `${countryName} is West Africa's second-largest economy combining gold mining, cocoa exports, and Accra fintech growth with Tema port gateway access.`, hub: 'Accra', hubLabel: 'Fintech & Services', hubNarrative: 'Mobile money and digital finance cluster', sources: 'World Bank, BoG, Ghana Statistical Service', agoaTitle: 'AGOA: Duty-Free U.S. Market Access', agoaTone: 'emerald', agoaStatus: 'Active · AGOA eligible', regionalTitle: 'ECOWAS: West African Gateway' },
     ZAF: { title: 'Africa\'s Industrial Powerhouse', intro: `${countryName} is Africa's most industrialized economy combining PGMs, automotive manufacturing, deep capital markets, and renewable energy transition.`, hub: 'Johannesburg', hubLabel: 'Financial Capital', hubNarrative: 'JSE and banking sector anchor', sources: 'World Bank, SARB, Stats SA', agoaTitle: 'AGOA: Duty-Free U.S. Market Access', agoaTone: 'emerald', agoaStatus: 'Active · AGOA eligible', regionalTitle: 'SADC: Southern African Hub' },
-    ETH: { title: 'East Africa Manufacturing Giant', intro: `${countryName} is Africa's second-most populous nation combining EPZ apparel manufacturing, coffee exports, and hydropower infrastructure at scale.`, hub: 'Addis Ababa', hubLabel: 'Industrial Capital', hubNarrative: 'EPZ and manufacturing cluster', sources: 'World Bank, NBE, Central Statistics Agency', agoaTitle: 'AGOA: Restoration Watch', agoaTone: 'amber', agoaStatus: 'Suspended · $680M+ potential', regionalTitle: 'AfCFTA: Continental Market Access' },
+    ETH: { title: 'East Africa Manufacturing Giant', intro: `${countryName} is Africa's second-most populous nation combining EPZ apparel manufacturing, coffee exports, and hydropower infrastructure at scale.`, hub: 'Addis Ababa', hubLabel: 'Industrial Capital', hubNarrative: 'EPZ and manufacturing cluster', sources: 'World Bank, NBE, Central Statistics Agency', agoaTitle: 'AGOA: Not a Current Beneficiary', agoaTone: 'amber', agoaStatus: 'Ineligible · terminated Jan 2022', regionalTitle: 'AfCFTA: Continental Market Access' },
     SEN: { title: 'West Africa Stability Anchor', intro: `${countryName} is a stable West African democracy combining phosphate mining, fisheries, Sangomar energy, and Diamniadio industrial zone investment.`, hub: 'Dakar', hubLabel: 'Regional Capital', hubNarrative: 'UEMOA and ECOWAS gateway', sources: 'World Bank, BCEAO, ANSD', agoaTitle: 'AGOA: Duty-Free U.S. Market Access', agoaTone: 'emerald', agoaStatus: 'Active · AGOA eligible', regionalTitle: 'UEMOA: CFA Zone Stability' },
     CIV: { title: 'West Africa Growth Leader', intro: `${countryName} is West Africa's fastest-growing major economy combining world's largest cocoa production, gold mining, and Abidjan port logistics.`, hub: 'Abidjan', hubLabel: 'Trade Gateway', hubNarrative: 'West Africa\'s largest container port hub', sources: 'World Bank, BCEAO, INS Côte d\'Ivoire', agoaTitle: 'AGOA: Duty-Free U.S. Market Access', agoaTone: 'emerald', agoaStatus: 'Active · AGOA eligible', regionalTitle: 'ECOWAS: Sahel Re-Export Hub' },
     TZA: { title: 'East Africa Resource Economy', intro: `${countryName} combines gold mining, EPZ apparel exports, cashew agriculture, and Dar es Salaam port access for EAC trade corridors.`, hub: 'Dar es Salaam', hubLabel: 'Port Gateway', hubNarrative: 'EAC trade and EPZ manufacturing hub', sources: 'World Bank, BoT, NBS Tanzania', agoaTitle: 'AGOA: Duty-Free U.S. Market Access', agoaTone: 'emerald', agoaStatus: 'Active · AGOA eligible', regionalTitle: 'EAC: East African Community' },
@@ -101,16 +131,16 @@ function wave1AfricaOverview(iso3: string, countryName: string, m: Metrics): Cou
     snapshotTitle: p.title,
     snapshotIntro: p.intro,
     snapshotMetrics: [
-      { emoji: '💰', label: 'Economic Scale', value: m.gdp_current_usd ? `$${(m.gdp_current_usd / 1e9).toFixed(0)}B` : 'Pending', sublabel: 'GDP (2025)', narrative: 'Latest Souvera intelligence estimate' },
-      { emoji: '👥', label: 'Population', value: m.population_total ? `${(m.population_total / 1e6).toFixed(0)}M` : 'Pending', sublabel: 'People (2025)', narrative: 'Demographic base and domestic market scale' },
+      { emoji: '💰', label: 'Economic Scale', value: fmtGdp(m.gdp_current_usd), sublabel: 'GDP (2025)', narrative: 'Latest Souvera intelligence estimate' },
+      { emoji: '👥', label: 'Population', value: fmtPop(m.population_total), sublabel: 'People (2025)', narrative: 'Demographic base and domestic market scale' },
       { emoji: '🏙️', label: 'Hub City', value: p.hub, sublabel: p.hubLabel, narrative: p.hubNarrative },
       { emoji: '📈', label: 'Growth', value: fmtPct(m.gdp_growth_annual_pct), sublabel: 'GDP Growth (2025)', narrative: 'Latest annual growth rate' },
     ],
     momentumIntro: `${countryName} economic momentum reflects sector investment, trade corridor development, and macro policy frameworks.`,
     momentumMetrics: [
       { emoji: '📈', label: 'GDP Growth', value: fmtPct(m.gdp_growth_annual_pct), sublabel: '(2025)', narrative: 'Annual growth rate' },
-      { emoji: '💰', label: 'FDI Inflows', value: m.fdi_net_inflows_current_usd ? (m.fdi_net_inflows_current_usd >= 1e9 ? `$${(m.fdi_net_inflows_current_usd / 1e9).toFixed(1)}B` : `$${(m.fdi_net_inflows_current_usd / 1e6).toFixed(0)}M`) : 'Pending', sublabel: '(2025)', narrative: 'Foreign direct investment' },
-      { emoji: '💰', label: 'GDP', value: m.gdp_current_usd ? `$${(m.gdp_current_usd / 1e9).toFixed(0)}B` : 'Pending', sublabel: '(2025)', narrative: 'Economic scale' },
+      { emoji: '💰', label: 'FDI Inflows', value: fmtFdi(m.fdi_net_inflows_current_usd), sublabel: '(2025)', narrative: 'Foreign direct investment' },
+      { emoji: '💰', label: 'GDP', value: fmtGdp(m.gdp_current_usd), sublabel: '(2025)', narrative: 'Economic scale' },
       { emoji: '📉', label: 'Inflation', value: fmtPct(m.inflation_consumer_prices_annual_pct), sublabel: '(2025)', narrative: 'Consumer price index' },
     ],
     momentumFooterSources: p.sources,
@@ -122,7 +152,7 @@ function wave1AfricaOverview(iso3: string, countryName: string, m: Metrics): Cou
     ],
     whyNowCallout: 'See Souvera Country Analysis below for editorial intelligence on timing and entry strategy.',
     marketAccessItems: [
-      { emoji: '🇺🇸', tone: p.agoaTone, title: p.agoaTitle, paragraphs: [`${countryName} AGOA status shapes duty-free U.S. market access for qualifying exports. See Trade tab for bilateral trade detail.`], footnote: `Status: ${p.agoaStatus}` },
+      { emoji: '🇺🇸', tone: p.agoaTone, title: p.agoaTitle, paragraphs: [`${countryName} AGOA status shapes duty-free U.S. market access for qualifying exports.${p.agoaTone === 'emerald' ? ` ${petroleumExclusionClause(iso3)}` : ''} See Trade tab for bilateral trade detail.`], footnote: `Status: ${p.agoaStatus}` },
       { emoji: '🌍', tone: 'emerald', title: p.regionalTitle, paragraphs: [`${countryName} participates in regional trade frameworks supporting cross-border investment and re-export models.`], footnote: 'See Trade tab for partner detail' },
       { emoji: '🌍', tone: 'emerald', title: 'AfCFTA: Continental Free Trade Area', paragraphs: [`${countryName} exports to African countries duty-free under AfCFTA, accessing a combined market of 1.3B consumers.`], footnote: 'Continental duty-free trade integration' },
     ],
@@ -134,15 +164,15 @@ function nigeriaOverview(countryName: string, m: Metrics): CountryOverviewConten
     snapshotTitle: "Africa's Largest Economy",
     snapshotIntro: `${countryName} is profiled with macro data as of {{MACRO_ASOF_YEAR}}: nominal GDP {{GDP_NOMINAL_USD}}, growth {{GDP_GROWTH}}, inflation {{INFLATION}}. Technology and agriculture lead the sector scorecard; post-2023 reforms remain a structural watchpoint per policy registry.`,
     snapshotMetrics: [
-      { emoji: '💰', label: 'Economic Scale', value: m.gdp_current_usd ? `$${(m.gdp_current_usd / 1e9).toFixed(0)}B+` : 'Pending', sublabel: 'GDP ({{MACRO_ASOF_YEAR}})', narrative: "West Africa's largest economy, representing 24% of regional output" },
-      { emoji: '👥', label: 'Population', value: m.population_total ? `${(m.population_total / 1e6).toFixed(1)}M` : '223M', sublabel: 'Population (latest)', narrative: "Africa's most populous nation with median age of 19.7 years" },
+      { emoji: '💰', label: 'Economic Scale', value: fmtGdp(m.gdp_current_usd), sublabel: 'GDP ({{MACRO_ASOF_YEAR}})', narrative: "West Africa's largest economy, representing 24% of regional output" },
+      { emoji: '👥', label: 'Population', value: fmtPop(m.population_total, '223M'), sublabel: 'Population (latest)', narrative: "Africa's most populous nation with median age of 19.7 years" },
       { emoji: '💻', label: 'Tech Hub', value: 'Lagos', sublabel: 'Fintech Capital', narrative: '400+ funded startups, $2B+ VC investment' },
       { emoji: '📈', label: 'Growth Leader', value: fmtPct(m.gdp_growth_annual_pct), sublabel: 'GDP Growth ({{MACRO_ASOF_YEAR}})', narrative: 'Post-reform macro trajectory per structured series' },
     ],
     momentumIntro: `${countryName} entered sustained growth following 2023 currency reforms. Technology sector expansion and agricultural modernization are driving GDP acceleration, with inflation declining from peak levels.`,
     momentumMetrics: [
       { emoji: '📈', label: 'GDP Growth', value: fmtPct(m.gdp_growth_annual_pct), sublabel: '({{MACRO_ASOF_YEAR}})', narrative: 'Per structured macro series ({{MACRO_ASOF_YEAR}})' },
-      { emoji: '💰', label: 'FDI Inflows', value: m.fdi_net_inflows_current_usd ? `$${(m.fdi_net_inflows_current_usd / 1e9).toFixed(1)}B` : 'Not covered', sublabel: '({{MACRO_ASOF_YEAR}})', narrative: 'FDI {{FDI}} per canonical series' },
+      { emoji: '💰', label: 'FDI Inflows', value: fmtFdi(m.fdi_net_inflows_current_usd, 'Not covered'), sublabel: '({{MACRO_ASOF_YEAR}})', narrative: 'FDI {{FDI}} per canonical series' },
       { emoji: '🚀', label: 'Tech sector', value: 'Scorecard', sublabel: 'Sector tab', narrative: 'Sector strength from Souvera scorecard — not a macro series' },
       { emoji: '📉', label: 'Inflation', value: fmtPct(m.inflation_consumer_prices_annual_pct), sublabel: '({{MACRO_ASOF_YEAR}})', narrative: 'Inflation trajectory per structured series (2023 reform cycle referenced in Economy tab)' },
     ],
@@ -157,10 +187,10 @@ function nigeriaOverview(countryName: string, m: Metrics): CountryOverviewConten
     marketAccessItems: [
       {
         emoji: '🇺🇸',
-        tone: 'amber',
-        title: 'AGOA: U.S. Market Access',
-        paragraphs: [`${countryName} AGOA status is sourced from the Evidence Vault — see Trade tab for legislative watchpoints and restoration timeline.`],
-        footnote: 'Status: Under review · Source: Evidence Vault',
+        tone: 'emerald',
+        title: 'AGOA: Duty-Free U.S. Market Access',
+        paragraphs: [`${countryName} is a designated AGOA beneficiary with duty-free U.S. access for qualifying non-petroleum exports — see Trade tab for bilateral flows and preferential detail.`],
+        footnote: 'Status: Active · AGOA eligible',
       },
       {
         emoji: '🌍',
@@ -185,15 +215,15 @@ function jamaicaOverview(countryName: string, m: Metrics): CountryOverviewConten
     snapshotTitle: 'Caribbean Digital Gateway',
     snapshotIntro: `${countryName} is the English-speaking Caribbean's leading nearshore hub, combining tourism strength, bauxite mining, and a fast-growing digital services sector. Kingston anchors fintech, BPO, and submarine cable connectivity for the region.`,
     snapshotMetrics: [
-      { emoji: '💰', label: 'Economic Scale', value: m.gdp_current_usd ? `$${(m.gdp_current_usd / 1e9).toFixed(1)}B` : '~$19B', sublabel: 'GDP (2025)', narrative: "Caribbean's third-largest English-speaking economy" },
-      { emoji: '👥', label: 'Population', value: m.population_total ? `${(m.population_total / 1e6).toFixed(1)}M` : '2.8M', sublabel: 'People (2025)', narrative: 'English-speaking workforce with US time-zone alignment' },
+      { emoji: '💰', label: 'Economic Scale', value: fmtGdp(m.gdp_current_usd), sublabel: 'GDP (2025)', narrative: "Caribbean's third-largest English-speaking economy" },
+      { emoji: '👥', label: 'Population', value: fmtPop(m.population_total, '2.8M'), sublabel: 'People (2025)', narrative: 'English-speaking workforce with US time-zone alignment' },
       { emoji: '🌐', label: 'Digital Hub', value: 'Kingston', sublabel: 'Nearshore Capital', narrative: 'Submarine cables, Jam-Dex CBDC pilot, growing BPO cluster' },
       { emoji: '📈', label: 'Growth', value: fmtPct(m.gdp_growth_annual_pct), sublabel: 'GDP Growth (2025)', narrative: 'Tourism recovery + digital services expansion' },
     ],
     momentumIntro: `${countryName}'s economy is recovering from the pandemic tourism shock with diversified growth in digital infrastructure, luxury tourism, and nearshore services. Remittance flows and IMF-backed fiscal reforms support macro stability.`,
     momentumMetrics: [
       { emoji: '📈', label: 'GDP Growth', value: fmtPct(m.gdp_growth_annual_pct), sublabel: '(2025)', narrative: 'Tourism recovery + digital services expansion' },
-      { emoji: '💰', label: 'FDI Inflows', value: m.fdi_net_inflows_current_usd ? `$${(m.fdi_net_inflows_current_usd / 1e6).toFixed(0)}M` : '$900M', sublabel: '(2024)', narrative: 'Nearshore BPO and tourism investment' },
+      { emoji: '💰', label: 'FDI Inflows', value: fmtFdi(m.fdi_net_inflows_current_usd), sublabel: '(2024)', narrative: 'Nearshore BPO and tourism investment' },
       { emoji: '✈️', label: 'Tourism', value: '+15%', sublabel: 'Arrival Growth', narrative: 'Higher average spend per visitor vs 2019' },
       { emoji: '📉', label: 'Inflation', value: fmtPct(m.inflation_consumer_prices_annual_pct), sublabel: '(2025)', narrative: 'BOJ tightening supports price stability' },
     ],
@@ -210,8 +240,8 @@ function jamaicaOverview(countryName: string, m: Metrics): CountryOverviewConten
         emoji: '🇺🇸',
         tone: 'emerald',
         title: 'CBI: Caribbean Basin Initiative',
-        paragraphs: [`${countryName} enjoys preferential U.S. market access under CBI/CARICOM arrangements, supporting duty-free entry for eligible exports.`],
-        bullets: ['$890M+ current eligible exports to the U.S.', '4,200+ product categories under preferential access', 'Strong diaspora remittance corridor ($3.5B+ annually)'],
+        paragraphs: [`${countryName} enjoys preferential U.S. market access under CBI/CARICOM arrangements. ${petroleumExclusionClause('JAM')}`],
+        bullets: ['Preferential export corridor to the U.S. under CBI rules of origin', '4,200+ product categories under preferential access', 'Strong diaspora remittance corridor supporting FX stability'],
         footnote: 'Status: Active · CARICOM/CBI eligible',
       },
       {
@@ -237,15 +267,15 @@ function kenyaOverview(countryName: string, m: Metrics): CountryOverviewContent 
     snapshotTitle: 'East Africa Fintech Hub',
     snapshotIntro: `${countryName} is East Africa's largest economy and the continent's mobile money pioneer, combining M-Pesa infrastructure, renewable energy leadership, and Mombasa port gateway access for regional trade.`,
     snapshotMetrics: [
-      { emoji: '💰', label: 'Economic Scale', value: m.gdp_current_usd ? `$${(m.gdp_current_usd / 1e9).toFixed(0)}B` : '~$115B', sublabel: 'GDP (2025)', narrative: "East Africa's largest economy by output" },
-      { emoji: '👥', label: 'Population', value: m.population_total ? `${(m.population_total / 1e6).toFixed(1)}M` : '56M', sublabel: 'People (2025)', narrative: 'Young, urbanizing workforce with high mobile adoption' },
+      { emoji: '💰', label: 'Economic Scale', value: fmtGdp(m.gdp_current_usd), sublabel: 'GDP (2025)', narrative: "East Africa's largest economy by output" },
+      { emoji: '👥', label: 'Population', value: fmtPop(m.population_total, '56M'), sublabel: 'People (2025)', narrative: 'Young, urbanizing workforce with high mobile adoption' },
       { emoji: '💳', label: 'Fintech Hub', value: 'Nairobi', sublabel: 'Mobile Money Capital', narrative: 'M-Pesa ecosystem, CBK-regulated digital finance cluster' },
       { emoji: '📈', label: 'Growth', value: fmtPct(m.gdp_growth_annual_pct), sublabel: 'GDP Growth (2025)', narrative: 'Services-led expansion + infrastructure investment' },
     ],
     momentumIntro: `${countryName}'s economy is driven by fintech scale, renewable energy expansion, and logistics gateway investment. IMF-backed fiscal reforms and EAC integration support macro stability.`,
     momentumMetrics: [
       { emoji: '📈', label: 'GDP Growth', value: fmtPct(m.gdp_growth_annual_pct), sublabel: '(2025)', narrative: 'Services and agriculture export resilience' },
-      { emoji: '💰', label: 'FDI Inflows', value: m.fdi_net_inflows_current_usd ? `$${(m.fdi_net_inflows_current_usd / 1e9).toFixed(1)}B` : '$1.4B', sublabel: '(2025)', narrative: 'Fintech, energy, and logistics investment' },
+      { emoji: '💰', label: 'FDI Inflows', value: fmtFdi(m.fdi_net_inflows_current_usd), sublabel: '(2025)', narrative: 'Fintech, energy, and logistics investment' },
       { emoji: '⚡', label: 'Renewables', value: '90%+', sublabel: 'Grid Mix', narrative: 'Geothermal, wind, and solar baseload' },
       { emoji: '📉', label: 'Inflation', value: fmtPct(m.inflation_consumer_prices_annual_pct), sublabel: '(2025)', narrative: 'CBK policy anchoring price stability' },
     ],
@@ -262,8 +292,8 @@ function kenyaOverview(countryName: string, m: Metrics): CountryOverviewContent 
         emoji: '🇺🇸',
         tone: 'emerald',
         title: 'AGOA: Duty-Free U.S. Market Access',
-        paragraphs: [`${countryName} is AGOA-eligible with duty-free access to the U.S. market for qualifying exports including agriculture, textiles, and manufactured goods.`],
-        bullets: ['$420M+ in AGOA-eligible agricultural exports annually', 'Horticulture and specialty coffee command premium U.S. pricing', 'Fintech and digital services corridor expanding to North America'],
+        paragraphs: [`${countryName} is AGOA-eligible with duty-free access to the U.S. for qualifying exports. ${petroleumExclusionClause('KEN')}`],
+        bullets: ['AGOA-eligible agricultural and horticulture export corridors', 'Horticulture and specialty coffee command premium U.S. pricing', 'Fintech and digital services corridor expanding to North America'],
         footnote: 'Status: Active · AGOA eligible',
       },
       {
@@ -289,15 +319,15 @@ function trinidadOverview(countryName: string, m: Metrics): CountryOverviewConte
     snapshotTitle: 'Caribbean Energy Hub',
     snapshotIntro: `${countryName} is the Caribbean's largest energy exporter and industrial base, combining petrochemicals, LNG, and manufacturing with Port of Spain's role as a regional logistics and financial gateway.`,
     snapshotMetrics: [
-      { emoji: '💰', label: 'Economic Scale', value: m.gdp_current_usd ? `$${(m.gdp_current_usd / 1e9).toFixed(1)}B` : '~$28B', sublabel: 'GDP (2025)', narrative: "Caribbean's highest per-capita industrial output" },
-      { emoji: '👥', label: 'Population', value: m.population_total ? `${(m.population_total / 1e6).toFixed(1)}M` : '1.4M', sublabel: 'People (2025)', narrative: 'Skilled energy and manufacturing workforce' },
+      { emoji: '💰', label: 'Economic Scale', value: fmtGdp(m.gdp_current_usd), sublabel: 'GDP (2025)', narrative: "Caribbean's highest per-capita industrial output" },
+      { emoji: '👥', label: 'Population', value: fmtPop(m.population_total, '1.4M'), sublabel: 'People (2025)', narrative: 'Skilled energy and manufacturing workforce' },
       { emoji: '⚡', label: 'Energy Hub', value: 'Point Fortin', sublabel: 'LNG & Petrochemicals', narrative: 'Regional supplier of ammonia, methanol, and LNG' },
       { emoji: '📈', label: 'Growth', value: fmtPct(m.gdp_growth_annual_pct), sublabel: 'GDP Growth (2025)', narrative: 'Energy prices and Guyana corridor trade supporting output' },
     ],
     momentumIntro: `${countryName}'s economy is anchored by energy exports with diversification into downstream manufacturing, maritime services, and CARICOM trade integration. Fiscal reforms and energy price normalization shape the 2025–2027 outlook.`,
     momentumMetrics: [
       { emoji: '📈', label: 'GDP Growth', value: fmtPct(m.gdp_growth_annual_pct), sublabel: '(2025)', narrative: 'Energy-linked recovery with manufacturing upside' },
-      { emoji: '💰', label: 'FDI Inflows', value: m.fdi_net_inflows_current_usd ? `$${(m.fdi_net_inflows_current_usd / 1e6).toFixed(0)}M` : '$1.1B', sublabel: '(2024)', narrative: 'Petrochemical and logistics corridor investment' },
+      { emoji: '💰', label: 'FDI Inflows', value: fmtFdi(m.fdi_net_inflows_current_usd), sublabel: '(2024)', narrative: 'Petrochemical and logistics corridor investment' },
       { emoji: '⚡', label: 'Energy Exports', value: '+8%', sublabel: 'YoY Volume', narrative: 'LNG and ammonia supply chains to Americas' },
       { emoji: '📉', label: 'Inflation', value: fmtPct(m.inflation_consumer_prices_annual_pct), sublabel: '(2025)', narrative: 'CBTT policy anchoring price stability' },
     ],
@@ -341,15 +371,15 @@ function barbadosOverview(countryName: string, m: Metrics): CountryOverviewConte
     snapshotTitle: 'Eastern Caribbean Services Hub',
     snapshotIntro: `${countryName} combines high-income tourism, international financial services, and renewable energy ambition on a stable, English-speaking platform with strong institutional governance.`,
     snapshotMetrics: [
-      { emoji: '💰', label: 'Economic Scale', value: m.gdp_current_usd ? `$${(m.gdp_current_usd / 1e9).toFixed(1)}B` : '~$6.5B', sublabel: 'GDP (2025)', narrative: 'Highest GDP per capita in the Eastern Caribbean' },
-      { emoji: '👥', label: 'Population', value: m.population_total ? `${(m.population_total / 1e6).toFixed(1)}M` : '0.28M', sublabel: 'People (2025)', narrative: 'Highly educated services workforce' },
+      { emoji: '💰', label: 'Economic Scale', value: fmtGdp(m.gdp_current_usd), sublabel: 'GDP (2025)', narrative: 'Highest GDP per capita in the Eastern Caribbean' },
+      { emoji: '👥', label: 'Population', value: fmtPop(m.population_total, '0.28M'), sublabel: 'People (2025)', narrative: 'Highly educated services workforce' },
       { emoji: '🏦', label: 'IFS Hub', value: 'Bridgetown', sublabel: 'Financial Services', narrative: 'Regional IFC and fintech sandbox leadership' },
       { emoji: '📈', label: 'Growth', value: fmtPct(m.gdp_growth_annual_pct), sublabel: 'GDP Growth (2025)', narrative: 'Tourism recovery + renewable investment' },
     ],
     momentumIntro: `${countryName}'s economy is recovering from pandemic tourism disruption with growth in financial services exports, rum and food manufacturing, and solar deployment. IMF-supported fiscal discipline supports macro stability.`,
     momentumMetrics: [
       { emoji: '📈', label: 'GDP Growth', value: fmtPct(m.gdp_growth_annual_pct), sublabel: '(2025)', narrative: 'Tourism and services-led expansion' },
-      { emoji: '💰', label: 'FDI Inflows', value: m.fdi_net_inflows_current_usd ? `$${(m.fdi_net_inflows_current_usd / 1e6).toFixed(0)}M` : '$420M', sublabel: '(2024)', narrative: 'Hospitality and renewable project pipeline' },
+      { emoji: '💰', label: 'FDI Inflows', value: fmtFdi(m.fdi_net_inflows_current_usd), sublabel: '(2024)', narrative: 'Hospitality and renewable project pipeline' },
       { emoji: '✈️', label: 'Tourism', value: '+12%', sublabel: 'Arrival Growth', narrative: 'Premium long-stay segment outperforming' },
       { emoji: '📉', label: 'Inflation', value: fmtPct(m.inflation_consumer_prices_annual_pct), sublabel: '(2025)', narrative: 'CBB policy supports price stability' },
     ],
@@ -367,7 +397,7 @@ function barbadosOverview(countryName: string, m: Metrics): CountryOverviewConte
         tone: 'emerald',
         title: 'CBI: Caribbean Basin Initiative',
         paragraphs: [`${countryName} benefits from CBI duty-free entry for eligible rum, food, and light manufacturing exports to the U.S. market.`],
-        bullets: ['$380M+ CBI-eligible exports annually', 'Rum and specialty food premium pricing in U.S. retail', 'IFS and BPO services to North American clients'],
+        bullets: ['CBI-eligible rum, food, and light manufacturing exports', 'Rum and specialty food premium pricing in U.S. retail', 'IFS and BPO services to North American clients'],
         footnote: 'Status: Active · CARICOM/CBI eligible',
       },
       {
@@ -393,15 +423,15 @@ function bahamasOverview(countryName: string, m: Metrics): CountryOverviewConten
     snapshotTitle: 'Atlantic Financial & Tourism Gateway',
     snapshotIntro: `${countryName} is a high-income archipelago economy driven by tourism, offshore financial services, and maritime logistics, with Nassau as a regional wealth management and cruise hub.`,
     snapshotMetrics: [
-      { emoji: '💰', label: 'Economic Scale', value: m.gdp_current_usd ? `$${(m.gdp_current_usd / 1e9).toFixed(1)}B` : '~$14B', sublabel: 'GDP (2025)', narrative: 'Largest GDP among CARICOM island economies' },
-      { emoji: '👥', label: 'Population', value: m.population_total ? `${(m.population_total / 1e6).toFixed(1)}M` : '0.4M', sublabel: 'People (2025)', narrative: 'Concentrated Nassau–Freeport workforce' },
+      { emoji: '💰', label: 'Economic Scale', value: fmtGdp(m.gdp_current_usd), sublabel: 'GDP (2025)', narrative: 'Largest GDP among CARICOM island economies' },
+      { emoji: '👥', label: 'Population', value: fmtPop(m.population_total, '0.4M'), sublabel: 'People (2025)', narrative: 'Concentrated Nassau–Freeport workforce' },
       { emoji: '🏦', label: 'IFS Center', value: 'Nassau', sublabel: 'Wealth Management', narrative: 'Offshore banking and trust services hub' },
       { emoji: '📈', label: 'Growth', value: fmtPct(m.gdp_growth_annual_pct), sublabel: 'GDP Growth (2025)', narrative: 'Tourism and construction-led recovery' },
     ],
     momentumIntro: `${countryName}'s economy is rebounding on tourism arrivals, resort development, and financial services stability. Hurricane resilience investment and fiscal consolidation remain policy priorities.`,
     momentumMetrics: [
       { emoji: '📈', label: 'GDP Growth', value: fmtPct(m.gdp_growth_annual_pct), sublabel: '(2025)', narrative: 'Tourism and construction driving output' },
-      { emoji: '💰', label: 'FDI Inflows', value: m.fdi_net_inflows_current_usd ? `$${(m.fdi_net_inflows_current_usd / 1e6).toFixed(0)}M` : '$980M', sublabel: '(2024)', narrative: 'Resort and marina development pipeline' },
+      { emoji: '💰', label: 'FDI Inflows', value: fmtFdi(m.fdi_net_inflows_current_usd), sublabel: '(2024)', narrative: 'Resort and marina development pipeline' },
       { emoji: '🛳️', label: 'Tourism', value: '+14%', sublabel: 'Arrival Growth', narrative: 'Cruise and stopover volumes recovering' },
       { emoji: '📉', label: 'Inflation', value: fmtPct(m.inflation_consumer_prices_annual_pct), sublabel: '(2025)', narrative: 'BSD peg supports import price stability' },
     ],
@@ -419,7 +449,7 @@ function bahamasOverview(countryName: string, m: Metrics): CountryOverviewConten
         tone: 'emerald',
         title: 'CBI: Caribbean Basin Initiative',
         paragraphs: [`${countryName} has preferential U.S. access under CBI for eligible tourism-linked manufacturing, seafood, and services exports.`],
-        bullets: ['$720M+ CBI-eligible export corridor', 'USD currency peg reduces FX risk for U.S. investors', 'Proximity to Florida logistics hubs'],
+        bullets: ['CBI-eligible export corridor to the U.S.', 'USD currency peg reduces FX risk for U.S. investors', 'Proximity to Florida logistics hubs'],
         footnote: 'Status: Active · CBI eligible',
       },
       {
@@ -445,16 +475,16 @@ function defaultOverview(countryName: string, m: Metrics): CountryOverviewConten
     snapshotTitle: 'Country Overview',
     snapshotIntro: `${countryName} macroeconomic profile and investment context. Metrics below reflect the latest available Souvera intelligence data.`,
     snapshotMetrics: [
-      { emoji: '💰', label: 'GDP', value: m.gdp_current_usd ? `$${(m.gdp_current_usd / 1e9).toFixed(1)}B` : 'Pending', sublabel: 'Current', narrative: 'Economic scale indicator' },
-      { emoji: '👥', label: 'Population', value: m.population_total ? `${(m.population_total / 1e6).toFixed(1)}M` : 'Pending', sublabel: 'Total', narrative: 'Demographic base' },
+      { emoji: '💰', label: 'GDP', value: fmtGdp(m.gdp_current_usd), sublabel: 'Current', narrative: 'Economic scale indicator' },
+      { emoji: '👥', label: 'Population', value: fmtPop(m.population_total), sublabel: 'Total', narrative: 'Demographic base' },
       { emoji: '📈', label: 'Growth', value: fmtPct(m.gdp_growth_annual_pct), sublabel: 'GDP Growth', narrative: 'Annual growth rate' },
       { emoji: '🌍', label: 'Region', value: countryName, sublabel: 'Market', narrative: 'See Trade tab for market access detail' },
     ],
     momentumIntro: `${countryName} economic momentum indicators are sourced from World Bank and national statistics agencies.`,
     momentumMetrics: [
       { emoji: '📈', label: 'GDP Growth', value: fmtPct(m.gdp_growth_annual_pct), sublabel: 'Annual', narrative: 'Latest available growth rate' },
-      { emoji: '💰', label: 'GDP', value: m.gdp_current_usd ? `$${(m.gdp_current_usd / 1e9).toFixed(1)}B` : 'Pending', sublabel: 'Current', narrative: 'Economic scale' },
-      { emoji: '👥', label: 'Population', value: m.population_total ? `${(m.population_total / 1e6).toFixed(1)}M` : 'Pending', sublabel: 'Total', narrative: 'Demographic base' },
+      { emoji: '💰', label: 'GDP', value: fmtGdp(m.gdp_current_usd), sublabel: 'Current', narrative: 'Economic scale' },
+      { emoji: '👥', label: 'Population', value: fmtPop(m.population_total), sublabel: 'Total', narrative: 'Demographic base' },
       { emoji: '📉', label: 'Inflation', value: fmtPct(m.inflation_consumer_prices_annual_pct), sublabel: 'CPI', narrative: 'Consumer price index' },
     ],
     momentumFooterSources: 'World Bank, Souvera Analysis',
@@ -467,4 +497,22 @@ function defaultOverview(countryName: string, m: Metrics): CountryOverviewConten
     whyNowCallout: 'See Souvera Country Analysis below for editorial intelligence on timing and entry strategy.',
     marketAccessItems: [],
   };
+}
+
+/** Three-paragraph curated analysis for Economic Momentum PNG export */
+export function buildEconomicMomentumAnalysis(
+  countryName: string,
+  overview: CountryOverviewContent,
+  momentumIndex?: number | null,
+  investorReadiness?: number | null,
+  updatedAt?: string
+): string {
+  const metricSummary = overview.momentumMetrics
+    .slice(0, 3)
+    .map((m) => `${m.label} ${m.value}`)
+    .join('; ');
+  const p1 = `${countryName}'s economic momentum profile synthesises growth, scale, inflation, and capital-flow signals into an investor readiness lens. ${overview.momentumIntro}`;
+  const p2 = `Key indicators: ${metricSummary}.${momentumIndex != null ? ` SOUVERA momentum index ${Math.round(momentumIndex)}/100` : ''}${investorReadiness != null ? ` with investor readiness ${Math.round(investorReadiness)}/100` : ''} — positive bands typically precede FDI inflection; negative bands warrant FX and policy stress-testing.`;
+  const p3 = `Cross-reference with Trade and Sectors tabs for corridor-specific entry timing. Anchor sizing on FX convertibility, fiscal space, and regional policy overlays from the Risk tab. Data: ${overview.momentumFooterSources}; updated ${updatedAt ?? 'recently'}. Curated estimates — not investment advice.`;
+  return [p1, p2, p3].join('\n\n');
 }

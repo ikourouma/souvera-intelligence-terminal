@@ -5,10 +5,23 @@ import { FOOTER_LINK_GROUPS } from '@/lib/site-navigation';
 
 const footerLinks = {
   ...FOOTER_LINK_GROUPS,
-  access: FOOTER_LINK_GROUPS.access.map((link) =>
-    link.href === '/access/request-access' ? { ...link, highlight: true as const } : link
-  ),
 };
+
+function footerLinkClass(highlight?: 'afceta' | 'access'): string {
+  if (highlight === 'afceta') {
+    return 'text-[13px] font-semibold transition-all bg-gradient-to-r from-violet-300 via-fuchsia-300 to-teal-300 bg-clip-text text-transparent hover:from-violet-200 hover:via-fuchsia-200 hover:to-teal-200';
+  }
+  if (highlight === 'access') {
+    return 'text-[13px] font-semibold transition-colors flex items-center gap-1 hover:text-emerald-300';
+  }
+  return 'text-[13px] transition-colors hover:text-souvera-blue';
+}
+
+function footerLinkStyle(highlight?: 'afceta' | 'access'): React.CSSProperties | undefined {
+  if (highlight === 'afceta') return undefined;
+  if (highlight === 'access') return { color: '#22C55E' };
+  return { color: '#6B7280' };
+}
 
 export function SouveraFooter() {
   return (
@@ -61,7 +74,11 @@ export function SouveraFooter() {
             <ul className="space-y-2.5">
               {footerLinks.intelligence.map((link) => (
                 <li key={link.name}>
-                  <Link href={link.href} className="text-[13px] transition-colors hover:text-souvera-blue" style={{ color: '#6B7280' }}>
+                  <Link
+                    href={link.href}
+                    className={footerLinkClass(link.highlight)}
+                    style={footerLinkStyle(link.highlight)}
+                  >
                     {link.name}
                   </Link>
                 </li>
@@ -91,11 +108,11 @@ export function SouveraFooter() {
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className={`text-[13px] transition-colors flex items-center gap-1 ${link.highlight ? 'font-semibold hover:text-emerald-300' : 'hover:text-souvera-blue'}`}
-                    style={{ color: link.highlight ? '#22C55E' : '#6B7280' }}
+                    className={footerLinkClass(link.highlight)}
+                    style={footerLinkStyle(link.highlight)}
                   >
                     {link.name}
-                    {link.highlight && <ArrowUpRight className="w-3 h-3" />}
+                    {link.highlight === 'access' && <ArrowUpRight className="w-3 h-3" />}
                   </Link>
                 </li>
               ))}

@@ -9,6 +9,7 @@ const PUBLIC_ROUTES = [
   '/status',
   '/login',
   '/register',
+  '/signup',
   '/auth',
   '/legal',
   '/platform',
@@ -26,7 +27,6 @@ const PROTECTED_ROUTES = [
   '/settings',
   '/org',
   '/admin',
-  '/dashboard',
 ];
 
 function isPublicRoute(pathname: string): boolean {
@@ -90,8 +90,7 @@ export async function proxy(request: NextRequest) {
     const isAssetForTerminal = pathname.startsWith('/_next') && (
       referer.includes('/terminal') || 
       referer.includes('/africa/map') || 
-      referer.includes('/caribbean/map') || 
-      referer.includes('/dashboard')
+      referer.includes('/caribbean/map')
     );
 
     if (isAssetForTerminal && process.env.TERMINAL_URL) {
@@ -106,9 +105,9 @@ export async function proxy(request: NextRequest) {
   // Update session and get user
   const { supabaseResponse, user } = await updateSession(request);
 
-  // Redirect authenticated users away from login/register
-  if (user && (pathname === '/login' || pathname === '/register')) {
-    const redirectUrl = request.nextUrl.searchParams.get('redirect') || '/terminal';
+  // Redirect authenticated users away from login/register/signup
+  if (user && (pathname === '/login' || pathname === '/register' || pathname.startsWith('/signup'))) {
+    const redirectUrl = request.nextUrl.searchParams.get('redirect') || '/intelligence';
     return NextResponse.redirect(new URL(redirectUrl, request.url));
   }
 
@@ -123,8 +122,7 @@ export async function proxy(request: NextRequest) {
   const isTerminalPath = pathname.startsWith('/terminal') || 
                          pathname === '/africa/map' || 
                          pathname === '/caribbean/map' ||
-                         pathname.startsWith('/data/') ||
-                         pathname.startsWith('/dashboard');
+                         pathname.startsWith('/data/');
 
   if (isTerminalPath && process.env.TERMINAL_URL) {
     // Redirect root /terminal to /terminal/africa

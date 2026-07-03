@@ -9,10 +9,13 @@ import {
   ArrowUpRight, ArrowDownLeft, Repeat, Ship, Clock,
 } from 'lucide-react';
 import { exportElementToPNG } from '@/lib/intelligence/export-png';
-import { iso3ToIso2 } from '@/lib/intelligence/export-branding';
+import { iso3ToIso2, flagUrlFromIso3, formatTradeCountryLabel, tradeCountryMatchesSearch } from '@/lib/intelligence/export-branding';
+import { buildCuratedCardAnalysisForExport } from '@/lib/intelligence/generate-card-analysis';
 import { HighlightedText } from '@/components/intelligence/HighlightedText';
+import { CollapsibleAnalysis } from '@/components/intelligence/CollapsibleAnalysis';
 import { TradeDataQualityBadge, TradeDataQualityBanner } from '@/components/intelligence/TradeDataQualityBadge';
 import { DirectionToggle, FlowDirection } from '@/components/intelligence/DirectionToggle';
+import { Top10Card, Top10Item } from '@/components/intelligence/Top10Card';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -67,6 +70,7 @@ interface CBTPAFlowResponse {
       total_trade_usd: number;
       country_count: number;
     }>;
+    top_traders?: Array<{ iso3: string; name: string; usTrade: number; total: number; cbi: boolean; caricom: boolean }>;
     data_vintage: string;
     direction: string;
     legislative_deadline: string;
@@ -152,11 +156,10 @@ function generateSouveraAnalysis(row: CBTPAFlowRow, direction: FlowDirection): s
   const totalValue = isImport ? row.total_imports_usd : row.total_exports_usd;
   const topPartner = row.top_partners?.[0];
   const topProduct = row.top_products?.[0];
-  const prefMargin = row.preference_margin_pct;
 
   const flowText = isImport
-    ? `${row.country_name} imports ${usdB(totalValue ?? 0)} in ${row.category_label.toLowerCase()}, with ${pct(usShare)} (${usdB(usValue ?? 0)}) sourced from the United States.`
-    : `${row.country_name} exports ${usdB(totalValue ?? 0)} in ${row.category_label.toLowerCase()}, with ${pct(usShare)} (${usdB(usValue ?? 0)}) going to the US market.`;
+    ? `${formatTradeCountryLabel(row.iso3, row.country_name)} imports ${usdB(totalValue ?? 0)} in ${row.category_label.toLowerCase()}, with ${pct(usShare)} (${usdB(usValue ?? 0)}) sourced from the United States.`
+    : `${formatTradeCountryLabel(row.iso3, row.country_name)} exports ${usdB(totalValue ?? 0)} in ${row.category_label.toLowerCase()}, with ${pct(usShare)} (${usdB(usValue ?? 0)}) going to the US market.`;
 
   const caribbeanText = caribbeanValue && caribbeanShare && caribbeanShare > 5
     ? ` Intra-Caribbean trade represents ${pct(caribbeanShare)} (${usdB(caribbeanValue)}).`
@@ -166,11 +169,11 @@ function generateSouveraAnalysis(row: CBTPAFlowRow, direction: FlowDirection): s
     ? ` Key product: ${topProduct.description} (HS ${topProduct.hsCode}) at ${usdB(topProduct.valueUsd)}/yr (${pct(topProduct.sharePct)} of category).`
     : '';
 
-  const cbtpaText = prefMargin != null && prefMargin > 0
-    ? ` CBTPA preference margin of ${pct(prefMargin)} creates cost advantage over MFN rate.`
-    : row.roo_compliant
+  const cbtpaText = row.roo_compliant
     ? ' Compliant with CBTPA Rules of Origin.'
-    : '';
+    : row.cbi_beneficiary
+      ? ' CBTPA-eligible product category.'
+      : '';
 
   const growthText = row.yoy_growth_pct != null && row.yoy_growth_pct > 5
     ? ` US-Caribbean trade growing at ${pct(row.yoy_growth_pct)} YoY.`
@@ -221,8 +224,16 @@ function ExportableSection({
         cardTitle: `${country.name} — ${category ?? title}`,
         countryName: country.name,
         iso2: iso3ToIso2(country.iso3),
+        flagUrl: flagUrlFromIso3(country.iso3),
         sourceAttribution: sourceNotes,
         dataAsOf: `${year}`,
+        disclaimer: 'Curated estimates. For research and policy analysis purposes only.',
+        curatedAnalysis: buildCuratedCardAnalysisForExport({
+          cardType: 'cbtpa_flows',
+          countryName: country.name,
+          iso3: country.iso3,
+          data: { Category: category ?? title, Year: year },
+        }),
       });
     } finally {
       onExportEnd();
@@ -437,11 +448,11 @@ function CountryTradeDrawer({
                 <Sparkles className="w-4 h-4" />
                 <span className="uppercase tracking-wide font-semibold">Souvera Analysis</span>
               </div>
-              {sorted.slice(0, 3).map((r, idx) => (
-                <div key={r.id} className="text-sm text-zinc-300 leading-relaxed">
-                  <HighlightedText text={generateSouveraAnalysis(r, direction)} />
-                </div>
-              ))}
+              <CollapsibleAnalysis
+                text={sorted.slice(0, 3).map((r) => generateSouveraAnalysis(r, direction)).join('\n\n')}
+                titleClass="hidden"
+                className="text-zinc-300 text-sm"
+              />
             </div>
           </ExportableSection>
 
@@ -546,6 +557,12 @@ function CategoryCard({
         sourceAttribution: 'USTR CBI · ITC Trade Map · UN Comtrade',
         dataAsOf: rows[0]?.year?.toString() ?? '2023',
         disclaimer: 'Curated estimates. For research and policy analysis purposes only.',
+        curatedAnalysis: buildCuratedCardAnalysisForExport({
+          cardType: 'cbtpa_flows',
+          countryName: meta?.label ?? categoryGroup,
+          iso3: 'CBI',
+          data: { Category: meta?.label ?? categoryGroup, Direction: direction, Countries: rows.length },
+        }),
       });
     } finally {
       setExporting(false);
@@ -624,14 +641,16 @@ function CategoryCard({
                 key={r.id}
                 onClick={() => onCountryClick(r.iso3, r.country_name, categoryGroup)}
                 className="border-b border-zinc-800/60 hover:bg-zinc-800/50 cursor-pointer transition-colors group"
-                title={`Click for ${r.country_name} CBTPA profile`}
+                title={`Click for ${formatTradeCountryLabel(r.iso3, r.country_name)} CBTPA profile`}
               >
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
                     <Users className="w-3 h-3 text-zinc-600 group-hover:text-blue-400 transition-colors shrink-0" />
                     <div>
-                      <p className="text-white font-medium text-xs group-hover:text-blue-300 transition-colors">{r.country_name}</p>
-                      <p className="text-zinc-500 text-[10px]">{r.iso3} · {r.sub_region || r.region}</p>
+                      <p className="text-white font-medium text-xs group-hover:text-blue-300 transition-colors">{formatTradeCountryLabel(r.iso3, r.country_name)}</p>
+                      {(r.sub_region || r.region) ? (
+                        <p className="text-zinc-500 text-[10px]">{r.sub_region || r.region}</p>
+                      ) : null}
                     </div>
                   </div>
                 </td>
@@ -719,10 +738,9 @@ export default function CBTpaTradeIntelligence() {
   const groupedByCategory = useMemo(() => {
     if (!data?.rows) return {};
     const groups: Record<string, CBTPAFlowRow[]> = {};
-    const searchLower = searchTerm.toLowerCase().trim();
     for (const row of data.rows) {
       if (regionFilter && row.region !== regionFilter && row.sub_region !== regionFilter) continue;
-      if (searchLower && !row.country_name.toLowerCase().includes(searchLower) && !row.iso3.toLowerCase().includes(searchLower)) continue;
+      if (!tradeCountryMatchesSearch(row.iso3, row.country_name, searchTerm)) continue;
       if (!groups[row.category_group]) groups[row.category_group] = [];
       groups[row.category_group].push(row);
     }
@@ -847,6 +865,29 @@ export default function CBTpaTradeIntelligence() {
             </div>
           </div>
         </div>
+
+        {/* Top 10 Traders */}
+        {data?.summary?.top_traders && data.summary.top_traders.length > 0 && (
+          <Top10Card
+            title={isImport ? 'Top 10 US-Caribbean Importers' : 'Top 10 US-Caribbean Exporters'}
+            items={data.summary.top_traders.map((t) => ({
+              id: t.iso3,
+              label: t.name,
+              sublabel: t.cbi ? 'CBI Beneficiary' : t.caricom ? 'CARICOM Member' : t.iso3,
+              value: t.usTrade,
+              secondaryValue: t.total > 0 ? (t.usTrade / t.total) * 100 : 0,
+              secondaryLabel: 'US share',
+              badge: t.cbi ? 'CBI' : t.caricom ? 'CARICOM' : undefined,
+              badgeColor: t.cbi ? 'emerald' : 'blue',
+            }))}
+            onItemClick={(item) => setSelectedCountry({ iso3: item.id, name: item.label })}
+            colorScheme="cyan"
+            exportFileName={`souvera-cbtpa-top-${isImport ? 'importers' : 'exporters'}-${new Date().toISOString().slice(0, 10)}`}
+            exportTitle={`Top 10 CBTPA ${isImport ? 'Importers' : 'Exporters'}`}
+            sourceAttribution="USTR CBI Program · ITC Trade Map · UN Comtrade"
+            dataAsOf={data.summary.data_vintage}
+          />
+        )}
 
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-3">

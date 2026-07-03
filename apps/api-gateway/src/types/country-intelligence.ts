@@ -106,14 +106,71 @@ export interface TradePartner {
   badge?: string;
 }
 
+export interface TradeMetricProvenance {
+  sourceKey: string;
+  sourceLabel: string;
+  /** What the figure measures */
+  metricScope: 'bilateral_all_goods' | 'category_flow_aggregate' | 'preferential';
+  asOfYear?: number;
+}
+
+export interface TradeSourceReconciliation {
+  message: string;
+  censusExportsToUsUsd: number;
+  categoryFlowTotalUsd: number;
+  deltaUsd: number;
+  deltaPct: number;
+}
+
+/** Parsed USTR country-page trade summary line (tertiary corroboration — not primary KPIs). */
+export type UstrTradeMetricScope =
+  | 'goods_and_services_total'
+  | 'goods_total'
+  | 'us_exports_to_country'
+  | 'us_imports_from_country'
+  | 'services_total';
+
+export interface UstrTradeSummaryMetric {
+  scope: UstrTradeMetricScope;
+  valueUsd: number;
+  year: number;
+  yoyPct?: number | null;
+  yoyDirection?: 'up' | 'down' | null;
+}
+
+/** Payload for Trade tab USTR perspective panel. */
+export interface UstrTradeSummaryPayload {
+  iso3: string;
+  sourceUrl: string;
+  agoaStatusText?: string | null;
+  tradeAgreementText?: string | null;
+  metrics: UstrTradeSummaryMetric[];
+  lastReviewedAt?: string;
+  dataLabel: string;
+}
+
 export interface CountryTrade {
   /** Year trade totals / partners were last refreshed */
   asOfYear?: number;
+  /** Whether hero totals are global trade or U.S.-bilateral (Census) only */
+  tradeScope?: 'global' | 'bilateral_us';
+  /** Provenance note from trade snapshot (e.g. U.S. Census Bureau) */
+  dataSource?: string;
   totalTradeUsd?: number;
   exportsUsd?: number;
   importsUsd?: number;
-  exportsToUs?: { year?: number; valueUsd?: number; yoyPct?: number };
-  importsFromUs?: { year?: number; valueUsd?: number; yoyPct?: number };
+  exportsToUs?: {
+    year?: number;
+    valueUsd?: number;
+    yoyPct?: number;
+    source?: TradeMetricProvenance;
+  };
+  importsFromUs?: {
+    year?: number;
+    valueUsd?: number;
+    yoyPct?: number;
+    source?: TradeMetricProvenance;
+  };
   topPartners?: TradePartner[];
   exportComposition?: Array<{ sector: string; sharePct: number; valueUsd?: number }>;
   importComposition?: Array<{ sector: string; sharePct: number; valueUsd?: number }>;
@@ -129,12 +186,24 @@ export interface CountryTrade {
     topPartners?: TradePartner[];
   };
   agoa?: {
-    status: 'eligible' | 'suspended' | 'restoration_opportunity';
+    status: 'eligible' | 'suspended' | 'restoration_opportunity' | 'not_applicable' | 'ineligible';
     statusNote?: string;
+    /** Total bilateral exports to US (MFN, all products). */
+    totalExportsToUsUsd?: number;
+    /** Current AGOA-preferential exports (0 when suspended). */
     currentExportsUsd?: number;
+    /** Modeled potential if AGOA restored. */
     potentialExportsUsd?: number;
+    restorationPotentialUsd?: number;
     eligibleCategories?: number;
+    dataSource?: string;
+    dataVintage?: number;
+    metricsSource?: TradeMetricProvenance;
+    /** Multi-year AGOA-preferential export series for trend narrative. */
+    trend?: Array<{ year: number; agoaPreferentialUsd: number }>;
   };
+  /** When Census bilateral and USITC category-flow totals diverge materially. */
+  sourceReconciliation?: TradeSourceReconciliation;
   pending?: boolean;
 }
 
@@ -174,11 +243,20 @@ export interface AgoaPolicyUiSnapshot {
   apparelEligible: boolean;
   notes: string;
   agoaStatus: 'eligible' | 'suspended' | 'graduated' | 'ineligible' | 'not_applicable' | 'under_review';
+  /** Year country became AGOA-eligible (from Evidence Vault). */
+  eligibleSinceYear?: number;
+  /** Year AGOA benefits were suspended (from Evidence Vault). */
+  suspensionSinceYear?: number;
 }
+
+/** Headline metrics flagged is_estimate=true in souvera_country_observations */
+export type MetricEstimateFlags = Partial<Record<keyof CountryMetrics, boolean>>;
 
 export interface CountryIntelligenceResponse {
   country: CountryIdentity;
   metrics: CountryMetrics;
+  /** Per-metric estimate flags for IMF WEO / curated estimate rows */
+  metricEstimates?: MetricEstimateFlags;
   signal: CountrySignal | null;
   momentum: CountryMomentum | null;
   newsPulse: CountryNewsPulse | null;
@@ -193,6 +271,8 @@ export interface CountryIntelligenceResponse {
   /** Top 20 metric source attribution (Phase 0C). */
   sourceMeta?: CountrySourceMeta;
   officialReferences?: OfficialReferenceLink[];
+  /** Tertiary USTR country-page trade summary (corroboration only). */
+  ustrTradeSummary?: UstrTradeSummaryPayload;
   meta: {
     accessTier: string;
     authenticated: boolean;

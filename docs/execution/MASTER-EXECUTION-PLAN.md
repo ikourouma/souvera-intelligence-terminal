@@ -17,6 +17,7 @@
 | Trade policy demo | [trade-policy-intelligence-demo-plan.md](./trade-policy-intelligence-demo-plan.md) |
 | Admin roadmap | [admin-platform-assessment-plan.md](./admin-platform-assessment-plan.md) |
 | Reports + AI + quotas | [reports-ai-platform-plan.md](./reports-ai-platform-plan.md) |
+| Traction pages (Fortune-5) | [traction-pages-fortune5-stress-test.md](../audits/traction-pages-fortune5-stress-test.md) |
 | Country terminal sprints | [country-terminal-sprint-plan.md](./country-terminal-sprint-plan.md) |
 | Backlog IDs | [project-backlog.md](./project-backlog.md) |
 
@@ -37,18 +38,31 @@
 - Trade Policy admin hub (+ `/events` sub-route)
 - Nav: AfCFTA + Supply-Demand under Trade & Policy
 
-### Tier 2.5 — QA polish (current sprint) 🔄 In progress
+### Tier 2.5 — Sovereign Trade Accuracy & Census Pipeline 🔄 Sign-off in progress
+
+**Certification doc:** [`docs/ux/phase-2.5-certification.md`](../ux/phase-2.5-certification.md)
+
+| Item | Status | Notes |
+|------|--------|-------|
+| Census pipeline + dual-source reconciliation | ✅ | Tasks 3–4, 9; COD banner live |
+| Petroleum exclusion transparency | ✅ | Task 8; SDM filter scaffolding Task 10 |
+| USTR Africa leverage | ✅ | Task 11; curated links + tertiary panel |
+| SDM data clarity (74×8) | ✅ | Task 12; flow-backed export products |
+| AfCETA Trade Intelligence (Task 14) | ✅ | 416 corridor signals; forum spotlights |
+| AfCETA Corridor Flows UX (Task 14b) | ✅ | Corridor Lab, drawer, rule-based executive analysis, PNG export |
+| Explorer self-serve signup (Task 15) | ✅ | `/signup`, check-email, login CTA; invite-assisted for paid tiers |
+| Automated audit gates | ✅ | All green incl. `audit-afceta-corridor-consistency.ts` (416 rows) |
+| Manual smoke + stakeholder sign-off | 🔲 | AfCETA flows + Explorer signup E2E + GUY/JAM/COD/NGA/ERI/ZWE review |
+| Reports tab decision | 🔲 | Remains disabled until explicit post-2.5 approval |
+
+**Legacy Tier 2.5 polish (pre-certification):**
 
 | Item | Status | Notes |
 |------|--------|-------|
 | NGA 5 export sectors | ✅ | Solid Minerals added; 2+3 layout |
 | Import/export $ volumes | ✅ | Derived from `exportsUsd` / `importsUsd` via API trade payload |
-| Breakdown card animation | ✅ | Fade-in + hover lift + share bar |
-| Total import/export banner | ✅ | On each breakdown section |
-| AGOA timeline PNG | ✅ | Public — presentation decks |
-| AGOA country status PNG | ✅ | Business+ cards (status + apparel public fields in export) |
-| Economy data API-driven | ✅ | `souvera_country_observations` via country API; re-seed fixes indicators |
-| Master plan (this doc) | ✅ | Single view |
+| AGOA timeline / country status PNG | ✅ | Public + Business+ exports |
+| Economy data API-driven | ✅ | `souvera_country_observations` via country API |
 
 ### Tier 3 — Admin-managed intelligence 📋 Planned
 

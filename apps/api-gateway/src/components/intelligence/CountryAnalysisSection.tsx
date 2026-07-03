@@ -35,24 +35,26 @@ export function CountryAnalysisSection({
   return (
     <div
       id="souvera-country-analysis"
-      className="bg-blue-950/10 border border-blue-900/30 rounded-xl p-4"
+      className="exportable-card group relative bg-blue-950/10 border border-blue-900/30 rounded-xl p-4"
     >
+      {/* Hover-activated PNG download button */}
+      {canExport && (
+        <button
+          type="button"
+          onClick={handleExport}
+          className="export-btn absolute top-2 right-2 p-1.5 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+          title="Download Souvera Country Analysis as PNG"
+          aria-label="Download Souvera Country Analysis as PNG"
+          data-export-exclude
+        >
+          <Download className="w-4 h-4 text-zinc-300" />
+        </button>
+      )}
+      
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-xs font-bold text-blue-400 uppercase tracking-wider">
           Souvera Country Analysis
         </h3>
-        {canExport && (
-          <button
-            type="button"
-            onClick={handleExport}
-            className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors"
-            title="Export Souvera Country Analysis (PNG)"
-            data-export-exclude
-          >
-            <Download className="w-3 h-3" />
-            PNG
-          </button>
-        )}
       </div>
 
       {parsed.lead && (

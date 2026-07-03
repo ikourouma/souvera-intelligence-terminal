@@ -158,6 +158,53 @@ Each source must define:
 
 ---
 
+### 🇺🇸 U.S. Census Bureau (International Trade)
+
+| Field          | Value                                                                                      |
+| -------------- | ------------------------------------------------------------------------------------------ |
+| Source Key     | `us_census_trade`                                                                          |
+| Domain         | Trade                                                                                      |
+| API            | [https://api.census.gov/data/timeseries/intltrade](https://api.census.gov/data/timeseries/intltrade) |
+| FTP Fallback   | `ftp2.census.gov` (only when API unreachable)                                              |
+| Docs           | [https://www.census.gov/data/developers/data-sets/international-trade.html](https://www.census.gov/data/developers/data-sets/international-trade.html) |
+| Auth           | API Key (`CENSUS_API_KEY`)                                                                 |
+| Data Type      | Open (U.S. Government)                                                                     |
+| Refresh        | Monthly                                                                                    |
+| SLA            | Tier 1                                                                                     |
+| Priority       | 1                                                                                          |
+| Fallback       | UN Comtrade                                                                                |
+| Cost           | Free                                                                                       |
+| Legal          | Approved                                                                                   |
+| Redistribution | Allowed with attribution                                                                   |
+| Owner          | Data Engineering                                                                           |
+| Status         | Active                                                                                     |
+| Target Tables  | `souvera_country_trade_snapshots` (bilateral totals)                                     |
+
+---
+
+### 🇺🇸 USITC DataWeb / HTS
+
+| Field          | Value                                                                                      |
+| -------------- | ------------------------------------------------------------------------------------------ |
+| Source Key     | `usitc_hts`                                                                                |
+| Domain         | Trade / Reference                                                                          |
+| API            | [https://datawebws.usitc.gov/dataweb](https://datawebws.usitc.gov/dataweb)                 |
+| Docs           | [https://hts.usitc.gov/](https://hts.usitc.gov/)                                           |
+| Auth           | API Key (`USITC_DATAWEB_API_KEY`)                                                          |
+| Data Type      | Open (U.S. Government)                                                                     |
+| Refresh        | Monthly                                                                                    |
+| SLA            | Tier 1                                                                                     |
+| Priority       | 1                                                                                          |
+| Fallback       | `us_census_trade`                                                                          |
+| Cost           | Free                                                                                       |
+| Legal          | Approved                                                                                   |
+| Redistribution | Aggregated derived indicators only                                                         |
+| Owner          | Data Engineering                                                                           |
+| Status         | Active                                                                                     |
+| Target Tables  | `souvera_agoa_trade_flows`, `souvera_cbtpa_trade_flows`                                    |
+
+---
+
 ## 4.3 COUNTRY METADATA
 
 ---

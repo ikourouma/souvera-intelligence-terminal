@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { SouveraMegaNav } from '@/components/ui/SouveraMegaNav';
 import { SouveraFooter } from '@/components/ui/SouveraFooter';
+import { PublicPageHero } from '@/components/marketing/PublicPageHero';
+import { AuditProofCallout } from '@/components/marketing/traction/AuditProofCallout';
 import { Database, ShieldCheck, GitMerge, Brain, ArrowRight, Award, Lock } from 'lucide-react';
 
 export const metadata: Metadata = {
@@ -49,22 +51,20 @@ export default function DataFoundationPage() {
     <main className="min-h-screen bg-[#0B0F14] text-white">
       <SouveraMegaNav />
 
-      <section className="pt-24 pb-16 border-b border-zinc-800">
+      <PublicPageHero
+        label="Platform"
+        title="The Souvera Data Foundation."
+        description="From fragmented data to decision-ready intelligence. Ingestion, normalization, validation, and governed AI-assisted analysis across official institutional feeds."
+        backLink={{ href: '/platform', label: 'Platform overview' }}
+        ctas={[
+          { href: '/signup', label: 'Create free account', variant: 'signup' },
+          { href: '/resources/data-sources', label: 'Data sources', variant: 'secondary' },
+        ]}
+      />
+
+      <section className="py-8 border-b border-zinc-800">
         <div className="max-w-[1600px] mx-auto px-6 lg:px-12">
-          <div className="max-w-3xl">
-            <div className="text-[10px] font-bold tracking-[0.2em] uppercase text-blue-500 mb-4">
-              Platform
-            </div>
-            <h1
-              className="text-4xl md:text-5xl font-bold tracking-tight mb-6"
-              style={{ fontFamily: 'Space Grotesk, sans-serif' }}
-            >
-              The Souvera Data Foundation.
-            </h1>
-            <p className="text-lg text-zinc-400 leading-relaxed">
-              From fragmented data to decision-ready intelligence. The Souvera data engine combines approved external sources, normalization rules, quality scoring, and AI-assisted analysis to transform fragmented public and licensed data into institutional-grade market intelligence.
-            </p>
-          </div>
+          <AuditProofCallout />
         </div>
       </section>
 
@@ -238,16 +238,29 @@ export default function DataFoundationPage() {
             </p>
             <div className="flex flex-wrap gap-4">
               <Link
-                href="/access/request-access"
-                className="px-10 py-5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-[12px] tracking-widest uppercase transition-all rounded-sm"
+                href="/signup"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold transition-all rounded-sm"
               >
-                Request Access
+                Create free account
               </Link>
               <Link
-                href="/resources/data-sources"
-                className="px-10 py-5 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-white font-bold text-[12px] tracking-widest uppercase transition-all rounded-sm"
+                href="/access/request-access?plan=business"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-semibold transition-all rounded-sm"
               >
-                View Data Sources
+                Request Business access
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link
+                href="/platform/signal-engine"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-white font-semibold transition-all rounded-sm"
+              >
+                Signal engine
+              </Link>
+              <Link
+                href="/insights/methodology"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-white font-semibold transition-all rounded-sm"
+              >
+                Methodology
               </Link>
             </div>
           </div>

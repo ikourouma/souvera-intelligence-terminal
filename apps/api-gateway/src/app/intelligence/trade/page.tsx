@@ -18,7 +18,10 @@ import {
   Package,
   Ship,
   Repeat,
+  Sparkles,
 } from 'lucide-react';
+import { LiveCuratedBanner } from '@/components/intelligence/LiveCuratedBanner';
+import { InstitutionalAccessCta } from '@/components/marketing/InstitutionalAccessCta';
 
 export const metadata: Metadata = {
   title: 'Trade Intelligence | Souvera',
@@ -32,132 +35,185 @@ function daysUntilAgoaExpiry(): number {
   return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
 }
 
-/**
- * Module ordering — deliberate:
- * 1. SDM  → macro WHERE (all 8 sectors, 74 markets)
- * 2. Product Finder → specific WHAT (priority ~150 products, reciprocal justification)
- * 3. AGOA Tracker  → policy WHO (eligibility, legislative timeline)
- * 4. AfCFTA Tracker → continental framework
- */
-const tradeModules = [
-  {
-    title: 'African Demand Intelligence',
-    description: 'US export opportunity sizing by product category across 74 markets. Quantifies African demand for US goods — the core AGOA reauthorization "two-way street" argument.',
-    href: '/intelligence/trade/demand',
-    icon: BarChart3,
-    color: 'bg-blue-500/10 border-blue-500/30',
-    iconColor: 'text-blue-400',
-    badge: 'Phase 0.5A',
-    stats: [
-      { label: 'US export potential', value: '$12B+/yr' },
-      { label: 'Categories', value: '10 groups' },
+// Categorized module structure for better scannability
+const TRADE_CATEGORIES = {
+  afrocaribbean: {
+    title: 'Afro-Caribbean Corridor',
+    description: 'Atlantic trade intelligence — AfCETA framework and corridor opportunity scoring',
+    color: 'violet',
+    modules: [
+      {
+        title: 'AfCETA Trade Intelligence',
+        shortDesc: 'Treaty framework, four protocol pillars, and Caribbean export portfolio',
+        href: '/intelligence/trade/afceta',
+        icon: Sparkles,
+        badge: 'New',
+        featured: true,
+        stats: { primary: 'AfCETA', label: 'Treaty blueprint' },
+      },
+      {
+        title: 'Corridor Opportunity Index',
+        shortDesc: 'Africa ↔ Caribbean tradable flows by category and spotlight pair',
+        href: '/intelligence/trade/afceta/flows',
+        icon: Repeat,
+        badge: 'Live',
+        stats: { primary: '74×8', label: 'Markets × categories' },
+      },
     ],
   },
-  {
-    title: 'Caribbean Demand Intelligence',
-    description: 'US export opportunities in Caribbean markets. Quantifies Caribbean demand for US goods under CBTPA and bilateral trade frameworks.',
-    href: '/intelligence/trade/demand-caribbean',
-    icon: Ship,
-    color: 'bg-cyan-500/10 border-cyan-500/30',
-    iconColor: 'text-cyan-400',
-    badge: 'Phase 0.5C',
-    stats: [
-      { label: 'Framework', value: 'CBTPA' },
-      { label: 'Categories', value: '10 groups' },
+  usAfrica: {
+    title: 'US-Africa Trade',
+    description: 'AGOA framework, export opportunities, and eligibility',
+    color: 'blue',
+    modules: [
+      {
+        title: 'AGOA Eligibility Tracker',
+        shortDesc: 'Country eligibility status & legislative milestones',
+        href: '/intelligence/trade/agoa',
+        icon: Scale,
+        badge: 'Live',
+        priority: true,
+        stats: { primary: '54', label: 'Countries tracked' },
+      },
+      {
+        title: 'African Demand Intelligence',
+        shortDesc: 'US export opportunity sizing by product category',
+        href: '/intelligence/trade/demand',
+        icon: BarChart3,
+        badge: 'Phase 0.5A',
+        stats: { primary: '8', label: 'Demand categories' },
+      },
+      {
+        title: 'AGOA Trade Flows',
+        shortDesc: 'African exports to US under AGOA preferences',
+        href: '/intelligence/trade/agoa/flows',
+        icon: Repeat,
+        badge: 'Phase 0.5E',
+        stats: { primary: 'USITC', label: 'Verified flows' },
+      },
+      {
+        title: 'AGOA Product Finder',
+        shortDesc: 'Priority products with reciprocal justification',
+        href: '/intelligence/trade/agoa/products',
+        icon: Shirt,
+        badge: 'Preview',
+        stats: { primary: '~150', label: 'Priority products' },
+      },
+      {
+        title: 'Supply-Demand Matrix',
+        shortDesc: 'Macro sector signals across markets',
+        href: '/intelligence/trade/supply-demand',
+        icon: BarChart3,
+        badge: 'Phase 2',
+        stats: { primary: '74×8', label: 'Markets × Sectors' },
+      },
     ],
   },
-  {
-    title: 'CBTPA Import-Export Intelligence',
-    description: 'US-Caribbean bilateral trade flows under the Caribbean Basin Trade Partnership Act. Track imports, exports, preference margins, and intra-CARICOM trade.',
-    href: '/intelligence/trade/cbtpa/flows',
-    icon: Repeat,
-    color: 'bg-blue-500/10 border-blue-500/30',
-    iconColor: 'text-blue-400',
-    badge: 'Phase 0.7',
-    stats: [
-      { label: 'Coverage', value: '20 Markets' },
-      { label: 'Trade Direction', value: 'Import/Export' },
+  caribbean: {
+    title: 'Caribbean Trade',
+    description: 'CBTPA framework and CARICOM markets',
+    color: 'cyan',
+    modules: [
+      {
+        title: 'Caribbean Demand Intelligence',
+        shortDesc: 'US export opportunities in Caribbean markets',
+        href: '/intelligence/trade/demand-caribbean',
+        icon: Ship,
+        badge: 'Phase 0.5C',
+        stats: { primary: '20', label: 'Markets covered' },
+      },
+      {
+        title: 'CBTPA Trade Flows',
+        shortDesc: 'Import/export flows under CBTPA',
+        href: '/intelligence/trade/cbtpa/flows',
+        icon: Repeat,
+        badge: 'Phase 0.7',
+        stats: { primary: 'Bi-Dir', label: 'Import & Export' },
+      },
     ],
   },
-  {
-    title: 'AfCFTA Import-Export Intelligence',
-    description: 'Intra-Africa trade flows under AfCFTA. Toggle between Import and Export views to analyze regional supply chains and market access opportunities.',
-    href: '/intelligence/trade/afcfta/flows',
-    icon: Repeat,
-    color: 'bg-emerald-500/10 border-emerald-500/30',
-    iconColor: 'text-emerald-400',
-    badge: 'Phase 0.5D',
-    stats: [
-      { label: 'Coverage', value: '54 Markets' },
-      { label: 'Trade Direction', value: 'Import/Export' },
+  continental: {
+    title: 'Continental Frameworks',
+    description: 'AfCFTA implementation and intra-Africa trade',
+    color: 'emerald',
+    modules: [
+      {
+        title: 'AfCFTA Status Tracker',
+        shortDesc: 'Ratification and implementation status',
+        href: '/intelligence/trade/afcfta',
+        icon: Building2,
+        badge: 'Preview',
+        stats: { primary: '54', label: 'African nations' },
+      },
+      {
+        title: 'AfCFTA Trade Flows',
+        shortDesc: 'Intra-Africa import/export analysis',
+        href: '/intelligence/trade/afcfta/flows',
+        icon: Repeat,
+        badge: 'Phase 0.5D',
+        stats: { primary: 'Intra', label: 'Regional flows' },
+      },
     ],
   },
-  {
-    title: 'Supply-Demand Matrix',
-    description: 'Macro sector signals across 74 markets and 8 sectors — identify WHERE the strongest supply capacity, demand gaps, and AGOA export opportunities sit.',
-    href: '/intelligence/trade/supply-demand',
-    icon: BarChart3,
-    color: 'bg-purple-500/10 border-purple-500/30',
-    iconColor: 'text-purple-400',
-    badge: 'Phase 2',
-    stats: [
-      { label: 'Markets', value: '74' },
-      { label: 'Sectors', value: '8' },
+  reference: {
+    title: 'Reference Data',
+    description: 'Deep-dive research and compliance',
+    color: 'zinc',
+    modules: [
+      {
+        title: 'Full Product Catalog',
+        shortDesc: 'Complete AGOA eligibility lookup',
+        href: '/intelligence/trade/agoa/products?catalog=full',
+        icon: Package,
+        badge: 'Reference',
+        stats: { primary: '~6,400', label: 'Products' },
+      },
     ],
   },
-  {
-    title: 'AGOA Product Finder',
-    description: 'Priority ~150 products organized by sector — Africa export surplus, US reciprocal opportunity, tariff cliff exposure. Evidence layer for AGOA reauthorization.',
-    href: '/intelligence/trade/agoa/products',
-    icon: Shirt,
-    color: 'bg-violet-500/10 border-violet-500/30',
-    iconColor: 'text-violet-400',
-    badge: 'Preview',
-    stats: [
-      { label: 'Products', value: '~150' },
-      { label: 'Sectors', value: '8' },
-    ],
+};
+
+const COLOR_CLASSES = {
+  violet: {
+    bg: 'bg-violet-500/5',
+    border: 'border-violet-500/25',
+    icon: 'bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 text-fuchsia-300',
+    badge: 'bg-fuchsia-500/10 text-fuchsia-300 border-fuchsia-500/30',
+    stat: 'text-fuchsia-400',
+    hover: 'hover:border-fuchsia-500/45',
   },
-  {
-    title: 'AGOA Eligibility Tracker',
-    description: 'Track AGOA eligibility status, apparel provisions, and legislative milestones for sub-Saharan African countries.',
-    href: '/intelligence/trade/agoa',
-    icon: Scale,
-    color: 'bg-blue-500/10 border-blue-500/30',
-    iconColor: 'text-blue-400',
-    badge: 'Live',
-    stats: [
-      { label: 'Framework', value: 'Sub-Saharan Africa' },
-      { label: 'Countries', value: '54 Tracked' },
-    ],
+  blue: {
+    bg: 'bg-blue-500/5',
+    border: 'border-blue-500/20',
+    icon: 'bg-blue-500/10 text-blue-400',
+    badge: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+    stat: 'text-blue-400',
+    hover: 'hover:border-blue-500/40',
   },
-  {
-    title: 'AfCFTA Status Tracker',
-    description: 'Monitor African Continental Free Trade Area implementation — ratification, deposit, and trading status.',
-    href: '/intelligence/trade/afcfta',
-    icon: Building2,
-    color: 'bg-emerald-500/10 border-emerald-500/30',
-    iconColor: 'text-emerald-400',
-    badge: 'Preview',
-    stats: [
-      { label: 'Coverage', value: '54 African Countries' },
-      { label: 'Data', value: 'Curation in Progress' },
-    ],
+  cyan: {
+    bg: 'bg-cyan-500/5',
+    border: 'border-cyan-500/20',
+    icon: 'bg-cyan-500/10 text-cyan-400',
+    badge: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
+    stat: 'text-cyan-400',
+    hover: 'hover:border-cyan-500/40',
   },
-  {
-    title: 'Full Product Catalog',
-    description: 'Browse full AGOA eligibility across ~6,400 product categories — reference layer for compliance, rules of origin, and deep-dive research.',
-    href: '/intelligence/trade/agoa/products?catalog=full',
-    icon: Package,
-    color: 'bg-zinc-800/50 border-zinc-700/50',
-    iconColor: 'text-zinc-400',
-    badge: 'Reference',
-    stats: [
-      { label: 'Products', value: '~6,400' },
-      { label: 'Use', value: 'Eligibility lookup' },
-    ],
+  emerald: {
+    bg: 'bg-emerald-500/5',
+    border: 'border-emerald-500/20',
+    icon: 'bg-emerald-500/10 text-emerald-400',
+    badge: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    stat: 'text-emerald-400',
+    hover: 'hover:border-emerald-500/40',
   },
-];
+  zinc: {
+    bg: 'bg-zinc-800/30',
+    border: 'border-zinc-700/50',
+    icon: 'bg-zinc-700/50 text-zinc-400',
+    badge: 'bg-zinc-700/50 text-zinc-400 border-zinc-600/50',
+    stat: 'text-zinc-300',
+    hover: 'hover:border-zinc-600/50',
+  },
+} as const;
 
 export default function TradeIntelligenceHub() {
   const daysRemaining = daysUntilAgoaExpiry();
@@ -180,7 +236,7 @@ export default function TradeIntelligenceHub() {
             Trade Policy Intelligence
           </h1>
           <p className="text-xl text-zinc-400 max-w-3xl">
-            Evidence-based intelligence on AGOA eligibility, AfCFTA implementation, and supply-demand dynamics across African and Caribbean markets.
+            Evidence-based intelligence on AGOA eligibility, AfCFTA implementation, AfCETA corridor opportunities, and supply-demand dynamics across African and Caribbean markets.
           </p>
 
           {/* Data Source Attribution */}
@@ -218,61 +274,124 @@ export default function TradeIntelligenceHub() {
         </div>
       </section>
 
-      {/* Trade Modules */}
-      <section className="max-w-[1600px] mx-auto px-6 lg:px-12 py-12">
-        <h2 className="text-2xl font-bold text-white mb-8">Trade Intelligence Modules</h2>
-        
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {tradeModules.map((module) => (
-            <Link
-              key={module.href}
-              href={module.href}
-              className={`group relative p-6 rounded-xl border ${module.color} hover:border-opacity-60 transition-all duration-300`}
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className={`p-3 rounded-lg ${module.color}`}>
-                  <module.icon className={`w-6 h-6 ${module.iconColor}`} />
-                </div>
-                <span className={`px-2 py-1 rounded text-xs ${
-                  module.badge === 'Live'
-                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                    : 'bg-zinc-800 text-zinc-400'
-                }`}>
-                  {module.badge}
+      {/* Quick Navigation */}
+      <section className="max-w-[1600px] mx-auto px-6 lg:px-12 pt-8">
+        <div className="flex flex-wrap gap-2">
+          {Object.entries(TRADE_CATEGORIES).map(([key, category]) => {
+            const colors = COLOR_CLASSES[category.color as keyof typeof COLOR_CLASSES];
+            return (
+              <a
+                key={key}
+                href={`#${key}`}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium border ${colors.border} ${colors.bg} text-zinc-300 hover:text-white transition-colors`}
+              >
+                {category.title}
+                <span className="ml-2 text-xs text-zinc-500">({category.modules.length})</span>
+              </a>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Trade Modules by Category */}
+      <section className="max-w-[1600px] mx-auto px-6 lg:px-12 py-8 space-y-12">
+        {Object.entries(TRADE_CATEGORIES).map(([key, category]) => {
+          const colors = COLOR_CLASSES[category.color as keyof typeof COLOR_CLASSES];
+          return (
+            <div key={key} id={key}>
+              {/* Category Header */}
+              <div className="flex items-center gap-3 mb-6">
+                <h2 className="text-xl font-bold text-white">{category.title}</h2>
+                <span className={`px-2 py-0.5 rounded text-xs border ${colors.badge}`}>
+                  {category.modules.length} modules
                 </span>
               </div>
+              <p className="text-sm text-zinc-500 mb-6 -mt-4">{category.description}</p>
 
-              <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-indigo-400 transition-colors">
-                {module.title}
-              </h3>
-              <p className="text-zinc-400 text-sm mb-4 line-clamp-2">
-                {module.description}
-              </p>
+              {/* Module Cards - Compact Horizontal Layout */}
+              <div className="grid gap-3">
+                {category.modules.map((module) => (
+                  <Link
+                    key={module.href}
+                    href={module.href}
+                    className={`group flex items-center gap-4 p-4 rounded-xl border transition-all duration-200 ${
+                      'featured' in module && module.featured
+                        ? 'border-fuchsia-500/40 bg-gradient-to-r from-violet-600/10 via-fuchsia-600/8 to-teal-600/8 hover:border-fuchsia-400/60 shadow-[0_0_24px_rgba(217,70,239,0.08)] hover:shadow-[0_0_32px_rgba(217,70,239,0.15)]'
+                        : `${colors.border} ${colors.bg} ${colors.hover}`
+                    }`}
+                  >
+                    {/* Icon */}
+                    <div className={`shrink-0 p-2.5 rounded-lg ${
+                      'featured' in module && module.featured
+                        ? 'bg-gradient-to-br from-violet-500/25 to-fuchsia-500/25 text-fuchsia-200'
+                        : colors.icon
+                    }`}>
+                      <module.icon className="w-5 h-5" />
+                    </div>
 
-              <div className="flex items-center gap-4 mb-4">
-                {module.stats.map((stat, idx) => (
-                  <div key={idx}>
-                    <p className="text-xs text-zinc-500">{stat.label}</p>
-                    <p className="text-sm font-medium text-white">{stat.value}</p>
-                  </div>
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <h3 className={`font-semibold truncate transition-colors ${
+                          'featured' in module && module.featured
+                            ? 'text-white group-hover:text-fuchsia-200'
+                            : 'text-white group-hover:text-indigo-400'
+                        }`}>
+                          {module.title}
+                        </h3>
+                        {'featured' in module && module.featured && (
+                          <span className="shrink-0 px-1.5 py-0.5 bg-gradient-to-r from-fuchsia-500/20 to-violet-500/20 text-fuchsia-300 border border-fuchsia-500/30 rounded text-[10px] font-bold tracking-wider uppercase">
+                            Featured
+                          </span>
+                        )}
+                        {'priority' in module && module.priority && (
+                          <span className="shrink-0 px-1.5 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded text-[10px] font-medium">
+                            PRIORITY
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-zinc-500 truncate">{module.shortDesc}</p>
+                    </div>
+
+                    {/* Stats */}
+                    <div className="shrink-0 text-right hidden sm:block">
+                      <p className={`text-lg font-bold ${
+                        'featured' in module && module.featured ? 'text-fuchsia-400' : colors.stat
+                      }`}>{module.stats.primary}</p>
+                      <p className="text-xs text-zinc-500">{module.stats.label}</p>
+                    </div>
+
+                    {/* Badge & Arrow */}
+                    <div className="shrink-0 flex items-center gap-3">
+                      <span className={`hidden md:inline-flex px-2 py-1 rounded text-xs ${
+                        module.badge === 'Live' || module.badge === 'New'
+                          ? module.badge === 'New'
+                            ? 'bg-fuchsia-500/10 text-fuchsia-300 border border-fuchsia-500/30'
+                            : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                          : 'bg-zinc-800 text-zinc-400 border border-zinc-700'
+                      }`}>
+                        {module.badge}
+                      </span>
+                      <ArrowRight className={`w-4 h-4 group-hover:translate-x-1 transition-all ${
+                        'featured' in module && module.featured
+                          ? 'text-fuchsia-500/60 group-hover:text-fuchsia-300'
+                          : 'text-zinc-600 group-hover:text-indigo-400'
+                      }`} />
+                    </div>
+                  </Link>
                 ))}
               </div>
-
-              <div className="flex items-center text-sm text-indigo-400 group-hover:text-indigo-300">
-                <span>Explore</span>
-                <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-              </div>
-            </Link>
-          ))}
-        </div>
+            </div>
+          );
+        })}
       </section>
 
       {/* Key Concepts */}
       <section className="max-w-[1600px] mx-auto px-6 lg:px-12 py-12">
         <h2 className="text-2xl font-bold text-white mb-8">Key Trade Frameworks</h2>
-        
+
         <div className="grid md:grid-cols-2 gap-6">
-          {/* AGOA Card */}
+          {/* AGOA — US-Africa */}
           <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6">
             <div className="flex items-center gap-3 mb-4">
               <Scale className="w-5 h-5 text-blue-400" />
@@ -281,27 +400,30 @@ export default function TradeIntelligenceHub() {
               </h3>
             </div>
             <p className="text-zinc-400 text-sm mb-4">
-              U.S. trade preference program providing duty-free access for eligible sub-Saharan African countries. 
+              U.S. trade preference program providing duty-free access for eligible sub-Saharan African countries.
               Covers over 1,800 products plus GSP-eligible products.
             </p>
             <div className="space-y-2 text-sm">
               <div className="flex items-center justify-between text-zinc-500">
-                <span>Framework Type</span>
-                <span className="text-zinc-300">U.S. Unilateral Preference</span>
+                <span>Region</span>
+                <span className="text-zinc-300">Sub-Saharan Africa ↔ United States</span>
               </div>
               <div className="flex items-center justify-between text-zinc-500">
-                <span>Review Cycle</span>
-                <span className="text-zinc-300">Annual Presidential Review</span>
+                <span>Framework Type</span>
+                <span className="text-zinc-300">U.S. Unilateral Preference</span>
               </div>
               <div className="flex items-center justify-between text-zinc-500">
                 <span>Status</span>
                 <span className="text-amber-400">Subject to Reauthorization</span>
               </div>
             </div>
+            <Link href="/intelligence/trade/agoa" className="inline-flex items-center gap-1 mt-4 text-sm text-blue-400 hover:text-blue-300">
+              AGOA Tracker <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
 
-          {/* AfCFTA Card */}
-          <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6">
+          {/* AfCFTA — Continental Africa */}
+          <div className="bg-zinc-900/50 border border-emerald-500/20 rounded-xl p-6">
             <div className="flex items-center gap-3 mb-4">
               <Building2 className="w-5 h-5 text-emerald-400" />
               <h3 className="text-lg font-semibold text-white">
@@ -309,13 +431,13 @@ export default function TradeIntelligenceHub() {
               </h3>
             </div>
             <p className="text-zinc-400 text-sm mb-4">
-              Continental free trade agreement creating a single market for goods and services across Africa. 
-              Aims to boost intra-African trade and economic integration.
+              Continental free trade agreement creating a single market for goods and services across Africa.
+              Souvera tracks ratification status and intra-African trade flows.
             </p>
             <div className="space-y-2 text-sm">
               <div className="flex items-center justify-between text-zinc-500">
-                <span>Framework Type</span>
-                <span className="text-zinc-300">Continental FTA</span>
+                <span>Region</span>
+                <span className="text-zinc-300">Continental Africa</span>
               </div>
               <div className="flex items-center justify-between text-zinc-500">
                 <span>Coverage</span>
@@ -326,8 +448,81 @@ export default function TradeIntelligenceHub() {
                 <span className="text-emerald-400">Implementation Phase</span>
               </div>
             </div>
+            <Link href="/intelligence/trade/afcfta" className="inline-flex items-center gap-1 mt-4 text-sm text-emerald-400 hover:text-emerald-300">
+              AfCFTA Status Tracker <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          {/* CBTPA — Caribbean */}
+          <div className="bg-zinc-900/50 border border-cyan-500/20 rounded-xl p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <Ship className="w-5 h-5 text-cyan-400" />
+              <h3 className="text-lg font-semibold text-white">
+                Caribbean Basin Trade Partnership Act (CBTPA)
+              </h3>
+            </div>
+            <p className="text-zinc-400 text-sm mb-4">
+              U.S. preferential trade framework for Caribbean Basin Initiative beneficiaries.
+              Souvera tracks bilateral flows, tariff margins, and CARICOM integration metrics.
+            </p>
+            <div className="space-y-2 text-sm">
+              <div className="flex items-center justify-between text-zinc-500">
+                <span>Region</span>
+                <span className="text-zinc-300">Caribbean ↔ United States</span>
+              </div>
+              <div className="flex items-center justify-between text-zinc-500">
+                <span>Coverage</span>
+                <span className="text-zinc-300">20 Caribbean Markets</span>
+              </div>
+              <div className="flex items-center justify-between text-zinc-500">
+                <span>Status</span>
+                <span className="text-cyan-400">Active Preference Program</span>
+              </div>
+            </div>
+            <Link href="/intelligence/trade/cbtpa/flows" className="inline-flex items-center gap-1 mt-4 text-sm text-cyan-400 hover:text-cyan-300">
+              CBTPA Trade Flows <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          {/* AfCETA — Afro-Caribbean */}
+          <div className="bg-gradient-to-br from-violet-600/10 via-fuchsia-600/5 to-teal-600/5 border border-fuchsia-500/30 rounded-xl p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <Sparkles className="w-5 h-5 text-fuchsia-400" />
+              <h3 className="text-lg font-semibold text-white">
+                African-Caribbean Economic &amp; Trade Agreement (AfCETA)
+              </h3>
+            </div>
+            <p className="text-zinc-400 text-sm mb-4">
+              Proposed Atlantic corridor framework connecting AfCFTA and CARICOM markets.
+              Corridor Opportunity Index scores tradable flows across eight shared product categories.
+            </p>
+            <div className="space-y-2 text-sm">
+              <div className="flex items-center justify-between text-zinc-500">
+                <span>Region</span>
+                <span className="text-zinc-300">Africa ↔ Caribbean</span>
+              </div>
+              <div className="flex items-center justify-between text-zinc-500">
+                <span>Coverage</span>
+                <span className="text-zinc-300">74 Markets · 8 Categories</span>
+              </div>
+              <div className="flex items-center justify-between text-zinc-500">
+                <span>Status</span>
+                <span className="text-fuchsia-400">Corridor Intelligence Live</span>
+              </div>
+            </div>
+            <Link href="/intelligence/trade/afceta" className="inline-flex items-center gap-1 mt-4 text-sm font-medium bg-gradient-to-r from-violet-400 via-fuchsia-400 to-teal-400 bg-clip-text text-transparent hover:from-violet-300 hover:via-fuchsia-300 hover:to-teal-300">
+              AfCETA Trade Intelligence <ArrowRight className="w-3.5 h-3.5 text-fuchsia-400" />
+            </Link>
           </div>
         </div>
+      </section>
+
+      {/* Source attribution */}
+      <section className="max-w-[1600px] mx-auto px-6 lg:px-12 pb-12">
+        <LiveCuratedBanner
+          description="Trade intelligence on Souvera combines official source feeds with editorially governed profiles across African and Caribbean markets. Policy status, flow data, and corridor metrics carry source attribution and refresh on a governed schedule."
+          sources={['USTR', 'AfCFTA Secretariat', 'USITC', 'Census Bureau', 'tralac']}
+        />
       </section>
 
       {/* Data Transparency Notice */}
@@ -337,23 +532,25 @@ export default function TradeIntelligenceHub() {
           <div className="grid md:grid-cols-3 gap-6 text-sm">
             <div>
               <p className="text-zinc-500 mb-1">Data Classification</p>
-              <p className="text-zinc-300">Curated Preview Data</p>
+              <p className="text-zinc-300">Source-Attributed Intelligence</p>
             </div>
             <div>
               <p className="text-zinc-500 mb-1">Primary Sources</p>
-              <p className="text-zinc-300">USTR, AfCFTA Secretariat, tralac</p>
+              <p className="text-zinc-300">USTR, AfCFTA Secretariat, USITC, tralac</p>
             </div>
             <div>
               <p className="text-zinc-500 mb-1">Refresh Cadence</p>
-              <p className="text-zinc-300">Manual curation with source attribution</p>
+              <p className="text-zinc-300">Governed curation with source attribution</p>
             </div>
           </div>
           <p className="text-zinc-500 text-xs mt-4">
-            Trade policy status is subject to change. Data is curated from official sources and may not reflect the most recent updates. 
-            Always verify critical eligibility decisions with official sources.
+            Trade policy status is subject to change. Figures are sourced from official institutions and updated on a governed schedule.
+            Verify critical eligibility decisions with primary sources where required.
           </p>
         </div>
       </section>
+
+      <InstitutionalAccessCta />
     </div>
   );
 }

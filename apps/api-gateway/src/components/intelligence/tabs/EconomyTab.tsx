@@ -1,13 +1,22 @@
 'use client';
 
-import { Download } from 'lucide-react';
+import { Download, ChevronDown, ChevronUp } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import Link from 'next/link';
+import { useState } from 'react';
 import { exportCardToPNG } from '@/lib/intelligence/export-png';
 import { countryExportContext } from '@/lib/intelligence/export-branding';
-import { getEconomyTabCopy, type EconomyYearPoint } from '@/lib/intelligence/country-economy-content';
+import { getEconomyTabCopy, buildEconomyOverviewAnalysis, type EconomyYearPoint } from '@/lib/intelligence/country-economy-content';
+import { getLatestCompleteMacroYear } from '@/lib/intelligence/build-economy-years';
 import { economyIndicatorRowsForYears } from '@/lib/intelligence/economy-indicator-rows';
 import type { IntelligenceTabProps } from '@/types/country-intelligence';
+import { DataPendingState } from '@/components/intelligence/DataPendingState';
+import { getStructuralDataGap } from '@/lib/market-coverage/structural-data-gaps';
+import { CollapsibleAnalysis } from '@/components/intelligence/CollapsibleAnalysis';
+import { HighlightedText } from '@/components/intelligence/HighlightedText';
+import { EstimateBadge } from '@/components/intelligence/EstimateBadge';
+import { metricKeyIsEstimate } from '@/lib/intelligence/metric-estimate-flags';
+import type { MetricEstimateFlags } from '@/types/country-intelligence';
 
 type TimeSeriesYear = EconomyYearPoint;
 
@@ -19,11 +28,16 @@ export function EconomyTab({ data, userEntitlements }: IntelligenceTabProps) {
   const canExport = hasAccess;
   const iso3 = data.country?.iso3?.toUpperCase() ?? '';
   const iso3Lower = iso3.toLowerCase();
-  const copy = getEconomyTabCopy(iso3);
+  const baseCopy = getEconomyTabCopy(iso3);
+  // Replace the generic "Local/USD" fallback with the country's actual currency pair.
+  // Curated profiles (e.g. ZWE's "ZiG/USD") are kept as-is since they may be more current
+  // than the stored currency_code.
+  const fxCode = data.country?.currencyCode?.trim().toUpperCase();
+  const copy =
+    fxCode && baseCopy.fxPairLabel === 'Local/USD'
+      ? { ...baseCopy, fxPairLabel: fxCode === 'USD' ? 'USD' : `${fxCode}/USD` }
+      : baseCopy;
   const exportCtx = countryExportContext(data.country);
-
-  const handleExport = (elementId: string, fileName: string, cardTitle: string) =>
-    exportCardToPNG({ elementId, fileName, cardTitle, ...exportCtx });
 
   if (!hasAccess) {
     return (
@@ -47,11 +61,16 @@ export function EconomyTab({ data, userEntitlements }: IntelligenceTabProps) {
   }
 
   if (!data.timeSeries || data.timeSeries.years.length === 0) {
+    const gap = getStructuralDataGap(iso3);
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <p className="text-zinc-500">Economic time series data pending for {data.country.name}</p>
-        </div>
+      <div className="flex items-center justify-center min-h-[400px] px-4">
+        <DataPendingState
+          variant={gap ? 'not_reported' : 'pending'}
+          message={
+            gap?.disclaimer ??
+            `Macroeconomic time series for ${data.country.name} is awaiting verified ingestion from World Bank / IMF sources.`
+          }
+        />
       </div>
     );
   }
@@ -60,15 +79,44 @@ export function EconomyTab({ data, userEntitlements }: IntelligenceTabProps) {
   const hasForecast = userEntitlements.includes('forecast_metrics') || userEntitlements.includes('admin_access');
   const forecastData = hasForecast ? forecast : undefined;
 
-  const latestYear = years[years.length - 1];
+  const latestYear = getLatestCompleteMacroYear(years);
   const earliestYear = years[0];
   const gdpChange = latestYear.gdp_current_usd && earliestYear.gdp_current_usd
     ? ((latestYear.gdp_current_usd - earliestYear.gdp_current_usd) / earliestYear.gdp_current_usd) * 100
     : 0;
 
+  const handleExport = (elementId: string, fileName: string, cardTitle: string, curatedAnalysis?: string) =>
+    exportCardToPNG({
+      elementId,
+      fileName,
+      cardTitle,
+      curatedAnalysis,
+      dataAsOf: String(latestYear.year),
+      disclaimer: 'Curated macro estimates. Verify against official sources before investment decisions.',
+      sourceAttribution: copy.dataSources,
+      ...exportCtx,
+    });
+
   return (
     <div className="space-y-8">
-      <EconomyHeroNarrative latestYear={latestYear} gdpChange={gdpChange} copy={copy} />
+      <EconomyHeroNarrative
+        latestYear={latestYear}
+        earliestYear={earliestYear}
+        gdpChange={gdpChange}
+        copy={copy}
+        countryName={data.country.name}
+        iso3={iso3}
+        canExport={canExport}
+        metricEstimates={data.metricEstimates}
+        onExport={(curatedAnalysis) =>
+          handleExport(
+            'economy-overview-card',
+            `${iso3Lower}-economy-overview`,
+            'Economic Overview',
+            curatedAnalysis
+          )
+        }
+      />
 
       <KeyIndicatorsTable
         years={years}
@@ -110,21 +158,6 @@ export function EconomyTab({ data, userEntitlements }: IntelligenceTabProps) {
   );
 }
 
-function ExportButton({ onClick, className = 'text-blue-400 hover:text-blue-300' }: { onClick: () => void; className?: string }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      data-export-exclude
-      className={`text-xs flex items-center gap-1 transition-colors ${className}`}
-      title="Export as PNG (Professional+)"
-    >
-      <Download className="w-3.5 h-3.5" />
-      <span className="hidden sm:inline">PNG</span>
-    </button>
-  );
-}
-
 function AnalysisBullets({ bullets }: { bullets: string[] }) {
   if (!bullets.length) return null;
   return (
@@ -134,7 +167,7 @@ function AnalysisBullets({ bullets }: { bullets: string[] }) {
         {bullets.map((b) => (
           <li key={b} className="flex items-start gap-2">
             <span className="text-blue-400 mt-0.5">•</span>
-            <span>{b}</span>
+            <span><HighlightedText text={b} /></span>
           </li>
         ))}
       </ul>
@@ -142,33 +175,129 @@ function AnalysisBullets({ bullets }: { bullets: string[] }) {
   );
 }
 
+function formatMetricUsd(value?: number): string {
+  if (value == null || !Number.isFinite(value)) return 'N/A';
+  const sign = value < 0 ? '-' : '';
+  const abs = Math.abs(value);
+  if (abs >= 1e12) return `${sign}$${(abs / 1e12).toFixed(2)}T`;
+  if (abs >= 1e9) return `${sign}$${(abs / 1e9).toFixed(1)}B`;
+  if (abs >= 1e6) return `${sign}$${(abs / 1e6).toFixed(1)}M`;
+  if (abs >= 1e3) return `${sign}$${(abs / 1e3).toFixed(1)}K`;
+  return `${sign}$${abs.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+}
+
 function EconomyHeroNarrative({
   latestYear,
+  earliestYear,
   gdpChange,
   copy,
+  countryName,
+  iso3,
+  canExport,
+  metricEstimates,
+  onExport,
 }: {
   latestYear: TimeSeriesYear;
+  earliestYear: TimeSeriesYear;
   gdpChange: number;
   copy: ReturnType<typeof getEconomyTabCopy>;
+  countryName: string;
+  iso3: string;
+  canExport: boolean;
+  metricEstimates?: MetricEstimateFlags;
+  onExport: (curatedAnalysis: string) => void;
 }) {
-  const growth = latestYear.gdp_growth_pct != null ? latestYear.gdp_growth_pct.toFixed(1) : 'N/A';
-  const fdi = latestYear.fdi_net_inflows_usd != null
-    ? latestYear.fdi_net_inflows_usd >= 1e9
-      ? `$${(latestYear.fdi_net_inflows_usd / 1e9).toFixed(1)}B`
-      : `$${(latestYear.fdi_net_inflows_usd / 1e6).toFixed(0)}M`
-    : 'N/A';
-  const inflation = latestYear.inflation_cpi_pct != null ? latestYear.inflation_cpi_pct.toFixed(1) : 'N/A';
-  const gdpChangeStr = Number.isFinite(gdpChange) ? gdpChange.toFixed(1) : 'N/A';
+  const [isExporting, setIsExporting] = useState(false);
+
+  const fullAnalysis = buildEconomyOverviewAnalysis({
+    countryName,
+    iso3,
+    latestYear,
+    earliestYear,
+    gdpChange,
+    copy,
+  });
+
+  const gdpB = formatMetricUsd(latestYear.gdp_current_usd);
+  const growth = latestYear.gdp_growth_pct != null ? `${latestYear.gdp_growth_pct.toFixed(1)}%` : 'N/A';
+  const fdi = formatMetricUsd(latestYear.fdi_net_inflows_usd);
+  const inflation = latestYear.inflation_cpi_pct != null ? `${latestYear.inflation_cpi_pct.toFixed(1)}%` : 'N/A';
+  const gdpChangeStr = Number.isFinite(gdpChange) ? `${gdpChange >= 0 ? '+' : ''}${gdpChange.toFixed(1)}%` : 'N/A';
+
+  const handleExport = async () => {
+    if (isExporting) return;
+    setIsExporting(true);
+    try {
+      await onExport(fullAnalysis);
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   return (
-    <div className="bg-blue-950/10 border border-blue-900/30 rounded-xl p-6">
+    <div id="economy-overview-card" className="exportable-card group relative bg-blue-950/10 border border-blue-900/30 rounded-xl p-6">
+      {canExport && (
+        <button
+          type="button"
+          onClick={handleExport}
+          disabled={isExporting}
+          className="export-btn absolute top-2 right-2 p-1.5 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+          title="Download Economic Overview as PNG"
+          aria-label="Download Economic Overview as PNG"
+          data-export-exclude
+        >
+          <Download className="w-4 h-4 text-blue-300" />
+        </button>
+      )}
       <h3 className="text-xs font-bold text-blue-400 uppercase tracking-widest mb-3">Economic Overview</h3>
-      <p className="text-zinc-300 leading-relaxed text-sm">
-        GDP expanded <span className="text-blue-400 font-semibold">{growth}%</span> in {latestYear.year}.
-        Five-year GDP change: <span className="text-blue-400">{gdpChangeStr}%</span>.
-        FDI inflows: <span className="text-emerald-400 font-semibold">{fdi}</span>.
-        Inflation: <span className="text-amber-400">{inflation}%</span>, {copy.heroInflationNote}.
-      </p>
+
+      {/* Export-visible metric summary (inline styles survive PNG rasterization) */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+        <div className="p-3 rounded-lg border border-blue-900/40" style={{ backgroundColor: '#1e3a5f33' }}>
+          <p className="text-[10px] uppercase tracking-wider mb-1 flex items-center gap-1 flex-wrap" style={{ color: '#60a5fa' }}>
+            Nominal GDP
+            {metricKeyIsEstimate('gdp_current_usd', metricEstimates) && <EstimateBadge />}
+          </p>
+          <p className="text-lg font-bold" style={{ color: '#6ee7b7' }}>{gdpB}</p>
+          <p className="text-[10px]" style={{ color: '#71717a' }}>{latestYear.year}</p>
+        </div>
+        <div className="p-3 rounded-lg border border-blue-900/40" style={{ backgroundColor: '#1e3a5f33' }}>
+          <p className="text-[10px] uppercase tracking-wider mb-1 flex items-center gap-1 flex-wrap" style={{ color: '#60a5fa' }}>
+            GDP Growth
+            {metricKeyIsEstimate('gdp_growth_annual_pct', metricEstimates) && <EstimateBadge />}
+          </p>
+          <p className="text-lg font-bold" style={{ color: '#93c5fd' }}>{growth}</p>
+          <p className="text-[10px]" style={{ color: '#71717a' }}>YoY {latestYear.year}</p>
+        </div>
+        <div className="p-3 rounded-lg border border-blue-900/40" style={{ backgroundColor: '#1e3a5f33' }}>
+          <p className="text-[10px] uppercase tracking-wider mb-1 flex items-center gap-1 flex-wrap" style={{ color: '#60a5fa' }}>
+            FDI Inflows
+            {metricKeyIsEstimate('fdi_net_inflows_current_usd', metricEstimates) && <EstimateBadge />}
+          </p>
+          <p className="text-lg font-bold" style={{ color: '#6ee7b7' }}>{fdi}</p>
+          <p className="text-[10px]" style={{ color: '#71717a' }}>Net inflows</p>
+        </div>
+        <div className="p-3 rounded-lg border border-blue-900/40" style={{ backgroundColor: '#1e3a5f33' }}>
+          <p className="text-[10px] uppercase tracking-wider mb-1 flex items-center gap-1 flex-wrap" style={{ color: '#60a5fa' }}>
+            Inflation
+            {metricKeyIsEstimate('inflation_consumer_prices_annual_pct', metricEstimates) && <EstimateBadge />}
+          </p>
+          <p className="text-lg font-bold" style={{ color: '#fbbf24' }}>{inflation}</p>
+          <p className="text-[10px]" style={{ color: '#71717a' }}>CPI · {gdpChangeStr} 5yr GDP</p>
+        </div>
+      </div>
+
+      {/* Live-only narrative — first paragraph visible; expand for full analysis */}
+      <div data-export-hide-analysis>
+        <CollapsibleAnalysis
+          text={fullAnalysis}
+          title="Souvera Analysis"
+          titleClass="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2"
+          defaultExpanded={false}
+          expandText="Expand full analysis"
+          collapseText="Collapse analysis"
+        />
+      </div>
       <div className="mt-4 flex items-center gap-4 text-xs text-zinc-500">
         <span>Data: {copy.dataSources}</span>
         <span>Updated: {latestYear.year}</span>
@@ -188,14 +317,56 @@ function KeyIndicatorsTable({
   canExport: boolean;
   onExport: () => void;
 }) {
+  const [isExporting, setIsExporting] = useState(false);
+  const [showAllIndicators, setShowAllIndicators] = useState(false);
   const bullets = copy.buildIndicatorBullets(years);
-  const rows = economyIndicatorRowsForYears(years);
+  const rows = economyIndicatorRowsForYears(years, copy.fxPairLabel);
+  const primaryRows = rows.filter((r) => r.primary);
+  const secondaryRows = rows.filter((r) => !r.primary);
+
+  const handleExport = async () => {
+    if (isExporting) return;
+    setIsExporting(true);
+    try {
+      await onExport();
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const renderRow = (row: (typeof rows)[number]) => (
+    <tr key={row.label} className="border-b border-zinc-800/50 hover:bg-zinc-900/30 transition-colors">
+      <td className="py-3 px-4 font-medium">{row.label}</td>
+      {years.map((year) => {
+        const raw = row.getValue(year);
+        const tone = raw != null && row.tone ? row.tone(raw) : 'text-zinc-300';
+        return (
+          <td key={year.year} className={`text-right py-3 px-4 font-bold ${tone}`}>
+            {raw != null ? row.format(raw) : 'N/A'}
+          </td>
+        );
+      })}
+    </tr>
+  );
 
   return (
-    <div id="economy-key-indicators">
+    <div id="economy-key-indicators" className="exportable-card group relative">
+      {/* Hover-activated PNG download button */}
+      {canExport && (
+        <button
+          onClick={handleExport}
+          disabled={isExporting}
+          className="export-btn absolute top-2 right-2 p-1.5 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+          data-export-exclude
+          title="Download as PNG"
+          aria-label="Download Key Economic Indicators as PNG"
+        >
+          <Download className={`w-4 h-4 text-zinc-300 ${isExporting ? 'animate-pulse' : ''}`} />
+        </button>
+      )}
+
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-lg font-bold text-zinc-400">Key Economic Indicators</h3>
-        {canExport && <ExportButton onClick={onExport} />}
       </div>
       <div className="overflow-x-auto bg-zinc-900/50 border border-zinc-800 rounded-xl p-4">
         <table className="w-full text-sm">
@@ -208,22 +379,31 @@ function KeyIndicatorsTable({
             </tr>
           </thead>
           <tbody className="text-zinc-300">
-            {rows.map((row) => (
-              <tr key={row.label} className="border-b border-zinc-800/50 hover:bg-zinc-900/30 transition-colors">
-                <td className="py-3 px-4 font-medium">{row.label}</td>
-                {years.map((year) => {
-                  const raw = row.getValue(year);
-                  const tone = raw != null && row.tone ? row.tone(raw) : 'text-zinc-300';
-                  return (
-                    <td key={year.year} className={`text-right py-3 px-4 font-bold ${tone}`}>
-                      {raw != null ? row.format(raw) : 'N/A'}
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
+            {(showAllIndicators || primaryRows.length === 0 ? rows : primaryRows).map(renderRow)}
           </tbody>
         </table>
+
+        {secondaryRows.length > 0 && primaryRows.length > 0 && (
+          <button
+            type="button"
+            onClick={() => setShowAllIndicators((v) => !v)}
+            data-export-exclude
+            className="mt-3 inline-flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 transition-colors font-medium"
+          >
+            {showAllIndicators ? (
+              <>
+                Show headline indicators only
+                <ChevronUp className="w-3.5 h-3.5" />
+              </>
+            ) : (
+              <>
+                Show all indicators ({secondaryRows.length} more)
+                <ChevronDown className="w-3.5 h-3.5" />
+              </>
+            )}
+          </button>
+        )}
+
         <AnalysisBullets bullets={bullets} />
       </div>
     </div>
@@ -241,6 +421,7 @@ function GDPSection({
   canExport: boolean;
   onExport: () => void;
 }) {
+  const [isExporting, setIsExporting] = useState(false);
   const chartData = years.map((year) => ({
     year: year.year,
     gdp: year.gdp_current_usd ? year.gdp_current_usd / 1e9 : null,
@@ -262,11 +443,34 @@ function GDPSection({
     `${pctChg >= 0 ? '+' : ''}${pctChg.toFixed(0)}% cumulative change over ${years.length} years`,
   ];
 
+  const handleExport = async () => {
+    if (isExporting) return;
+    setIsExporting(true);
+    try {
+      await onExport();
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
-    <div id="economy-gdp-card" className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6">
+    <div id="economy-gdp-card" className="exportable-card group relative bg-zinc-900/50 border border-zinc-800 rounded-xl p-6">
+      {/* Hover-activated PNG download button */}
+      {canExport && (
+        <button
+          onClick={handleExport}
+          disabled={isExporting}
+          className="export-btn absolute top-2 right-2 p-1.5 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+          data-export-exclude
+          title="Download GDP chart as PNG"
+          aria-label="Download GDP chart as PNG"
+        >
+          <Download className={`w-4 h-4 text-emerald-300 ${isExporting ? 'animate-pulse' : ''}`} />
+        </button>
+      )}
+
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-bold text-white">Gross Domestic Product</h3>
-        {canExport && <ExportButton onClick={onExport} className="text-emerald-400 hover:text-emerald-300" />}
       </div>
 
       <div className="h-[300px] mb-6">
@@ -307,6 +511,7 @@ function GrowthSection({
   canExport: boolean;
   onExport: () => void;
 }) {
+  const [isExporting, setIsExporting] = useState(false);
   const historicalData = years.map((year) => ({ year: year.year, growth: year.gdp_growth_pct, isForecast: false }));
   const forecastData = forecast?.map((f) => ({ year: f.year, growth: f.gdp_growth_pct, isForecast: true })) ?? [];
   const chartData = [...historicalData, ...forecastData];
@@ -328,11 +533,34 @@ function GrowthSection({
       : []),
   ];
 
+  const handleExport = async () => {
+    if (isExporting) return;
+    setIsExporting(true);
+    try {
+      await onExport();
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
-    <div id="economy-growth-card" className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6">
+    <div id="economy-growth-card" className="exportable-card group relative bg-zinc-900/50 border border-zinc-800 rounded-xl p-6">
+      {/* Hover-activated PNG download button */}
+      {canExport && (
+        <button
+          onClick={handleExport}
+          disabled={isExporting}
+          className="export-btn absolute top-2 right-2 p-1.5 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+          data-export-exclude
+          title="Download Growth chart as PNG"
+          aria-label="Download Growth chart as PNG"
+        >
+          <Download className={`w-4 h-4 text-emerald-300 ${isExporting ? 'animate-pulse' : ''}`} />
+        </button>
+      )}
+
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-bold text-white">Economic Growth</h3>
-        {canExport && <ExportButton onClick={onExport} className="text-emerald-400 hover:text-emerald-300" />}
       </div>
 
       <div className="h-[300px] mb-6">
@@ -387,6 +615,7 @@ function FXRateSection({
   canExport: boolean;
   onExport: () => void;
 }) {
+  const [isExporting, setIsExporting] = useState(false);
   const latestFx = years[years.length - 1]?.fx_to_usd;
   const earliestFx = years[0]?.fx_to_usd;
   const latestYear = years[years.length - 1].year;
@@ -403,11 +632,34 @@ function FXRateSection({
       ]
     : [];
 
+  const handleExport = async () => {
+    if (isExporting) return;
+    setIsExporting(true);
+    try {
+      await onExport();
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
-    <div id="economy-fx-card" className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6">
+    <div id="economy-fx-card" className="exportable-card group relative bg-zinc-900/50 border border-zinc-800 rounded-xl p-6">
+      {/* Hover-activated PNG download button */}
+      {canExport && (
+        <button
+          onClick={handleExport}
+          disabled={isExporting}
+          className="export-btn absolute top-2 right-2 p-1.5 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+          data-export-exclude
+          title="Download FX Rate chart as PNG"
+          aria-label="Download FX Rate chart as PNG"
+        >
+          <Download className={`w-4 h-4 text-cyan-300 ${isExporting ? 'animate-pulse' : ''}`} />
+        </button>
+      )}
+
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-bold text-white">Foreign Exchange Rate</h3>
-        {canExport && <ExportButton onClick={onExport} className="text-cyan-400 hover:text-cyan-300" />}
       </div>
 
       {latestFx != null && (

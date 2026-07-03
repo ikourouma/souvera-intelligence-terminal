@@ -66,7 +66,9 @@ export const EXECUTIVE_METRICS: MetricEntitlement[] = [
     requiredEntitlement: 'fx_metrics',
     minTier: 'professional',
     formatType: 'fx_rate',
-    unit: 'NGN/USD',
+    // Neutral fallback only — the panel overrides this with the country's own currency
+    // (e.g. MAD/USD, DZD/USD). Never hardcode a single market's pair here.
+    unit: 'Local/USD',
   },
 ];
 

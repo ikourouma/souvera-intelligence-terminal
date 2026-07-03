@@ -2,17 +2,19 @@
 // SOUVERA INTELLIGENCE TERMINAL
 // Supply-Demand Matrix
 // Owner: Afronovation, Inc.
+// Phase 4C: Supply-Demand Matrix
 // ===========================================
 
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { BarChart3, ArrowLeft, FileText, Lock } from 'lucide-react';
+import { BarChart3, ArrowLeft, Info, ArrowRightLeft } from 'lucide-react';
 import { checkServerEntitlement } from '@/lib/access/server-entitlements';
 import { UpgradePrompt } from '@/components/access';
+import { SupplyDemandMatrixClient } from './SupplyDemandMatrixClient';
 
 export const metadata: Metadata = {
   title: 'Supply-Demand Matrix | Trade Intelligence | Souvera',
-  description: 'Explore supply capacity and demand signals across 74 markets and 8 key sectors.',
+  description: 'Explore 74-market × 8-sector supply capacity and demand signals — quantified opportunity scoring for bidirectional US-Africa/Caribbean trade.',
 };
 
 export default async function SupplyDemandPage() {
@@ -50,7 +52,7 @@ export default async function SupplyDemandPage() {
               <BarChart3 className="w-6 h-6 text-purple-400" />
             </div>
             <span className="px-3 py-1 bg-purple-500/10 border border-purple-500/20 rounded-full text-xs font-medium text-purple-400">
-              Market Signals
+              Investor Tier
             </span>
           </div>
           
@@ -58,107 +60,58 @@ export default async function SupplyDemandPage() {
             Supply-Demand Matrix
           </h1>
           <p className="text-lg text-zinc-400 max-w-3xl">
-            Macro sector signals across 74 markets and 8 key sectors — the anchor layer for trade opportunity analysis.
+            Quantified opportunity scoring across <span className="text-white font-medium">74 markets × 8 sectors</span> — bidirectional trade analysis between Africa/Caribbean and the United States.
           </p>
 
-          {/* Data Attribution */}
-          <div className="mt-6 flex items-center gap-4 text-sm">
-            <span className="px-3 py-1 bg-purple-500/10 border border-purple-500/20 rounded-full text-purple-400">
-              Curated Preview Data
-            </span>
-            <span className="text-zinc-500">
-              Aggregated from multiple sources
-            </span>
+          {/* How to Read the Matrix */}
+          <div className="mt-6 p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg">
+            <div className="flex items-start gap-3">
+              <Info className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
+              <div className="text-sm">
+                <p className="text-zinc-300 mb-3">
+                  <span className="font-medium text-white">How to Read This Matrix:</span> This matrix identifies <strong className="text-emerald-400">export opportunities</strong> from Africa/Caribbean <strong className="text-blue-400">to the United States</strong>.
+                </p>
+                <div className="grid md:grid-cols-3 gap-4 mb-3">
+                  <div className="p-2 bg-emerald-500/5 border border-emerald-500/20 rounded">
+                    <p className="text-emerald-400 font-medium text-xs mb-1">Supply Score</p>
+                    <p className="text-zinc-400 text-xs">Country's <strong>production capacity</strong> and export readiness in this sector</p>
+                  </div>
+                  <div className="p-2 bg-blue-500/5 border border-blue-500/20 rounded">
+                    <p className="text-blue-400 font-medium text-xs mb-1">Demand Score</p>
+                    <p className="text-zinc-400 text-xs"><strong>US market</strong> import demand in this sector (not the country's own demand)</p>
+                  </div>
+                  <div className="p-2 bg-purple-500/5 border border-purple-500/20 rounded">
+                    <p className="text-purple-400 font-medium text-xs mb-1">Opportunity Score</p>
+                    <p className="text-zinc-400 text-xs">Where country supply can <strong>meet US demand</strong> with trade preference advantages</p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-4 text-xs text-zinc-500">
+                  <span><span className="text-emerald-400">Tier 1 (80+)</span>: High-conviction</span>
+                  <span><span className="text-blue-400">Tier 2 (60-79)</span>: Strong opportunity</span>
+                  <span><span className="text-yellow-400">Tier 3 (40-59)</span>: Emerging</span>
+                  <span><span className="text-zinc-400">Tier 4 (&lt;40)</span>: Early-stage</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bidirectional Trade Note */}
+          <div className="mt-4 p-4 bg-cyan-500/5 border border-cyan-500/20 rounded-lg">
+            <div className="flex items-start gap-3">
+              <ArrowRightLeft className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5" />
+              <div className="text-sm">
+                <p className="text-zinc-300">
+                  <span className="font-medium text-white">Bidirectional Trade View:</span> Click any cell to access <strong className="text-cyan-400">bidirectional analysis</strong>. Toggle between <span className="text-emerald-400">Region → US</span> (export capacity) and <span className="text-blue-400">US → Region</span> (import needs). Africa cells use AGOA reciprocity framing; Caribbean cells use CBI/CBTPA — petroleum excluded from preferential metrics (HTS Ch. 27).
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Content */}
-      <section className="max-w-[1600px] mx-auto px-6 lg:px-12 py-12">
-        {/* Access Notice */}
-        <div className="mb-8 p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-lg">
-          <div className="flex items-center gap-3">
-            <Lock className="w-5 h-5 text-indigo-400" />
-            <div>
-              <p className="text-white font-medium">Professional Access Required</p>
-              <p className="text-zinc-400 text-sm">
-                The supply-demand matrix is available for Professional and higher plans.
-              </p>
-            </div>
-            <Link
-              href="/access"
-              className="ml-auto px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-sm text-white font-medium transition-colors"
-            >
-              Upgrade
-            </Link>
-          </div>
-        </div>
-
-        {/* Coming Soon Content */}
-        <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-12 text-center">
-          <BarChart3 className="w-16 h-16 text-purple-500/50 mx-auto mb-6" />
-          <h2 className="text-2xl font-bold text-white mb-4">Matrix Generation in Progress</h2>
-          <p className="text-zinc-400 max-w-lg mx-auto mb-6">
-            The 74-market × 7-sector supply-demand matrix is being generated from curated data sources.
-            This view will show supply capacity scores, demand signals, and opportunity indicators.
-          </p>
-          <div className="flex items-center justify-center gap-2 text-zinc-500 text-sm">
-            <FileText className="w-4 h-4" />
-            <span>Expected: Phase 4B Sprint 4</span>
-          </div>
-        </div>
-
-        {/* Matrix Preview */}
-        <div className="mt-8 bg-zinc-900/30 border border-zinc-800 rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-white mb-4">Matrix Dimensions</h3>
-          <div className="grid md:grid-cols-2 gap-6 text-sm">
-            <div>
-              <p className="text-zinc-500 mb-2">Markets (74)</p>
-              <ul className="space-y-1 text-zinc-300">
-                <li>• 54 African countries</li>
-                <li>• 20 Caribbean markets</li>
-              </ul>
-            </div>
-            <div>
-              <p className="text-zinc-500 mb-2">Sectors (8)</p>
-              <ul className="space-y-1 text-zinc-300">
-                <li>• Manufacturing & Textiles</li>
-                <li>• Agriculture & Food Processing</li>
-                <li>• Energy & Power</li>
-                <li>• Mining & Critical Minerals</li>
-                <li>• Digital Infrastructure</li>
-                <li>• Fintech & Digital Finance</li>
-                <li>• Logistics & Trade</li>
-                <li>• Tourism & Hospitality</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        {/* Signal Types */}
-        <div className="mt-6 bg-zinc-900/30 border border-zinc-800 rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-white mb-4">Signal Types</h3>
-          <div className="grid md:grid-cols-3 gap-6 text-sm">
-            <div className="p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-lg">
-              <p className="text-emerald-400 font-medium mb-1">Supply Score</p>
-              <p className="text-zinc-400 text-xs">
-                Production capacity and export readiness based on African market data.
-              </p>
-            </div>
-            <div className="p-4 bg-blue-500/5 border border-blue-500/20 rounded-lg">
-              <p className="text-blue-400 font-medium mb-1">Demand Score</p>
-              <p className="text-zinc-400 text-xs">
-                U.S. and global import demand signals based on trade flow data.
-              </p>
-            </div>
-            <div className="p-4 bg-purple-500/5 border border-purple-500/20 rounded-lg">
-              <p className="text-purple-400 font-medium mb-1">Opportunity Score</p>
-              <p className="text-zinc-400 text-xs">
-                Derived signal combining supply capacity and demand potential.
-              </p>
-            </div>
-          </div>
-        </div>
+      <section className="max-w-[1600px] mx-auto px-6 lg:px-12 py-8">
+        <SupplyDemandMatrixClient />
       </section>
     </div>
   );

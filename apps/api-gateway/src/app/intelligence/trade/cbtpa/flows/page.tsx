@@ -5,7 +5,7 @@ import CBTpaTradeIntelligence from './CBTpaTradeIntelligence';
 
 export const metadata: Metadata = {
   title: 'CBTPA Import-Export Intelligence | Souvera',
-  description: 'US-Caribbean bilateral trade flows under the Caribbean Basin Trade Partnership Act. Track imports, exports, preference margins, and intra-CARICOM trade across 20 Caribbean markets.',
+  description: 'US-Caribbean bilateral trade flows under the Caribbean Basin Trade Partnership Act. Track imports, exports, rules-of-origin eligibility, and intra-CARICOM trade across 20 Caribbean markets.',
   openGraph: {
     title: 'CBTPA Import-Export Intelligence | Souvera',
     description: 'US-Caribbean bilateral trade flows under CBTPA. Preference margins, CARICOM integration, and legislative urgency insights.',

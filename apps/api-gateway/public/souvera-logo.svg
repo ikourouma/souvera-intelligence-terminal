@@ -1,0 +1,7 @@
+<svg width="180" height="40" viewBox="0 0 180 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- SOUVERA text -->
+  <text x="0" y="28" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="700" fill="#18181b" letter-spacing="0.5">SOUVERA</text>
+  
+  <!-- Green dot -->
+  <circle cx="172" cy="10" r="6" fill="#10b981"/>
+</svg>

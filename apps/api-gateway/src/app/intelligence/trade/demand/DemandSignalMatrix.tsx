@@ -8,8 +8,13 @@ import {
   X, Filter, AlertTriangle, Building2, Users, Search, Info,
 } from 'lucide-react';
 import { exportElementToPNG } from '@/lib/intelligence/export-png';
-import { iso3ToIso2 } from '@/lib/intelligence/export-branding';
+import { iso3ToIso2, flagUrlFromIso3, formatTradeCountryLabel, tradeCountryMatchesSearch } from '@/lib/intelligence/export-branding';
+import { formatUsdCompact } from '@/lib/intelligence/format-usd';
+import { buildCuratedCardAnalysisForExport } from '@/lib/intelligence/generate-card-analysis';
 import { HighlightedText } from '@/components/intelligence/HighlightedText';
+import { CollapsibleAnalysis } from '@/components/intelligence/CollapsibleAnalysis';
+import { Top10Card } from '@/components/intelligence/Top10Card';
+import { ProductDemandDrawer, ProductDemandRow } from '@/components/intelligence/ProductDemandDrawer';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -48,6 +53,14 @@ interface DemandResponse {
       us_export_potential_usd: number;
       country_count: number;
     }>;
+    top_products?: Array<{
+      group: string;
+      label: string;
+      usExports: number;
+      potential: number;
+      gap: number;
+      markets: number;
+    }>;
     data_vintage: string;
   };
   attribution: { sources: string[]; note: string };
@@ -56,8 +69,7 @@ interface DemandResponse {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function usdB(v: number): string {
-  if (v >= 1_000_000_000) return `$${(v / 1e9).toFixed(1)}B`;
-  return `$${(v / 1e6).toFixed(0)}M`;
+  return formatUsdCompact(v);
 }
 function pct(v: number | null | undefined): string {
   return v != null ? `${v.toFixed(1)}%` : '—';
@@ -138,8 +150,8 @@ function generateSouveraAnalysis(row: DemandRow): string {
   const potential = usdB(row.us_export_potential_usd ?? 0);
 
   const gapText = gap > 0
-    ? `The US currently captures ${pct(share)} of ${row.country_name}'s ${row.category_label.toLowerCase()} imports (${usShare}/yr). Reaching the benchmark share of ${pct(benchmark)} would unlock an additional ${usdB(gap)}/yr in US export revenue.`
-    : `The US already exceeds the benchmark share in ${row.country_name} for ${row.category_label.toLowerCase()} — a strong competitive position to defend.`;
+    ? `The US currently captures ${pct(share)} of ${formatTradeCountryLabel(row.iso3, row.country_name)}'s ${row.category_label.toLowerCase()} imports (${usShare}/yr). Reaching the benchmark share of ${pct(benchmark)} would unlock an additional ${usdB(gap)}/yr in US export revenue.`
+    : `The US already exceeds the benchmark share in ${formatTradeCountryLabel(row.iso3, row.country_name)} for ${row.category_label.toLowerCase()} — a strong competitive position to defend.`;
 
   const competitorText = topSupplier && !isUsTopSupplier
     ? ` ${topSupplier.country} currently leads with ${pct(topSupplier.sharePct)} market share — US exporters should target this gap through trade financing and relationship-building programs.`
@@ -199,9 +211,16 @@ function ExportableSection({
         cardTitle: `${country.name} — ${category ?? title}`,
         countryName: country.name,
         iso2: iso3ToIso2(country.iso3),
+        flagUrl: flagUrlFromIso3(country.iso3),
         sourceAttribution: sourceNotes,
         dataAsOf: year.toString(),
         disclaimer: 'Curated estimates. For research and policy analysis purposes only.',
+        curatedAnalysis: buildCuratedCardAnalysisForExport({
+          cardType: 'demand_matrix',
+          countryName: country.name,
+          iso3: country.iso3,
+          data: { Category: category ?? title, Year: year },
+        }),
       });
     } finally {
       onExportEnd();
@@ -402,9 +421,11 @@ function CountryDemandDrawer({ rows, country, fromCategory, onClose }: {
                 <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
                 <p className="text-indigo-300 text-[10px] font-semibold uppercase tracking-wide">Souvera Analysis</p>
               </div>
-              <p className="text-zinc-300 text-xs leading-relaxed">
-                <HighlightedText text={`${country.name} presents a combined US export opportunity of ${usdB(totalPotential)}/yr across ${rows.length} product ${rows.length === 1 ? 'category' : 'categories'}. Current US penetration of ${pct(overallUsShare)} of total tracked imports (${usdB(totalFromUs)}/yr) leaves a meaningful gap.${topCompetitor ? ` ${topCompetitor[1].name} leads as the primary competitor with ${usdB(topCompetitor[1].total)}/yr in exports to this market.` : ''} AGOA reauthorization and post-AGOA bilateral trade frameworks are the most effective levers to close this gap and sustain US competitiveness.`} />
-              </p>
+              <CollapsibleAnalysis
+                text={`${country.name} presents a combined US export opportunity of ${usdB(totalPotential)}/yr across ${rows.length} product ${rows.length === 1 ? 'category' : 'categories'}. Current US penetration of ${pct(overallUsShare)} of total tracked imports (${usdB(totalFromUs)}/yr) leaves a meaningful gap.${topCompetitor ? ` ${topCompetitor[1].name} leads as the primary competitor with ${usdB(topCompetitor[1].total)}/yr in exports to this market.` : ''}\n\nAGOA reauthorization and post-AGOA bilateral trade frameworks are the most effective levers to close this gap and sustain US competitiveness. Strategic positioning of US exports in these categories would leverage existing trade infrastructure and market relationships.`}
+                titleClass="hidden"
+                className="text-zinc-300 text-xs"
+              />
             </div>
           </ExportableSection>
 
@@ -566,11 +587,22 @@ function CategoryCard({ group, rows, onCountryClick }: {
         sourceAttribution: 'ITC Trade Data Monitor · UN Comtrade · BEA · USDA GATS',
         dataAsOf: rows[0]?.year?.toString() ?? '2023',
         disclaimer: 'Curated estimates. For research and policy analysis purposes only.',
+        curatedAnalysis: buildCuratedCardAnalysisForExport({
+          cardType: 'demand_matrix',
+          countryName: meta?.label ?? group,
+          iso3: 'AFR',
+          data: {
+            Category: meta?.label ?? group,
+            'Total US Imports': `$${Math.round(totalImports / 1e6)}M`,
+            'Export Potential': `$${Math.round(totalPotential / 1e6)}M`,
+            'Demand Gap': `$${Math.round(totalGap / 1e6)}M`,
+          },
+        }),
       });
     } finally {
       setExporting(false);
     }
-  }, [exporting, group, meta, rows]);
+  }, [exporting, group, meta, rows, totalImports, totalPotential, totalGap]);
 
   return (
     <div
@@ -657,14 +689,16 @@ function CategoryCard({ group, rows, onCountryClick }: {
                     key={r.id}
                     onClick={() => onCountryClick({ iso3: r.iso3, name: r.country_name }, group)}
                     className="border-b border-zinc-800/60 hover:bg-zinc-800/50 cursor-pointer transition-colors group"
-                    title={`Click for ${r.country_name} full demand profile`}
+                    title={`Click for ${formatTradeCountryLabel(r.iso3, r.country_name)} full demand profile`}
                   >
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <Users className="w-3 h-3 text-zinc-600 group-hover:text-blue-400 transition-colors shrink-0" />
                         <div>
-                          <p className="text-white font-medium text-xs group-hover:text-blue-300 transition-colors">{r.country_name}</p>
-                          <p className="text-zinc-500 text-[10px]">{r.iso3} · {r.sub_region || r.region}</p>
+                          <p className="text-white font-medium text-xs group-hover:text-blue-300 transition-colors">{formatTradeCountryLabel(r.iso3, r.country_name)}</p>
+                          {(r.sub_region || r.region) ? (
+                            <p className="text-zinc-500 text-[10px]">{r.sub_region || r.region}</p>
+                          ) : null}
                         </div>
                       </div>
                     </td>
@@ -748,10 +782,12 @@ export function DemandSignalMatrix() {
   const [regionFilter, setRegionFilter] = useState('');
   const [countrySearch, setCountrySearch] = useState('');
   const [selectedCountry, setSelectedCountry] = useState<{ iso3: string; name: string; fromCategory?: string } | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
 
   useEffect(() => {
     setLoading(true);
     const params = new URLSearchParams();
+    params.set('region', 'Africa'); // Filter to African markets only
     if (groupFilter) params.set('group', groupFilter);
     fetch(`/api/v1/trade/demand?${params}`, { credentials: 'include' })
       .then((r) => r.json())
@@ -762,10 +798,9 @@ export function DemandSignalMatrix() {
   const byGroup = useMemo(() => {
     if (!data?.rows) return {};
     const grouped: Record<string, DemandRow[]> = {};
-    const searchLower = countrySearch.toLowerCase().trim();
     for (const r of data.rows) {
       if (regionFilter && r.region !== regionFilter && r.sub_region !== regionFilter) continue;
-      if (searchLower && !r.country_name.toLowerCase().includes(searchLower) && !r.iso3.toLowerCase().includes(searchLower)) continue;
+      if (!tradeCountryMatchesSearch(r.iso3, r.country_name, countrySearch)) continue;
       if (!grouped[r.category_group]) grouped[r.category_group] = [];
       grouped[r.category_group].push(r);
     }
@@ -793,8 +828,30 @@ export function DemandSignalMatrix() {
     return [...s].sort();
   }, [data]);
 
+  // Get rows for selected product category
+  const productRows = useMemo(() => {
+    if (!selectedProduct || !data?.rows) return [];
+    return data.rows.filter((r) => r.category_group === selectedProduct);
+  }, [selectedProduct, data]);
+
   return (
     <div className="min-h-screen bg-zinc-950">
+      {/* Product Demand Drawer */}
+      {selectedProduct && productRows.length > 0 && CATEGORY_META[selectedProduct] && (
+        <ProductDemandDrawer
+          categoryGroup={selectedProduct}
+          categoryMeta={CATEGORY_META[selectedProduct]}
+          rows={productRows as ProductDemandRow[]}
+          region="Africa"
+          onClose={() => setSelectedProduct(null)}
+          onCountryClick={(country) => {
+            setSelectedProduct(null);
+            setSelectedCountry(country);
+          }}
+          colorScheme="blue"
+        />
+      )}
+
       {selectedCountry && countryRows.length > 0 && (
         <CountryDemandDrawer
           rows={countryRows}
@@ -821,7 +878,7 @@ export function DemandSignalMatrix() {
           </div>
           <h1 className="text-3xl font-bold text-white mb-2">African Import Demand Intelligence</h1>
           <p className="text-zinc-300 max-w-3xl text-base leading-relaxed">
-            US export opportunity sizing by product category across African and Caribbean markets.
+            US export opportunity sizing by product category across all 54 African markets.
             Each row shows <span className="text-white font-medium">current US market share vs. benchmark potential</span>.
             Click any country row to open a full demand profile with Souvera analysis.
           </p>
@@ -870,6 +927,28 @@ export function DemandSignalMatrix() {
             </p>
           </div>
         </div>
+
+        {/* Top 10 Products by Export Potential */}
+        {data?.summary?.top_products && data.summary.top_products.length > 0 && (
+          <Top10Card
+            title="Top 10 Demanded Product Categories"
+            items={data.summary.top_products.map((p) => ({
+              id: p.group,
+              label: p.label || CATEGORY_META[p.group]?.label || p.group,
+              sublabel: `${p.markets} markets`,
+              value: p.potential,
+              secondaryValue: p.potential > 0 ? ((p.potential - p.gap) / p.potential) * 100 : 0,
+              secondaryLabel: 'US share',
+            }))}
+            onItemClick={(item) => setSelectedProduct(item.id)}
+            colorScheme="blue"
+            exportFileName={`souvera-african-demand-top-products-${new Date().toISOString().slice(0, 10)}`}
+            exportTitle="Top 10 African Import Demand Categories"
+            sourceAttribution="ITC Trade Data Monitor · UN Comtrade · BEA"
+            dataAsOf="2023"
+            columns={5}
+          />
+        )}
 
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-3">

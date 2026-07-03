@@ -28,9 +28,13 @@ const FRAMEWORK_EMOJI: Record<string, string> = {
 };
 
 function mapVaultRawToAgoaDbStatus(raw: string, publishable: boolean): AgoaDbStatus {
-  if (raw === 'under_review' || raw === 'needs_review') return 'under_review';
+  // Normalize human-readable labels (e.g. "Not applicable", "Not Applicable") to the enum
+  // form so geographically non-AGOA markets are classified correctly regardless of casing.
+  const normalized = raw.toLowerCase().trim().replace(/\s+/g, '_');
+  if (normalized === 'not_applicable' || normalized === 'n/a') return 'not_applicable';
+  if (normalized === 'under_review' || normalized === 'needs_review') return 'under_review';
   if (!publishable) return 'under_review';
-  switch (raw) {
+  switch (normalized) {
     case 'eligible':
     case 'active':
     case 'member':
@@ -89,6 +93,47 @@ export function policyRecordsToMarketAccessFrameworks(
     .map(policyRecordToMarketAccessFramework);
 }
 
+function parsePolicyEffectiveYear(value: string | null | undefined): number | undefined {
+  if (!value) return undefined;
+  const match = String(value).trim().match(/^(\d{4})/);
+  return match ? parseInt(match[1], 10) : undefined;
+}
+
+function parsePolicyEffectiveIsoDate(value: string | null | undefined): string | undefined {
+  if (!value) return undefined;
+  const s = String(value).trim();
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
+  const y = parsePolicyEffectiveYear(s);
+  return y ? `${y}-01-01` : undefined;
+}
+
+export interface AgoaEligibilitySnapshot {
+  iso3: string;
+  eligible: boolean;
+  agoaStatus: AgoaDbStatus;
+  eligibilitySince: number | null;
+  suspensionSinceYear: number | null;
+}
+
+/** Derive AGOA eligibility flags from Evidence Vault record (single authority). */
+export function agoaEligibilityFromRecord(
+  iso3: string,
+  record: PolicyStatusRecord,
+  rawDbStatus?: string
+): AgoaEligibilitySnapshot {
+  const raw = rawDbStatus ?? record.statusLabel;
+  const agoaStatus = mapVaultRawToAgoaDbStatus(raw, record.publishable);
+  const effectiveYear = parsePolicyEffectiveYear(record.statusEffectiveDate);
+  const eligible = agoaStatus === 'eligible';
+  return {
+    iso3: iso3.toUpperCase(),
+    eligible,
+    agoaStatus,
+    eligibilitySince: eligible && effectiveYear ? effectiveYear : null,
+    suspensionSinceYear: agoaStatus === 'suspended' && effectiveYear ? effectiveYear : null,
+  };
+}
+
 export function policyRecordToAgoaCountryRecord(
   record: PolicyStatusRecord,
   iso3: string,
@@ -96,17 +141,21 @@ export function policyRecordToAgoaCountryRecord(
 ): AgoaCountryRecord {
   const raw = rawDbStatus ?? record.statusLabel;
   const asOf = record.lastVerifiedAt?.slice(0, 10) ?? '2026-01-01';
+  const effectiveYear = parsePolicyEffectiveYear(record.statusEffectiveDate);
+  const effectiveIso = parsePolicyEffectiveIsoDate(record.statusEffectiveDate);
+  const isEligible = record.publishable && ['eligible', 'active'].includes(raw);
+  const isSuspended = record.publishable && raw === 'suspended';
   return {
     country_iso3: iso3.toUpperCase(),
     country_name: countryDisplayName(iso3),
     agoa_status: mapVaultRawToAgoaDbStatus(raw, record.publishable),
-    agoa_apparel_eligible: record.publishable && ['eligible', 'active'].includes(raw),
-    agoa_eligible_since: record.publishable && raw === 'eligible' ? record.lastReviewedDisplay ?? undefined : undefined,
-    agoa_suspension_date: record.publishable && raw === 'suspended' ? asOf : undefined,
+    agoa_apparel_eligible: isEligible,
+    agoa_eligible_since: isEligible ? effectiveIso : undefined,
+    agoa_suspension_date: isSuspended ? effectiveIso : undefined,
     agoa_notes: record.description,
     agoa_source_url: record.authoritativeSourceUrl ?? AGOA_SOURCE_URL,
     agoa_source_name: record.sourceDisplayName ?? 'USTR',
-    agoa_as_of_label: record.lastReviewedDisplay ?? 'Evidence Vault',
+    agoa_as_of_label: effectiveYear ? `${effectiveYear} USTR list` : (record.lastReviewedDisplay ?? 'Evidence Vault'),
     agoa_as_of_date: asOf,
     agoa_last_reviewed_at: record.lastVerifiedAt ?? `${asOf}T00:00:00Z`,
   };
@@ -223,6 +272,17 @@ async function fetchAllAgoaVaultRows(): Promise<{ data: DbPolicyRow[] | null }> 
   return { data: data as DbPolicyRow[] };
 }
 
+/** Load AGOA eligibility for all vault-backed African markets. */
+export async function fetchAgoaEligibilityMap(): Promise<Map<string, AgoaEligibilitySnapshot>> {
+  const map = new Map<string, AgoaEligibilitySnapshot>();
+  const { data } = await fetchAllAgoaVaultRows();
+  for (const row of data ?? []) {
+    const record = dbRowToPolicyRecord(row);
+    map.set(row.country_iso3, agoaEligibilityFromRecord(row.country_iso3, record, row.status));
+  }
+  return map;
+}
+
 async function fetchRawAgoaStatus(iso3: string): Promise<string | undefined> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -258,11 +318,16 @@ export function policyRecordToAgoaUiSnapshot(
 ): AgoaPolicyUiSnapshot {
   const raw = rawDbStatus ?? record.statusLabel;
   const rec = policyRecordToAgoaCountryRecord(record, 'XXX', raw);
+  const effectiveYear = parsePolicyEffectiveYear(record.statusEffectiveDate);
+  const isEligible = rec.agoa_status === 'eligible';
+  const isSuspended = rec.agoa_status === 'suspended';
   return {
     statusLabel: record.clientStatusLabel ?? 'Under review',
     evidenceBacked: record.publishable === true,
     apparelEligible: record.publishable && rec.agoa_apparel_eligible,
     notes: record.description,
     agoaStatus: rec.agoa_status,
+    eligibleSinceYear: isEligible && effectiveYear ? effectiveYear : undefined,
+    suspensionSinceYear: isSuspended && effectiveYear ? effectiveYear : undefined,
   };
 }

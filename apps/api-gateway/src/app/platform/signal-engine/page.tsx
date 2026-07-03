@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { SouveraMegaNav } from '@/components/ui/SouveraMegaNav';
 import { SouveraFooter } from '@/components/ui/SouveraFooter';
-import { Zap, TrendingUp, AlertTriangle, BarChart3, ArrowRight, Lock, Info } from 'lucide-react';
+import { PublicPageHero } from '@/components/marketing/PublicPageHero';
+import { Zap, TrendingUp, AlertTriangle, BarChart3, ArrowRight, Info } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Signal Engine | Market Intelligence Indicators | Souvera',
@@ -56,24 +57,20 @@ export default function SignalEnginePage() {
     <main className="min-h-screen bg-[#0B0F14] text-white">
       <SouveraMegaNav />
 
-      <section className="pt-24 pb-16 border-b border-zinc-800">
-        <div className="max-w-[1600px] mx-auto px-6 lg:px-12">
-          <div className="max-w-3xl">
-            <div className="text-[10px] font-bold tracking-[0.2em] uppercase text-blue-500 mb-4">
-              Platform
-            </div>
-            <h1
-              className="text-4xl md:text-5xl font-bold tracking-tight mb-6"
-              style={{ fontFamily: 'Space Grotesk, sans-serif' }}
-            >
-              The Signal Engine.
-            </h1>
-            <p className="text-lg text-zinc-400 leading-relaxed">
-              Market signals to inform your review. The Signal Engine combines rule-based scoring, statistical indicators, and AI-assisted pattern recognition to surface market momentum, opportunity signals, and risk indicators.
-            </p>
-          </div>
-        </div>
-      </section>
+      <PublicPageHero
+        label="Platform"
+        title="The Signal Engine."
+        description="Market signals to inform your review. Rule-based scoring, statistical indicators, and governed AI-assisted pattern recognition for momentum, opportunity, and risk across 74 markets."
+        backLink={{ href: '/platform', label: 'Platform overview' }}
+        ctas={[
+          { href: '/signup', label: 'Create free account', variant: 'signup' },
+          { href: '/insights/methodology', label: 'View methodology', variant: 'secondary' },
+        ]}
+        stats={[
+          { value: 'Hourly', label: 'Signal refresh' },
+          { value: '74', label: 'Markets monitored' },
+        ]}
+      />
 
       <section className="py-16 border-b border-zinc-800">
         <div className="max-w-[1600px] mx-auto px-6 lg:px-12">
@@ -225,16 +222,23 @@ export default function SignalEnginePage() {
             </p>
             <div className="flex flex-wrap gap-4">
               <Link
-                href="/access/request-access"
-                className="px-10 py-5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-[12px] tracking-widest uppercase transition-all rounded-sm"
+                href="/signup"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold transition-all rounded-sm"
               >
-                Request Access
+                Create free account
+              </Link>
+              <Link
+                href="/access/request-access?plan=business"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-semibold transition-all rounded-sm"
+              >
+                Request Business access
+                <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 href="/insights/methodology"
-                className="px-10 py-5 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-white font-bold text-[12px] tracking-widest uppercase transition-all rounded-sm"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-white font-semibold transition-all rounded-sm"
               >
-                View Methodology
+                View methodology
               </Link>
             </div>
           </div>

@@ -208,6 +208,84 @@ export function validateAfCFTAStatus(status: unknown): ValidationError | null {
   return null;
 }
 
+// AGOA trade-flow row validation (manual USITC DataWeb / agoa.info upload).
+// Operates on mapped target-column names from the agoa_trade_flows template.
+const AGOA_NUMERIC_USD_FIELDS = [
+  'total_exports_to_us_usd',
+  'agoa_exports_usd',
+  'non_agoa_exports_usd',
+  'tariff_savings_usd',
+  'us_total_imports_usd',
+] as const;
+
+export function validateAgoaTradeFlowRow(data: Record<string, unknown>): ValidationError[] {
+  const errors: ValidationError[] = [];
+
+  // Year — required, plausible range.
+  const year = Number(data.year);
+  if (!Number.isFinite(year) || year < 2000 || year > 2100) {
+    errors.push({
+      code: 'INVALID_YEAR',
+      message: `Invalid year: "${data.year}". Expected an integer between 2000 and 2100.`,
+      field: 'year',
+      value: data.year,
+    });
+  }
+
+  // Category group — required.
+  if (!data.category_group || String(data.category_group).trim() === '') {
+    errors.push({
+      code: 'MISSING_CATEGORY_GROUP',
+      message: 'category_group is required for AGOA trade-flow rows.',
+      field: 'category_group',
+      value: data.category_group,
+    });
+  }
+
+  // AGOA share must be a percentage 0–100.
+  if (data.agoa_share_pct != null && data.agoa_share_pct !== '') {
+    const share = Number(data.agoa_share_pct);
+    if (!Number.isFinite(share) || share < 0 || share > 100) {
+      errors.push({
+        code: 'INVALID_AGOA_SHARE',
+        message: `agoa_share_pct must be between 0 and 100 (got "${data.agoa_share_pct}").`,
+        field: 'agoa_share_pct',
+        value: data.agoa_share_pct,
+      });
+    }
+  }
+
+  // USD figures must be non-negative numbers when present.
+  for (const field of AGOA_NUMERIC_USD_FIELDS) {
+    const raw = data[field];
+    if (raw != null && raw !== '') {
+      const n = Number(raw);
+      if (!Number.isFinite(n) || n < 0) {
+        errors.push({
+          code: 'INVALID_USD_VALUE',
+          message: `${field} must be a non-negative number (got "${raw}").`,
+          field,
+          value: raw,
+        });
+      }
+    }
+  }
+
+  // agoa_exports must not exceed total exports when both are provided.
+  const total = Number(data.total_exports_to_us_usd);
+  const agoa = Number(data.agoa_exports_usd);
+  if (Number.isFinite(total) && Number.isFinite(agoa) && agoa > total) {
+    errors.push({
+      code: 'AGOA_EXCEEDS_TOTAL',
+      message: `agoa_exports_usd (${agoa}) cannot exceed total_exports_to_us_usd (${total}).`,
+      field: 'agoa_exports_usd',
+      value: agoa,
+    });
+  }
+
+  return errors;
+}
+
 // Date validation
 export function validateDate(value: unknown, fieldName: string): ValidationError | null {
   if (!value) return null;

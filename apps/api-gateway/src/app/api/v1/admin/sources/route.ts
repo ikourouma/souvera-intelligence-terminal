@@ -33,27 +33,15 @@ async function verifyAdminAccess(request: NextRequest): Promise<{ isAdmin: boole
 
     const supabase = getServiceClient();
     
-    // Check if user has platform_admin role in any organization
+    // Check if user has admin role in any organization
     const { data: memberData } = await supabase
       .from('souvera_organization_members')
       .select('role')
       .eq('user_id', user.id)
-      .eq('role', 'platform_admin')
+      .in('role', ['org_admin', 'platform_admin', 'super_admin'])
       .limit(1);
 
     if (memberData && memberData.length > 0) {
-      return { isAdmin: true, userId: user.id };
-    }
-
-    // Also check org_admin for data management
-    const { data: orgAdminData } = await supabase
-      .from('souvera_organization_members')
-      .select('role')
-      .eq('user_id', user.id)
-      .in('role', ['org_admin', 'platform_admin'])
-      .limit(1);
-
-    if (orgAdminData && orgAdminData.length > 0) {
       return { isAdmin: true, userId: user.id };
     }
 

@@ -39,7 +39,7 @@ async function verifyAdminAccess(): Promise<{ isAdmin: boolean; userId?: string;
       .from('souvera_organization_members')
       .select('role')
       .eq('user_id', user.id)
-      .in('role', ['org_admin', 'platform_admin'])
+      .in('role', ['org_admin', 'platform_admin', 'super_admin'])
       .limit(1);
 
     if (memberData && memberData.length > 0) {
