@@ -4,10 +4,6 @@
 // Owner: Afronovation, Inc.
 // ===========================================
 
-'use client';
-
-import { useEffect, useState, useCallback } from 'react';
-import Link from 'next/link';
 import {
   ArrowLeft,
   RefreshCw,
@@ -27,6 +23,7 @@ import {
   ChevronUp,
   ChevronDown,
 } from 'lucide-react';
+import { isAccessPlanId, resolvePlanCta } from '@/lib/access-plans';
 
 interface PricingPlan {
   plan_id: string;
@@ -63,8 +60,8 @@ const EMPTY_PLAN: Partial<PricingPlan> = {
   price_monthly: 0,
   price_annual: null,
   features: [],
-  cta_text: 'Get Started',
-  cta_url: '/access/request-access',
+  cta_text: 'Create free account',
+  cta_url: '/signup',
   cta_style: 'outline',
   is_featured: false,
   is_visible: true,
@@ -423,6 +420,9 @@ interface PricingEditorModalProps {
 
 function PricingEditorModal({ plan, saving, error, isCreateMode, onClose, onSave, onChange }: PricingEditorModalProps) {
   const [featureInput, setFeatureInput] = useState('');
+  const canonicalCta =
+    plan.plan_id && isAccessPlanId(plan.plan_id) ? resolvePlanCta(plan.plan_id) : null;
+  const ctaLocked = !!canonicalCta;
 
   const addFeature = () => {
     if (featureInput.trim()) {
@@ -624,20 +624,22 @@ function PricingEditorModal({ plan, saving, error, isCreateMode, onClose, onSave
               <label className="block text-sm font-medium text-zinc-400 mb-2">CTA Text</label>
               <input
                 type="text"
-                value={plan.cta_text || ''}
+                value={ctaLocked ? canonicalCta!.label : (plan.cta_text || '')}
                 onChange={(e) => onChange('cta_text', e.target.value)}
                 placeholder="Get Started"
-                className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                readOnly={ctaLocked}
+                className={`w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 ${ctaLocked ? 'opacity-70 cursor-not-allowed' : ''}`}
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-zinc-400 mb-2">CTA URL</label>
               <input
                 type="text"
-                value={plan.cta_url || ''}
+                value={ctaLocked ? canonicalCta!.href : (plan.cta_url || '')}
                 onChange={(e) => onChange('cta_url', e.target.value)}
-                placeholder="/access"
-                className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                placeholder="/signup"
+                readOnly={ctaLocked}
+                className={`w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 ${ctaLocked ? 'opacity-70 cursor-not-allowed' : ''}`}
               />
             </div>
             <div>
@@ -653,6 +655,12 @@ function PricingEditorModal({ plan, saving, error, isCreateMode, onClose, onSave
               </select>
             </div>
           </div>
+          {canonicalCta && (
+            <p className="text-xs text-zinc-500">
+              Standard tier CTAs are enforced on the public site ({canonicalCta.label} → {canonicalCta.href}).
+              Edit copy and pricing above; routing is managed in code.
+            </p>
+          )}
 
           {/* Toggles */}
           <div className="space-y-3">

@@ -94,23 +94,26 @@ export const SITE_MEGA_NAV: SiteNavItem[] = [
     icon: Building2,
     sections: [
       {
-        title: 'Core Infrastructure',
+        title: 'Technology & Finance',
         links: [
           { name: 'Sector Overview', href: '/sectors' },
-          { name: 'Digital Infrastructure', href: '/sectors/digital-infrastructure' },
+          { name: 'Technology & Software', href: '/sectors/technology' },
           { name: 'Fintech & Digital Finance', href: '/sectors/fintech' },
+          { name: 'Digital Infrastructure', href: '/sectors/digital-infrastructure' },
         ],
       },
       {
-        title: 'Industry Sectors',
+        title: 'Industry & Resources',
         links: [
-          { name: 'Mining & Critical Minerals', href: '/sectors/critical-minerals' },
+          { name: 'Manufacturing & Textiles', href: '/sectors/manufacturing-textiles' },
+          { name: 'Mining & Minerals', href: '/sectors/mining' },
+          { name: 'Critical Minerals', href: '/sectors/critical-minerals' },
           { name: 'Energy & Renewables', href: '/sectors/energy' },
           { name: 'Agriculture & Agribusiness', href: '/sectors/agriculture' },
         ],
       },
       {
-        title: 'Services & Connectivity',
+        title: 'Trade & Services',
         links: [
           { name: 'Logistics & Trade', href: '/sectors/logistics' },
           { name: 'Tourism & Hospitality', href: '/sectors/tourism-hospitality' },

@@ -7,6 +7,8 @@ import { SIGNAL_COLORS } from '@/lib/intelligence-entitlements';
 import type { CountryMetrics, CountrySignal } from '@/types/country-intelligence';
 import { exportElementToPNG } from '@/lib/intelligence/export-png';
 import type { CardAnalysisInput } from '@/lib/intelligence/generate-card-analysis';
+import { MarketSignalBadge } from '@/components/intelligence/MarketSignalBadge';
+import { resolveMarketSignal } from '@/lib/insights/signal-display';
 
 interface QuickStatsWidgetProps {
   country: { name: string; iso3?: string };
@@ -15,7 +17,11 @@ interface QuickStatsWidgetProps {
 }
 
 export function QuickStatsWidget({ country, metrics, signal }: QuickStatsWidgetProps) {
-  const level = (signal.level in SIGNAL_COLORS ? signal.level : 'stable') as SignalLevel;
+  const resolved = resolveMarketSignal({
+    profileSignal: signal.level,
+    gdpGrowthPct: metrics.gdp_growth_pct,
+  });
+  const level = (resolved.level in SIGNAL_COLORS ? resolved.level : 'stable') as SignalLevel;
   const signalColor = SIGNAL_COLORS[level];
   const score = signal.investmentScore ?? null;
   const cardRef = useRef<HTMLDivElement>(null);
@@ -126,7 +132,14 @@ export function QuickStatsWidget({ country, metrics, signal }: QuickStatsWidgetP
               </div>
             </>
           ) : (
-            <p className="text-sm text-zinc-500">Data pending</p>
+            <>
+              <MarketSignalBadge
+                profileSignal={signal.level}
+                gdpGrowthPct={metrics.gdp_growth_pct}
+                size="md"
+              />
+              <p className="text-xs text-zinc-500 mt-2">Investment score pending verification</p>
+            </>
           )}
         </div>
       </div>

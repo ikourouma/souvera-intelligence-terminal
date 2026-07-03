@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { CheckCircle2, ArrowRight, Loader2 } from 'lucide-react';
-import { ACCESS_PLANS, type AccessPlan } from '@/lib/access-plans';
+import { ACCESS_PLANS, mergePlanWithCms, type AccessPlan } from '@/lib/access-plans';
 
 interface CMSPlan {
   plan_id: string;
@@ -54,25 +54,18 @@ export function AccessPlanGrid() {
           if (data.plans && data.plans.length > 0) {
             const cmsPlans = data.plans as CMSPlan[];
             
-            setPlans(ACCESS_PLANS.map(staticPlan => {
-              const cmsPlan = cmsPlans.find(cp => cp.plan_id === staticPlan.id);
+            setPlans(ACCESS_PLANS.map((staticPlan) => {
+              const cmsPlan = cmsPlans.find((cp) => cp.plan_id === staticPlan.id);
+              const merged = mergePlanWithCms(staticPlan, cmsPlan);
               if (cmsPlan) {
                 return {
-                  ...staticPlan,
-                  name: cmsPlan.display_name || staticPlan.name,
-                  badge: cmsPlan.badge_text || staticPlan.badge,
-                  badgeColor: cmsPlan.badge_color || staticPlan.badgeColor,
-                  description: cmsPlan.description || staticPlan.description,
-                  features: cmsPlan.features?.length > 0 ? cmsPlan.features : staticPlan.features,
-                  cta: cmsPlan.cta_text || staticPlan.cta,
-                  ctaHref: cmsPlan.cta_url || staticPlan.ctaHref,
-                  featured: cmsPlan.is_featured ?? staticPlan.featured,
+                  ...merged,
                   priceMonthly: cmsPlan.price_monthly,
                   priceAnnual: cmsPlan.price_annual,
                   showPrice: cmsPlan.show_price !== false,
                 };
               }
-              return { ...staticPlan };
+              return { ...merged };
             }));
           }
         }

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { X, TrendingUp, Users, DollarSign, Globe, MapPin, AlertCircle, Loader2 } from 'lucide-react';
 import { UpgradePrompt } from '@/components/access/UpgradePrompt';
 import { PreviewDataBanner } from '@/components/intelligence/PreviewDataBanner';
+import { MarketSignalBadge } from '@/components/intelligence/MarketSignalBadge';
 
 interface CountryDrawerProps {
   iso3: string | null;
@@ -123,22 +124,6 @@ export function CountryDrawer({ iso3, onClose }: CountryDrawerProps) {
   const formatPercent = (value?: number) => {
     if (value === undefined || value === null) return 'N/A';
     return value >= 0 ? `+${value.toFixed(1)}%` : `${value.toFixed(1)}%`;
-  };
-
-  const getSignalLevelColor = (level?: string) => {
-    switch (level) {
-      case 'high_growth': return 'text-emerald-400';
-      case 'emerging': return 'text-blue-400';
-      case 'stable': return 'text-zinc-400';
-      case 'watchlist': return 'text-amber-400';
-      case 'risk_elevated': return 'text-red-400';
-      default: return 'text-zinc-500';
-    }
-  };
-
-  const getSignalLevelLabel = (level?: string) => {
-    if (!level) return 'N/A';
-    return level.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
   };
 
   return (
@@ -287,17 +272,17 @@ export function CountryDrawer({ iso3, onClose }: CountryDrawerProps) {
                       </div>
                     )}
 
-                    {countryData.signal?.level && (
-                      <div className="bg-zinc-900/50 border border-zinc-800 rounded-sm p-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Globe className="w-4 h-4 text-zinc-400" />
-                          <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">Signal</span>
-                        </div>
-                        <div className={`text-xl font-black ${getSignalLevelColor(countryData.signal.level)}`}>
-                          {getSignalLevelLabel(countryData.signal.level)}
-                        </div>
+                    <div className="bg-zinc-900/50 border border-zinc-800 rounded-sm p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Globe className="w-4 h-4 text-zinc-400" />
+                        <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">Signal</span>
                       </div>
-                    )}
+                      <MarketSignalBadge
+                        profileSignal={countryData.signal?.level}
+                        gdpGrowthPct={countryData.metrics?.gdpGrowthPct}
+                        size="md"
+                      />
+                    </div>
                   </div>
                 </div>
               )}

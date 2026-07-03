@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/lib/LanguageContext";
+import { getSiteUrl } from "@/lib/site-url";
 
 import { ComplianceBanner } from "@/components/ui/ComplianceBanner";
 import { GlobalLoadingIndicator } from "@/components/ui/GlobalLoadingIndicator";
@@ -9,12 +10,20 @@ import { GlobalLoadingIndicator } from "@/components/ui/GlobalLoadingIndicator";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://souvera.vercel.app'),
+  metadataBase: new URL(getSiteUrl()),
   title: {
     default: 'Souvera Intelligence Terminal',
     template: '%s | Souvera',
   },
   description: 'Institutional-grade macroeconomic intelligence for African and Caribbean markets. Data-driven insights for governments, investors, and enterprises.',
+  icons: {
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: 'any' },
+    ],
+    apple: [{ url: '/icon.svg', type: 'image/svg+xml' }],
+    shortcut: ['/favicon.ico', '/icon.svg'],
+  },
   keywords: [
     'Africa investment',
     'Caribbean economic data',

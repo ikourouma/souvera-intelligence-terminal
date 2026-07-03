@@ -280,3 +280,123 @@ export const DIGITAL_INFRASTRUCTURE_SECTOR: SectorOverviewContent = {
   ],
 };
 
+export const TECHNOLOGY_SECTOR: SectorOverviewContent = {
+  slug: 'technology',
+  tagline: 'Sector Intelligence',
+  title: 'Technology & Software',
+  subtitle: 'SaaS, enterprise software, and the developer economy across emerging markets.',
+  description:
+    'Africa and the Caribbean are building homegrown software ecosystems — from Lagos and Nairobi tech hubs to Kingston nearshore services. Souvera tracks venture funding, developer talent pools, cloud adoption, and enterprise digitization across 50+ markets for growth equity, strategic acquirers, and corporate venture arms.',
+  marketSize: '$8B+ emerging-market software pipeline',
+  growthSignal: 'High growth · Talent arbitrage',
+  keyMarketIso3: ['NGA', 'KEN', 'ZAF', 'RWA', 'GHA', 'JAM'],
+  primaryCta: { label: 'Explore Nigeria Terminal', href: '/country/NGA?tab=sectors' },
+  secondaryCta: { label: 'Digital Infrastructure Sector', href: '/sectors/digital-infrastructure' },
+  themes: [
+    {
+      id: 'saas',
+      title: 'SaaS & Enterprise Software',
+      description:
+        'Vertical SaaS for logistics, HR, and payments is scaling via mobile-first distribution. Nigeria and Kenya anchor B2B platforms with regional expansion playbooks; Caribbean markets leverage nearshore delivery for North American clients.',
+    },
+    {
+      id: 'talent',
+      title: 'Developer Talent & Remote Work',
+      description:
+        'Engineering talent pools, bootcamp pipelines, and remote-work adoption create exportable services revenue. Due diligence requires assessing retention, compensation benchmarks, and timezone alignment with target markets.',
+    },
+    {
+      id: 'cloud',
+      title: 'Cloud-Native Adoption',
+      description:
+        'Hyperscaler regions, API-first architecture, and DevOps maturity determine scalability. Markets with reliable power and fiber backbones support higher-value software exports and platform plays.',
+    },
+    {
+      id: 'venture',
+      title: 'Venture & Growth Capital',
+      description:
+        'Seed and Series A activity remains concentrated in fintech-adjacent software, but agritech, healthtech, and climate software are gaining traction. Institutional allocators focus on unit economics and cross-border regulatory exposure.',
+    },
+  ],
+};
+
+export const MANUFACTURING_SECTOR: SectorOverviewContent = {
+  slug: 'manufacturing-textiles',
+  tagline: 'Sector Intelligence',
+  title: 'Manufacturing & Textiles',
+  subtitle: 'Apparel, industrial production, and AfCFTA-linked factory corridors.',
+  description:
+    'Manufacturing is reshoring and nearshoring across Africa and the Caribbean — driven by AfCFTA rules of origin, AGOA apparel preferences, and supply-chain diversification away from Asia. Souvera tracks factory investment, textile export volumes, industrial policy, and special economic zone pipelines for trade finance and private equity allocators.',
+  marketSize: '$45B+ manufacturing modernization opportunity',
+  growthSignal: 'Emerging · Trade-preference driven',
+  keyMarketIso3: ['NGA', 'GHA', 'KEN', 'ETH', 'ZAF', 'JAM'],
+  primaryCta: { label: 'Explore Ghana Trade Flows', href: '/intelligence/trade/afcfta/flows' },
+  secondaryCta: { label: 'Logistics Sector', href: '/sectors/logistics' },
+  themes: [
+    {
+      id: 'apparel',
+      title: 'Apparel & Textiles Export',
+      description:
+        'AGOA and CBI preferences sustain apparel exports from East Africa and the Caribbean. Vertical integration — spinning, weaving, cut-and-sew — determines margin capture and compliance with rules-of-origin requirements.',
+    },
+    {
+      id: 'industrial',
+      title: 'Industrial & Light Manufacturing',
+      description:
+        'Automotive assembly, consumer goods, and agro-processing anchor job creation in Nigeria, South Africa, and Ghana. Power reliability, port access, and SEZ incentives are primary site-selection variables.',
+    },
+    {
+      id: 'afcfta',
+      title: 'AfCFTA Manufacturing Corridors',
+      description:
+        'Intra-African trade in manufactured goods requires harmonized standards, bonded logistics, and regional value chains. West Africa (Nigeria–Ghana) and East Africa (Kenya–Ethiopia) compete for anchor-factory positioning.',
+    },
+    {
+      id: 'policy',
+      title: 'Industrial Policy & SEZs',
+      description:
+        'Tax holidays, duty exemptions, and local content mandates shape factory economics. Investors require transparent land tenure, labor regulation clarity, and FX repatriation assurances before committing capex.',
+    },
+  ],
+};
+
+export const MINING_SECTOR: SectorOverviewContent = {
+  slug: 'mining',
+  tagline: 'Sector Intelligence',
+  title: 'Mining & Minerals',
+  subtitle: 'Gold, bauxite, industrial minerals, and the foundation of resource economies.',
+  description:
+    'Beyond battery metals, Africa and the Caribbean hold significant gold, bauxite, platinum, and industrial mineral reserves. Souvera tracks licensing regimes, production volumes, royalty frameworks, and community relations for mining majors, streaming companies, and sovereign wealth allocators — distinct from the EV-focused critical minerals narrative.',
+  marketSize: '$180B+ diversified mining sector',
+  growthSignal: 'Stable · Commodity-cycle linked',
+  keyMarketIso3: ['ZAF', 'GHA', 'ZWE', 'COD', 'JAM', 'GUY'],
+  primaryCta: { label: 'Explore Jamaica Mining Sector', href: '/country/JAM?tab=sectors' },
+  secondaryCta: { label: 'Critical Minerals Deep-Dive', href: '/sectors/critical-minerals' },
+  themes: [
+    {
+      id: 'gold',
+      title: 'Gold & Precious Metals',
+      description:
+        'West and Southern Africa remain global gold producers; Ghana and South Africa anchor institutional portfolios. Artisanal-mining formalization and royalty policy shifts are key governance variables for due diligence.',
+    },
+    {
+      id: 'bauxite',
+      title: 'Bauxite & Alumina',
+      description:
+        'Guinea, Jamaica, and Guyana supply bauxite to global alumina refineries. Vertical integration — mine-to-refinery — and energy costs determine competitive positioning in aluminum supply chains.',
+    },
+    {
+      id: 'industrial',
+      title: 'Industrial & Bulk Minerals',
+      description:
+        'Phosphate, manganese, iron ore, and limestone support construction and steel industries. Long-life assets with offtake contracts attract infrastructure-focused capital and sovereign development finance.',
+    },
+    {
+      id: 'governance',
+      title: 'Licensing, ESG & Community Relations',
+      description:
+        'Transparent concession frameworks, environmental impact assessments, and community benefit agreements determine social license. Zimbabwe, DRC, and emerging jurisdictions require heightened governance scoring.',
+    },
+  ],
+};
+

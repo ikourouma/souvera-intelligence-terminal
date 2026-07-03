@@ -93,17 +93,17 @@ const navigation = [
       {
         title: "Core Infrastructure",
         links: [
-          { name: "Agriculture & Farming", href: "/sectors/agriculture" },
-          { name: "Clean Energy & Water", href: "/sectors/clean-energy" },
-          { name: "Life Sciences & Biotech", href: "/sectors/life-sciences" },
+          { name: "Agriculture & Agribusiness", href: "/sectors/agriculture" },
+          { name: "Energy & Renewables", href: "/sectors/energy" },
+          { name: "Mining & Minerals", href: "/sectors/mining" },
         ],
       },
       {
         title: "Advanced Technology",
         links: [
-          { name: "Advanced Manufacturing", href: "/sectors/manufacturing" },
-          { name: "Fintech & Capital Markets", href: "/sectors/fintech" },
-          { name: "Defense & Security", href: "/sectors/defense" },
+          { name: "Technology & Software", href: "/sectors/technology" },
+          { name: "Manufacturing & Textiles", href: "/sectors/manufacturing-textiles" },
+          { name: "Fintech & Digital Finance", href: "/sectors/fintech" },
         ],
       },
     ],

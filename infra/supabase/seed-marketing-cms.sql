@@ -102,7 +102,7 @@ INSERT INTO souvera_pricing_display (
   'Get started with public macroeconomic data across Africa and the Caribbean.',
   0,
   '["Country profiles & GDP overview", "Market signal indicators", "Regional intelligence summaries", "Interactive intelligence map", "Caribbean overview"]',
-  'Request Access', '/access/request-access', 'outline',
+  'Create free account', '/signup', 'outline',
   false, true, 0
 ),
 (
@@ -110,7 +110,7 @@ INSERT INTO souvera_pricing_display (
   'Full macro data, sector intelligence, and expanded analysis for active analysts.',
   49,
   '["Everything in Explorer", "Inflation & Debt/GDP metrics", "Sector scores & analysis", "Expanded market coverage", "GDP forecast data", "Trade summary data", "Country comparison tools"]',
-  'View Plans', '/access', 'primary',
+  'Request Professional Access', '/access/request-access?plan=professional', 'primary',
   true, true, 1
 ),
 (
@@ -118,7 +118,7 @@ INSERT INTO souvera_pricing_display (
   'Full forecasts, trade data, and downloadable reports for investment teams.',
   199,
   '["Everything in Professional", "Full GDP forecasts & scenarios", "Full trade data — exports, imports, partners", "Sector forecasts", "Downloadable country reports", "Historical data series"]',
-  'View Plans', '/access', 'outline',
+  'Contact Sales', '/contact?plan=business&intent=upgrade', 'outline',
   false, true, 2
 ),
 (
@@ -126,7 +126,7 @@ INSERT INTO souvera_pricing_display (
   'Full API access, white-label intelligence, and dedicated support for institutions.',
   1999,
   '["Everything in Business", "Full API access", "White-label data feeds", "Custom briefings & memos", "Methodology documentation", "Dedicated account support"]',
-  'Contact Sales', '/contact', 'ghost',
+  'Contact Sales', '/access/institutional', 'ghost',
   false, true, 3
 )
 ON CONFLICT (plan_id) DO NOTHING;

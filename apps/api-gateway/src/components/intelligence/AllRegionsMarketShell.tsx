@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { Search, X, MapPin, TrendingUp, Users, ArrowRight } from 'lucide-react';
+import { MarketSignalBadge } from '@/components/intelligence/MarketSignalBadge';
 import type { Country } from './SouveraMapWorkspace';
 
 interface AllRegionsMarketShellProps {
@@ -258,6 +259,13 @@ export function AllRegionsMarketShell({
                       {formatPopulation(country.populationTotal)}
                     </div>
                   </div>
+                </div>
+
+                <div className="mt-3">
+                  <MarketSignalBadge
+                    signalLevel={country.signalLevel}
+                    gdpGrowthPct={country.gdpGrowthPct}
+                  />
                 </div>
 
                 {/* Hover Arrow */}

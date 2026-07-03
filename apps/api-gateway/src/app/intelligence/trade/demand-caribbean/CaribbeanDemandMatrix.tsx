@@ -12,6 +12,7 @@ import { iso3ToIso2, formatTradeCountryLabel, tradeCountryMatchesSearch } from '
 import { HighlightedText } from '@/components/intelligence/HighlightedText';
 import { Top10Card } from '@/components/intelligence/Top10Card';
 import { ProductDemandDrawer, ProductDemandRow } from '@/components/intelligence/ProductDemandDrawer';
+import { showDevLabels } from '@/lib/show-dev-labels';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -787,9 +788,11 @@ export function CaribbeanDemandMatrix() {
             <div className="p-2 bg-cyan-500/10 border border-cyan-500/20 rounded-lg">
               <Ship className="w-6 h-6 text-cyan-400" />
             </div>
+            {showDevLabels() && (
             <span className="px-3 py-1 bg-cyan-500/10 border border-cyan-500/20 rounded-full text-xs font-medium text-cyan-300">
               Phase 0.5C — US-Caribbean Trade Intelligence
             </span>
+            )}
           </div>
           <h1 className="text-3xl font-bold text-white mb-2">Caribbean Import Demand Intelligence</h1>
           <p className="text-zinc-300 max-w-3xl text-base leading-relaxed">

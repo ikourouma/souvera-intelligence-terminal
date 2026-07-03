@@ -15,6 +15,7 @@ import { HighlightedText } from '@/components/intelligence/HighlightedText';
 import { CollapsibleAnalysis } from '@/components/intelligence/CollapsibleAnalysis';
 import { DirectionToggle, FlowDirection } from '@/components/intelligence/DirectionToggle';
 import { Top10Card, Top10Item } from '@/components/intelligence/Top10Card';
+import { showDevLabels } from '@/lib/show-dev-labels';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -769,9 +770,11 @@ export function AfCFTATradeIntelligence() {
             <div className="p-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
               <Repeat className="w-6 h-6 text-emerald-400" />
             </div>
+            {showDevLabels() && (
             <span className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-xs font-medium text-emerald-300">
               Phase 0.5D — AfCFTA Trade Intelligence
             </span>
+            )}
           </div>
           <h1 className="text-3xl font-bold text-white mb-2">AfCFTA Import-Export Intelligence</h1>
           <p className="text-zinc-300 max-w-3xl text-base leading-relaxed">

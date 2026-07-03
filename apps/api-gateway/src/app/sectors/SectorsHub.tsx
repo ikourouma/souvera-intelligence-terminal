@@ -1,7 +1,18 @@
 'use client';
 
 import { HubPageTemplate, type HubContent } from '@/components/templates/HubPageTemplate';
-import { Banknote, Gem, Zap, Wheat, Truck, Palmtree, Network } from 'lucide-react';
+import {
+  Banknote,
+  Gem,
+  Zap,
+  Wheat,
+  Truck,
+  Palmtree,
+  Network,
+  Cpu,
+  Factory,
+  Pickaxe,
+} from 'lucide-react';
 
 const CONTENT: HubContent = {
   tagline: 'Sector Intelligence',
@@ -10,27 +21,27 @@ const CONTENT: HubContent = {
   description:
     'Souvera tracks strategic sectors across African and Caribbean markets, providing institutional-grade analysis of market size, growth trajectories, key players, and investment opportunities.',
   primaryCta: {
-    label: 'Request Access',
-    href: '/access/request-access',
+    label: 'Create free account',
+    href: '/signup',
   },
   secondaryCta: {
     label: 'View Methodology',
     href: '/insights/methodology',
   },
   highlights: [
-    { value: '7', label: 'Strategic Sectors' },
+    { value: '10', label: 'Strategic Sectors' },
     { value: '$600B+', label: 'Market Opportunity' },
     { value: '50+', label: 'Markets Covered' },
     { value: 'Live', label: 'Sector Overviews' },
   ],
   links: [
     {
-      title: 'Digital Infrastructure',
+      title: 'Technology & Software',
       description:
-        'Broadband, cloud readiness, digital public infrastructure, and cybersecurity across African and Caribbean markets.',
-      href: '/sectors/digital-infrastructure',
-      icon: Network,
-      badge: 'Infrastructure',
+        'SaaS, enterprise software, developer talent, and cloud-native adoption across emerging markets.',
+      href: '/sectors/technology',
+      icon: Cpu,
+      badge: 'High Growth',
       badgeColor: '#6366F1',
     },
     {
@@ -42,12 +53,39 @@ const CONTENT: HubContent = {
       badgeColor: '#3B82F6',
     },
     {
-      title: 'Critical Minerals & Mining',
+      title: 'Digital Infrastructure',
+      description:
+        'Broadband, cloud readiness, digital public infrastructure, and cybersecurity across African and Caribbean markets.',
+      href: '/sectors/digital-infrastructure',
+      icon: Network,
+      badge: 'Infrastructure',
+      badgeColor: '#8B5CF6',
+    },
+    {
+      title: 'Manufacturing & Textiles',
+      description:
+        'Apparel exports, industrial production, AfCFTA corridors, and special economic zone investment.',
+      href: '/sectors/manufacturing-textiles',
+      icon: Factory,
+      badge: '$45B Market',
+      badgeColor: '#F59E0B',
+    },
+    {
+      title: 'Mining & Minerals',
+      description:
+        'Gold, bauxite, industrial minerals, licensing frameworks, and community relations across resource economies.',
+      href: '/sectors/mining',
+      icon: Pickaxe,
+      badge: 'Resource Base',
+      badgeColor: '#EA580C',
+    },
+    {
+      title: 'Critical Minerals',
       description: 'Cobalt, lithium, copper, and rare earth elements. EV supply chain dynamics and strategic reserves.',
       href: '/sectors/critical-minerals',
       icon: Gem,
       badge: '$320B Market',
-      badgeColor: '#F59E0B',
+      badgeColor: '#D97706',
     },
     {
       title: 'Energy & Renewables',

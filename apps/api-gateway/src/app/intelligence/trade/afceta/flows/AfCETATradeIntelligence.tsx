@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import {
   ArrowLeft,
   ArrowRight,
@@ -77,6 +78,7 @@ function sortedCountryOptions(iso3List: readonly string[]) {
 }
 
 export default function AfCETATradeIntelligence() {
+  const searchParams = useSearchParams();
   const [mounted, setMounted] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('platform');
   const [direction, setDirection] = useState<AfcetaDirection>('africa_to_caribbean');
@@ -155,7 +157,11 @@ export default function AfCETATradeIntelligence() {
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    if (searchParams.get('spotlight') === 'true') {
+      setFilters((f) => ({ ...f, spotlightOnly: true }));
+      setShowFilters(true);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (viewMode === 'platform') fetchData();

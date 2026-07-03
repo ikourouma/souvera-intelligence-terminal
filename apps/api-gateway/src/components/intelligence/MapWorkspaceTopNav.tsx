@@ -13,6 +13,8 @@ interface MapWorkspaceTopNavProps {
   region?: RegionFilter;
   onRegionChange?: (region: RegionFilter) => void;
   showRegionFilter?: boolean;
+  /** When true, render inline under tab row (no sticky shell — parent provides bg/border). */
+  stacked?: boolean;
 }
 
 export function MapWorkspaceTopNav({
@@ -21,6 +23,7 @@ export function MapWorkspaceTopNav({
   region = 'africa',
   onRegionChange,
   showRegionFilter = false,
+  stacked = false,
 }: MapWorkspaceTopNavProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -45,9 +48,13 @@ export function MapWorkspaceTopNav({
     }
     setIsOpen(false);
   };
+  const shellClass = stacked
+    ? ''
+    : 'bg-zinc-900/80 backdrop-blur-sm border-b border-zinc-800 sticky top-[var(--site-nav-height,72px)] z-30';
+
   return (
-    <div className="bg-zinc-900/80 backdrop-blur-sm border-b border-zinc-800 sticky top-[var(--site-nav-height,72px)] z-30">
-      <div className="max-w-[1800px] mx-auto px-4 lg:px-8">
+    <div className={shellClass}>
+      <div className="max-w-[1600px] mx-auto px-6 lg:px-12">
         <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-3 py-3 sm:h-14 sm:py-0">
           {/* Left: Breadcrumb and workspace label */}
           <div className="flex items-center gap-3 text-center sm:text-left w-full sm:w-auto max-w-sm sm:max-w-none mx-auto sm:mx-0">

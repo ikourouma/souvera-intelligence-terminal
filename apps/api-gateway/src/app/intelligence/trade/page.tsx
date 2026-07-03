@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { LiveCuratedBanner } from '@/components/intelligence/LiveCuratedBanner';
 import { InstitutionalAccessCta } from '@/components/marketing/InstitutionalAccessCta';
+import { shouldShowModuleBadge } from '@/lib/show-dev-labels';
 
 export const metadata: Metadata = {
   title: 'Trade Intelligence | Souvera',
@@ -363,6 +364,7 @@ export default function TradeIntelligenceHub() {
 
                     {/* Badge & Arrow */}
                     <div className="shrink-0 flex items-center gap-3">
+                      {shouldShowModuleBadge(module.badge) && (
                       <span className={`hidden md:inline-flex px-2 py-1 rounded text-xs ${
                         module.badge === 'Live' || module.badge === 'New'
                           ? module.badge === 'New'
@@ -372,6 +374,7 @@ export default function TradeIntelligenceHub() {
                       }`}>
                         {module.badge}
                       </span>
+                      )}
                       <ArrowRight className={`w-4 h-4 group-hover:translate-x-1 transition-all ${
                         'featured' in module && module.featured
                           ? 'text-fuchsia-500/60 group-hover:text-fuchsia-300'

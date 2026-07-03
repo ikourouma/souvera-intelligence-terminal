@@ -1,7 +1,8 @@
 import { MetadataRoute } from 'next';
+import { getSiteUrl } from '@/lib/site-url';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://souvera.vercel.app';
+  const baseUrl = getSiteUrl();
   const lastModified = new Date();
 
   const routes = [
@@ -31,12 +32,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: '/intelligence/trade/agoa', priority: 0.7, changeFrequency: 'weekly' as const },
     { path: '/intelligence/trade/afcfta', priority: 0.6, changeFrequency: 'monthly' as const },
 
-    // Sectors sub-pages
+    // Sectors sub-pages (10 canonical taxonomy entries)
+    { path: '/sectors/technology', priority: 0.7, changeFrequency: 'monthly' as const },
     { path: '/sectors/fintech', priority: 0.7, changeFrequency: 'monthly' as const },
+    { path: '/sectors/digital-infrastructure', priority: 0.7, changeFrequency: 'monthly' as const },
+    { path: '/sectors/manufacturing-textiles', priority: 0.7, changeFrequency: 'monthly' as const },
+    { path: '/sectors/mining', priority: 0.7, changeFrequency: 'monthly' as const },
     { path: '/sectors/critical-minerals', priority: 0.7, changeFrequency: 'monthly' as const },
     { path: '/sectors/energy', priority: 0.7, changeFrequency: 'monthly' as const },
     { path: '/sectors/agriculture', priority: 0.7, changeFrequency: 'monthly' as const },
     { path: '/sectors/logistics', priority: 0.7, changeFrequency: 'monthly' as const },
+    { path: '/sectors/tourism-hospitality', priority: 0.7, changeFrequency: 'monthly' as const },
 
     // Insights sub-pages
     { path: '/insights/news', priority: 0.8, changeFrequency: 'weekly' as const },

@@ -10,6 +10,7 @@ import Image from 'next/image';
 import { REGION_COLORS, type AfricaRegion, DATA_STATUS_LABELS } from '@/lib/map-constants';
 import { EntitledMetricCard } from './EntitledMetricCard';
 import { EntitledSectorList } from './EntitledSectorList';
+import { MarketSignalBadge } from '@/components/intelligence/MarketSignalBadge';
 import {
   countryMapPanelCta,
   countryTerminalHref,
@@ -614,6 +615,18 @@ export function CountryIntelligencePanel({
             locked={!hasFdiAccess}
             lockedLabel="Professional+"
             missingLabel="Data pending"
+          />
+        </div>
+
+        {/* Market signal */}
+        <div className="px-5 py-3 border-t border-zinc-800/50 flex items-center justify-between gap-3">
+          <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+            Market Signal
+          </span>
+          <MarketSignalBadge
+            profileSignal={data.signal?.level}
+            gdpGrowthPct={data.metrics.gdpGrowthPct}
+            size="md"
           />
         </div>
 

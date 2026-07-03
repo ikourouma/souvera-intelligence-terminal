@@ -21,7 +21,7 @@ export const SECTOR_TAXONOMY: SectorTaxonomyEntry[] = [
   {
     sectorKey: 'technology',
     label: 'Technology & Software',
-    hubRoute: '/sectors/fintech',
+    hubRoute: '/sectors/technology',
     deepDiveSupported: true,
     regionsApplicable: ['africa', 'caribbean'],
     dbSectorKeyAliases: ['technology'],
@@ -53,7 +53,7 @@ export const SECTOR_TAXONOMY: SectorTaxonomyEntry[] = [
   {
     sectorKey: 'mining',
     label: 'Mining & Minerals',
-    hubRoute: '/sectors/critical-minerals',
+    hubRoute: '/sectors/mining',
     deepDiveSupported: true,
     regionsApplicable: ['africa'],
     dbSectorKeyAliases: ['mining'],

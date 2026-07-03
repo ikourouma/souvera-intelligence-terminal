@@ -15,6 +15,7 @@ import { HighlightedText } from '@/components/intelligence/HighlightedText';
 import { CollapsibleAnalysis } from '@/components/intelligence/CollapsibleAnalysis';
 import { Top10Card } from '@/components/intelligence/Top10Card';
 import { ProductDemandDrawer, ProductDemandRow } from '@/components/intelligence/ProductDemandDrawer';
+import { showDevLabels } from '@/lib/show-dev-labels';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -872,9 +873,11 @@ export function DemandSignalMatrix() {
             <div className="p-2 bg-blue-500/10 border border-blue-500/20 rounded-lg">
               <BarChart3 className="w-6 h-6 text-blue-400" />
             </div>
+            {showDevLabels() && (
             <span className="px-3 py-1 bg-blue-500/10 border border-blue-500/20 rounded-full text-xs font-medium text-blue-300">
               Phase 0.5A — US-Africa Trade Intelligence
             </span>
+            )}
           </div>
           <h1 className="text-3xl font-bold text-white mb-2">African Import Demand Intelligence</h1>
           <p className="text-zinc-300 max-w-3xl text-base leading-relaxed">

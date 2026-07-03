@@ -49,6 +49,8 @@ interface SouveraMapWorkspaceProps {
   workspaceLabel?: string;
   showTopNav?: boolean;
   embedded?: boolean;
+  /** When true, omit outer card chrome (parent provides border/radius). */
+  frameless?: boolean;
   className?: string;
   initialSelectedIso3?: string | null;
   onRegionChange?: (region: RegionFilter) => void;
@@ -60,6 +62,7 @@ export function SouveraMapWorkspace({
   workspaceLabel,
   showTopNav = true,
   embedded = false,
+  frameless = false,
   className,
   initialSelectedIso3,
   onRegionChange,
@@ -222,10 +225,14 @@ export function SouveraMapWorkspace({
     }
   }, [currentRegion]);
 
+  const shellClass = frameless
+    ? className || ''
+    : `bg-zinc-950 rounded-xl border border-zinc-800 ${className || ''}`;
+
   // Error state
   if (error && !loading) {
     return (
-      <div className="min-h-[600px] bg-zinc-950 rounded-xl border border-zinc-800 overflow-hidden">
+      <div className={`min-h-[600px] ${shellClass}`}>
         {showTopNav && (
           <MapWorkspaceTopNav 
             workspaceLabel={effectiveWorkspaceLabel}
@@ -259,7 +266,7 @@ export function SouveraMapWorkspace({
   // Loading state (initial)
   if (loading && countries.length === 0 && caribbeanCountries.length === 0) {
     return (
-      <div className="min-h-[600px] bg-zinc-950 rounded-xl border border-zinc-800 overflow-hidden">
+      <div className={`min-h-[600px] ${shellClass}`}>
         {showTopNav && (
           <MapWorkspaceTopNav 
             workspaceLabel={effectiveWorkspaceLabel}
@@ -281,7 +288,7 @@ export function SouveraMapWorkspace({
   // Caribbean market shell rendering
   if (currentRegion === 'caribbean') {
     return (
-      <div className={`bg-zinc-950 rounded-xl border border-zinc-800 overflow-hidden ${className || ''}`}>
+      <div className={shellClass}>
         {/* Workspace Nav - conditionally rendered */}
         {showTopNav && (
           <MapWorkspaceTopNav 
@@ -305,7 +312,7 @@ export function SouveraMapWorkspace({
           </div>
 
           {/* Intelligence Panel (Right) */}
-          <div className="lg:w-[35%] xl:w-[32%] min-h-[400px] lg:h-full">
+          <div className="lg:w-[35%] xl:w-[32%] min-h-[400px] lg:h-full pt-4 px-4 pb-4 lg:pt-5">
             <CountryIntelligencePanel
               selectedIso3={selectedIso3}
               onClose={handleClosePanel}
@@ -361,7 +368,7 @@ export function SouveraMapWorkspace({
   if (currentRegion === 'all') {
     const allCountries = [...countries, ...caribbeanCountries];
     return (
-      <div className={`bg-zinc-950 rounded-xl border border-zinc-800 overflow-hidden ${className || ''}`}>
+      <div className={shellClass}>
         {showTopNav && (
           <MapWorkspaceTopNav
             workspaceLabel={effectiveWorkspaceLabel}
@@ -382,7 +389,7 @@ export function SouveraMapWorkspace({
           </div>
 
           {/* Intelligence Panel (Right) */}
-          <div className="lg:w-[35%] xl:w-[32%] min-h-[400px] lg:h-full">
+          <div className="lg:w-[35%] xl:w-[32%] min-h-[400px] lg:h-full pt-4 px-4 pb-4 lg:pt-5">
             <CountryIntelligencePanel
               selectedIso3={selectedIso3}
               onClose={handleClosePanel}
@@ -429,7 +436,7 @@ export function SouveraMapWorkspace({
 
   // Default: Africa only
   return (
-    <div className={`bg-zinc-950 rounded-xl border border-zinc-800 overflow-hidden ${className || ''}`}>
+    <div className={shellClass}>
       {/* Workspace Nav - conditionally rendered */}
       {showTopNav && (
         <MapWorkspaceTopNav 
@@ -453,7 +460,7 @@ export function SouveraMapWorkspace({
         </div>
 
         {/* Intelligence Panel (Right) */}
-        <div className="lg:w-[35%] xl:w-[32%] min-h-[400px] lg:h-full">
+        <div className="lg:w-[35%] xl:w-[32%] min-h-[400px] lg:h-full pt-4 px-4 pb-4 lg:pt-5">
           <CountryIntelligencePanel
             selectedIso3={selectedIso3}
             onClose={handleClosePanel}

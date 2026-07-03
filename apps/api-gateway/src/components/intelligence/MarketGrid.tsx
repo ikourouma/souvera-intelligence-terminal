@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import { Search, MapPin, TrendingUp, Globe, ChevronDown, ChevronUp, X } from 'lucide-react';
 import { isApprovedSouveraMarket, isApprovedCaribbeanMarket } from '@/lib/market-coverage';
+import { MarketSignalBadge } from '@/components/intelligence/MarketSignalBadge';
 
 interface Country {
   iso2: string;
@@ -15,6 +16,7 @@ interface Country {
   lat?: number;
   lng?: number;
   gdpCurrentUsd?: number;
+  gdpGrowthPct?: number;
   populationTotal?: number;
   signalLevel?: string;
   freshnessAt?: string;
@@ -87,17 +89,6 @@ export function MarketGrid({ countries, onCountryClick, showRegionFilters = true
   }, [filteredCountries, isExpanded, searchQuery]);
 
   const showExpandButton = filteredCountries.length > INITIAL_VISIBLE_COUNT && !searchQuery;
-
-  const getSignalColor = (level?: string) => {
-    switch (level) {
-      case 'high_growth': return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
-      case 'emerging': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
-      case 'stable': return 'bg-zinc-500/20 text-zinc-400 border-zinc-500/30';
-      case 'watchlist': return 'bg-amber-500/20 text-amber-400 border-amber-500/30';
-      case 'risk_elevated': return 'bg-red-500/20 text-red-400 border-red-500/30';
-      default: return 'bg-zinc-800/50 text-zinc-500 border-zinc-700';
-    }
-  };
 
   const formatGDP = (gdp?: number) => {
     if (!gdp) return null;
@@ -248,13 +239,11 @@ export function MarketGrid({ countries, onCountryClick, showRegionFilters = true
                   )}
                 </div>
 
-                {/* Signal Badge */}
-                {country.signalLevel && (
-                  <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-sm text-[9px] font-bold tracking-widest uppercase border ${getSignalColor(country.signalLevel)}`}>
-                    <TrendingUp className="w-3 h-3" />
-                    {country.signalLevel.replace('_', ' ')}
-                  </div>
-                )}
+                <MarketSignalBadge
+                  signalLevel={country.signalLevel}
+                  gdpGrowthPct={country.gdpGrowthPct}
+                  className="mt-2"
+                />
               </button>
             ))}
           </div>

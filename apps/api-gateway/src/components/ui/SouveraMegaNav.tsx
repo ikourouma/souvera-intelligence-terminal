@@ -182,7 +182,7 @@ export function SouveraMegaNav() {
                 SOUVERA
               </span>
             </div>
-            <span className="text-[9px] text-zinc-600 uppercase tracking-widest font-mono hidden sm:block border-l border-zinc-800 pl-3">
+            <span className="text-[11px] text-zinc-400 uppercase tracking-wider font-medium hidden sm:block border-l border-zinc-800 pl-3">
               Intelligence Terminal
             </span>
           </Link>

@@ -6,6 +6,7 @@
 
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { normalizeCmsPricingRow } from '@/lib/access-plans';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -24,8 +25,8 @@ const FALLBACK_PLANS = [
       'Interactive intelligence map',
       'Caribbean overview',
     ],
-    cta_text: 'Request Access',
-    cta_url: '/access/request-access',
+    cta_text: 'Create free account',
+    cta_url: '/signup',
     cta_style: 'outline',
     is_featured: false,
     price_monthly: 0,
@@ -45,8 +46,8 @@ const FALLBACK_PLANS = [
       'Trade summary data',
       'Country comparison tools',
     ],
-    cta_text: 'View Plans',
-    cta_url: '/access',
+    cta_text: 'Request Professional Access',
+    cta_url: '/access/request-access?plan=professional',
     cta_style: 'primary',
     is_featured: true,
     price_monthly: 49,
@@ -65,8 +66,8 @@ const FALLBACK_PLANS = [
       'Downloadable country reports',
       'Historical data series',
     ],
-    cta_text: 'View Plans',
-    cta_url: '/access',
+    cta_text: 'Contact Sales',
+    cta_url: '/contact?plan=business&intent=upgrade',
     cta_style: 'outline',
     is_featured: false,
     price_monthly: 199,
@@ -86,9 +87,8 @@ const FALLBACK_PLANS = [
       'Dedicated account support',
     ],
     cta_text: 'Contact Sales',
-    cta_url: '/contact',
+    cta_url: '/access/institutional',
     cta_style: 'ghost',
-    is_featured: false,
     price_monthly: 1999,
   },
 ];
@@ -127,7 +127,7 @@ export async function GET() {
     }
 
     return NextResponse.json({
-      plans,
+      plans: plans.map((row) => normalizeCmsPricingRow(row as Record<string, unknown>)),
       source: 'cms',
     }, {
       headers: {

@@ -20,6 +20,7 @@ import {
   petroleumSectorNote,
 } from '@/lib/intelligence/preferential-trade-policy';
 import { AGOA_FLOW_CATEGORY_LABELS } from '@/lib/trade/agoa-flow-categories';
+import { showDevLabels } from '@/lib/show-dev-labels';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -1059,9 +1060,11 @@ export function AGOAFlowsClient() {
             <div className="p-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
               <Globe className="w-6 h-6 text-emerald-400" />
             </div>
+            {showDevLabels() && (
             <span className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-xs font-medium text-emerald-300">
               Phase 0.5E — AGOA Export Intelligence
             </span>
+            )}
           </div>
           
           <h1 className="text-3xl font-bold text-white mb-2">AGOA Trade Flows</h1>

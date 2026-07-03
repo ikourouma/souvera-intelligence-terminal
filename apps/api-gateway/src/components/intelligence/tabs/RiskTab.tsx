@@ -17,6 +17,7 @@ import {
 } from '@/lib/intelligence/country-risk-content';
 import { hydrateRiskContent } from '@/lib/intelligence/hydrate-intelligence-content';
 import { DataPendingState } from '@/components/intelligence/DataPendingState';
+import { MarketSignalBadge } from '@/components/intelligence/MarketSignalBadge';
 import type { IntelligenceTabProps } from '@/types/country-intelligence';
 
 const MITIGATION_ICONS = {
@@ -83,11 +84,18 @@ function RiskScorecard({
       
       <h3 className="text-lg font-bold text-white mb-4">Risk Scorecard</h3>
       {score == null ? (
-        <DataPendingState
-          variant="pending"
-          message="Risk scores are awaiting verified signal model inputs from macro, governance, and news sources."
-          className="border-0 bg-transparent p-0"
-        />
+        <>
+          {signal?.level && (
+            <div className="mb-4">
+              <MarketSignalBadge profileSignal={signal.level} size="md" />
+            </div>
+          )}
+          <DataPendingState
+            variant="pending"
+            message="Risk scores are awaiting verified signal model inputs from macro, governance, and news sources."
+            className="border-0 bg-transparent p-0"
+          />
+        </>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {rows.map((r) => (

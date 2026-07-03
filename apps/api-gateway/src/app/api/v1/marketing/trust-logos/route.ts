@@ -64,8 +64,17 @@ export async function GET() {
       });
     }
 
+    // Dedupe by name+abbreviation (CMS may contain duplicate seed rows)
+    const seen = new Set<string>();
+    const uniqueLogos = logos.filter((row) => {
+      const key = `${row.abbreviation}|${row.name}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
     return NextResponse.json({
-      logos,
+      logos: uniqueLogos,
       kpis: FALLBACK_KPIS,
       source: 'cms',
     }, {

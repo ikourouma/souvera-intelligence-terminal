@@ -3,87 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
+import {
+  landingPlansFromAccessPlans,
+  mergePlanWithCms,
+  isAccessPlanId,
+  ACCESS_PLANS,
+} from '@/lib/access-plans';
 
-// Fallback pricing tiers
-// Prices are admin-managed via CMS at /admin/marketing/pricing
-const FALLBACK_PLANS = [
-  {
-    id: 'explorer',
-    name: 'Explorer',
-    badge: 'Free',
-    badgeColor: '#22C55E',
-    description: 'Get started with public macroeconomic data across Africa and the Caribbean.',
-    highlights: [
-      'Country profiles & GDP overview',
-      'Market signal indicators',
-      'Regional intelligence summaries',
-      'Interactive intelligence map',
-      'Caribbean overview',
-    ],
-    cta: 'Request Access',
-    ctaHref: '/access/request-access',
-    ctaStyle: 'outline',
-    featured: false,
-  },
-  {
-    id: 'professional',
-    name: 'Professional',
-    badge: 'Most Popular',
-    badgeColor: '#2563EB',
-    description: 'Full macro data, sector intelligence, and expanded analysis for active analysts.',
-    highlights: [
-      'Everything in Explorer',
-      'Inflation & Debt/GDP metrics',
-      'Sector scores & analysis',
-      'Expanded market coverage',
-      'GDP forecast data',
-      'Trade summary data',
-      'Country comparison tools',
-    ],
-    cta: 'View Plans',
-    ctaHref: '/access',
-    ctaStyle: 'primary',
-    featured: true,
-  },
-  {
-    id: 'business',
-    name: 'Business',
-    badge: 'Recommended',
-    badgeColor: '#F59E0B',
-    description: 'Full forecasts, trade data, and downloadable reports for investment teams.',
-    highlights: [
-      'Everything in Professional',
-      'Full GDP forecasts & scenarios',
-      'Full trade data — exports, imports, partners',
-      'Sector forecasts',
-      'Downloadable country reports',
-      'Historical data series',
-    ],
-    cta: 'View Plans',
-    ctaHref: '/access',
-    ctaStyle: 'outline',
-    featured: false,
-  },
-  {
-    id: 'institutional',
-    name: 'Institutional',
-    badge: 'Enterprise',
-    badgeColor: '#A78BFA',
-    description: 'Full API access, white-label intelligence, and dedicated support for institutions.',
-    highlights: [
-      'Everything in Business',
-      'Full API access',
-      'White-label data feeds',
-      'Custom briefings & memos',
-      'Methodology documentation',
-      'Dedicated account support',
-    ],
-    cta: 'Contact Sales',
-    ctaHref: '/contact',
-    ctaStyle: 'ghost',
-    featured: false,
-  },
-];
+const FALLBACK_PLANS = landingPlansFromAccessPlans();
 
 interface Plan {
   id: string;
@@ -101,20 +28,46 @@ interface Plan {
   showPrice?: boolean;
 }
 
+const CTA_STYLES: Record<string, string> = {
+  explorer: 'outline',
+  professional: 'primary',
+  business: 'outline',
+  institutional: 'ghost',
+};
+
 function transformCMSPlan(cmsPlan: Record<string, unknown>): Plan {
+  const planId = (cmsPlan.plan_id as string) || 'unknown';
+  const staticPlan = isAccessPlanId(planId)
+    ? ACCESS_PLANS.find((p) => p.id === planId)
+    : undefined;
+
+  const merged = staticPlan
+    ? mergePlanWithCms(staticPlan, {
+        plan_id: planId,
+        display_name: cmsPlan.display_name as string | null,
+        badge_text: cmsPlan.badge_text as string | null,
+        badge_color: cmsPlan.badge_color as string | null,
+        description: cmsPlan.description as string | null,
+        features: cmsPlan.features as string[] | null,
+        cta_text: cmsPlan.cta_text as string | null,
+        cta_url: cmsPlan.cta_url as string | null,
+        is_featured: cmsPlan.is_featured as boolean | null,
+      })
+    : null;
+
   return {
-    id: (cmsPlan.plan_id as string) || 'unknown',
-    name: (cmsPlan.display_name as string) || '',
-    badge: (cmsPlan.badge_text as string) || '',
-    badgeColor: (cmsPlan.badge_color as string) || '#2563EB',
-    description: (cmsPlan.description as string) || '',
-    highlights: (cmsPlan.features as string[]) || [],
-    cta: (cmsPlan.cta_text as string) || 'Get Started',
-    ctaHref: (cmsPlan.cta_url as string) || '/access',
-    ctaStyle: (cmsPlan.cta_style as string) || 'outline',
-    featured: (cmsPlan.is_featured as boolean) || false,
-    priceMonthly: (cmsPlan.price_monthly as number) || null,
-    priceAnnual: (cmsPlan.price_annual as number) || null,
+    id: planId,
+    name: merged?.name || (cmsPlan.display_name as string) || '',
+    badge: merged?.badge || (cmsPlan.badge_text as string) || '',
+    badgeColor: merged?.badgeColor || (cmsPlan.badge_color as string) || '#2563EB',
+    description: merged?.description || (cmsPlan.description as string) || '',
+    highlights: merged?.features || (cmsPlan.features as string[]) || [],
+    cta: merged?.cta || 'Get Started',
+    ctaHref: merged?.ctaHref || '/access',
+    ctaStyle: (cmsPlan.cta_style as string) || CTA_STYLES[planId] || 'outline',
+    featured: merged?.featured ?? (cmsPlan.is_featured as boolean) ?? false,
+    priceMonthly: (cmsPlan.price_monthly as number) ?? null,
+    priceAnnual: (cmsPlan.price_annual as number) ?? null,
     showPrice: cmsPlan.show_price !== false,
   };
 }
@@ -255,7 +208,7 @@ export function PricingTiersSection() {
             Need a custom configuration or volume pricing?
           </p>
           <Link
-            href="/subscriptions"
+            href="/access"
             className="inline-flex items-center gap-2 px-8 py-4 font-bold text-[11px] tracking-widest uppercase transition-all hover:text-white"
             style={{ border: '1px solid #1F2A37', color: '#9CA3AF', background: 'transparent' }}
           >

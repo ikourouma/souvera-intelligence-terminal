@@ -3,14 +3,14 @@
 import React, { useState, useEffect } from 'react';
 
 const FALLBACK_SOURCES = [
-  { name: 'World Bank', abbr: 'WB', color: '#2563EB', note: 'Macro · Weekly' },
-  { name: 'Intl Monetary Fund', abbr: 'IMF', color: '#16A34A', note: 'Forecasts · Monthly' },
-  { name: 'UN Comtrade', abbr: 'UNC', color: '#7C3AED', note: 'Trade · Monthly' },
-  { name: 'African Dev Bank', abbr: 'AfDB', color: '#F59E0B', note: 'Africa · Monthly' },
-  { name: 'GDELT Project', abbr: 'GDL', color: '#DC2626', note: 'Signals · Hourly' },
-  { name: 'OECD / DB Nomics', abbr: 'OEC', color: '#0891B2', note: 'Macro · Monthly' },
-  { name: 'UNCTAD', abbr: 'UNC', color: '#EA580C', note: 'FDI · Quarterly' },
-  { name: 'Intl Energy Agency', abbr: 'IEA', color: '#4F46E5', note: 'Energy · Monthly' },
+  { id: 'wb', name: 'World Bank', abbr: 'WB', color: '#2563EB', note: 'Macro · Weekly' },
+  { id: 'imf', name: 'Intl Monetary Fund', abbr: 'IMF', color: '#16A34A', note: 'Forecasts · Monthly' },
+  { id: 'comtrade', name: 'UN Comtrade', abbr: 'UNC', color: '#7C3AED', note: 'Trade · Monthly' },
+  { id: 'afdb', name: 'African Dev Bank', abbr: 'AfDB', color: '#F59E0B', note: 'Africa · Monthly' },
+  { id: 'gdelt', name: 'GDELT Project', abbr: 'GDL', color: '#DC2626', note: 'Signals · Hourly' },
+  { id: 'oecd', name: 'OECD / DB Nomics', abbr: 'OEC', color: '#0891B2', note: 'Macro · Monthly' },
+  { id: 'unctad', name: 'UNCTAD', abbr: 'UNC', color: '#EA580C', note: 'FDI · Quarterly' },
+  { id: 'iea', name: 'Intl Energy Agency', abbr: 'IEA', color: '#4F46E5', note: 'Energy · Monthly' },
 ];
 
 const FALLBACK_KPIS = [
@@ -25,12 +25,26 @@ type Source = typeof FALLBACK_SOURCES[0];
 type KPI = typeof FALLBACK_KPIS[0];
 
 function transformCMSLogo(cmsLogo: Record<string, unknown>): Source {
+  const name = (cmsLogo.name as string) || '';
+  const abbr = (cmsLogo.abbreviation as string) || '';
   return {
-    name: (cmsLogo.name as string) || '',
-    abbr: (cmsLogo.abbreviation as string) || '',
+    id: (cmsLogo.id as string) || `${abbr}-${name}`.toLowerCase().replace(/\s+/g, '-'),
+    name,
+    abbr,
     color: (cmsLogo.color as string) || '#2563EB',
     note: (cmsLogo.note as string) || '',
   };
+}
+
+/** Drop duplicate CMS rows (e.g. re-seeded trust logos) — keep first by display order. */
+function dedupeSources(items: Source[]): Source[] {
+  const seen = new Set<string>();
+  return items.filter((item) => {
+    const key = item.id || `${item.abbr}|${item.name}|${item.note}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 export function TrustStrip() {
@@ -44,7 +58,7 @@ export function TrustStrip() {
         if (response.ok) {
           const data = await response.json();
           if (data.logos && data.logos.length > 0) {
-            setSources(data.logos.map(transformCMSLogo));
+            setSources(dedupeSources(data.logos.map(transformCMSLogo)));
           }
           if (data.kpis && data.kpis.length > 0) {
             setKpis(data.kpis);
@@ -83,7 +97,7 @@ export function TrustStrip() {
         {/* Source badges */}
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
           {sources.map((s) => (
-            <div key={s.name + s.note} className="flex flex-col items-center justify-center p-4 rounded-sm transition-all duration-300 group" style={{ background: '#0B0F14', border: '1px solid #1F2A37' }} title={s.name}>
+            <div key={s.id} className="flex flex-col items-center justify-center p-4 rounded-sm transition-all duration-300 group" style={{ background: '#0B0F14', border: '1px solid #1F2A37' }} title={s.name}>
               <div className="w-10 h-10 rounded-sm flex items-center justify-center mb-2 font-bold text-[11px] tracking-widest font-mono" style={{ background: `${s.color}15`, color: s.color, border: `1px solid ${s.color}25` }}>
                 {s.abbr}
               </div>

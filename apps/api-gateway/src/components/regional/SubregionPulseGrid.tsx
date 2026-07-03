@@ -120,6 +120,10 @@ export function SubregionPulseGrid({
         return 'text-blue-500';
       case 'stable':
         return 'text-zinc-500';
+      case 'watchlist':
+        return 'text-amber-500';
+      case 'risk_elevated':
+        return 'text-red-500';
       default:
         return 'text-zinc-600';
     }
@@ -133,8 +137,12 @@ export function SubregionPulseGrid({
         return 'Emerging';
       case 'stable':
         return 'Stable';
+      case 'watchlist':
+        return 'Watchlist';
+      case 'risk_elevated':
+        return 'Risk Elevated';
       default:
-        return 'N/A';
+        return 'Emerging';
     }
   };
 

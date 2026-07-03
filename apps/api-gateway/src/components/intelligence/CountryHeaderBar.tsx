@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { MapPin, Calendar, Database, Info, ChevronRight } from 'lucide-react';
 import { SIGNAL_COLORS, type SignalLevel } from '@/lib/intelligence-entitlements';
 import { HelpTooltip } from '@/components/shared/HelpTooltip';
+import { resolveMarketSignal } from '@/lib/insights/signal-display';
 
 export interface CountryHeaderBarProps {
   country: {
@@ -56,8 +57,8 @@ export function CountryHeaderBar({
   currentSection = 'Overview',
   className = '',
 }: CountryHeaderBarProps) {
-  const level: SignalLevel =
-    signal?.level && signal.level in SIGNAL_COLORS ? signal.level : 'stable';
+  const resolved = resolveMarketSignal({ profileSignal: signal?.level });
+  const level = resolved.level as SignalLevel;
   const signalColor = SIGNAL_COLORS[level];
   const investmentScore = signal?.investmentScore;
   const confidenceScore = signal?.confidenceScore;

@@ -8,6 +8,7 @@ import { formatCurrency } from '@/lib/intelligence-entitlements';
 import { exportCardToPNG } from '@/lib/intelligence/export-png';
 import { countryExportContext } from '@/lib/intelligence/export-branding';
 import { PreviewDataBanner } from '@/components/intelligence/PreviewDataBanner';
+import { MarketSignalBadge } from '@/components/intelligence/MarketSignalBadge';
 
 interface Country {
   iso2: string;
@@ -230,26 +231,9 @@ export function CountryComparisonTool() {
     return `${prefix}${num.toString()}`;
   };
 
-  const getSignalBadge = (signal?: string) => {
-    if (!signal) return null;
-    
-    const colors = {
-      high_growth: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20',
-      emerging: 'text-blue-500 bg-blue-500/10 border-blue-500/20',
-      stable: 'text-zinc-500 bg-zinc-500/10 border-zinc-500/20',
-      watchlist: 'text-amber-500 bg-amber-500/10 border-amber-500/20',
-      risk_elevated: 'text-red-500 bg-red-500/10 border-red-500/20',
-    };
-
-    const label = signal.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
-    const colorClass = colors[signal as keyof typeof colors] || colors.stable;
-
-    return (
-      <span className={`text-[9px] font-bold tracking-widest uppercase px-2 py-1 rounded-sm border ${colorClass}`}>
-        {label}
-      </span>
-    );
-  };
+  const getSignalBadge = (signal?: string, gdpGrowthPct?: number) => (
+    <MarketSignalBadge signalLevel={signal} gdpGrowthPct={gdpGrowthPct} />
+  );
 
   if (loading) {
     return (

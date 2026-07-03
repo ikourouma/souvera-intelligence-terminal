@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   ArrowRight,
@@ -12,6 +13,7 @@ import {
 } from 'lucide-react';
 import { SouveraMegaNav } from '@/components/ui/SouveraMegaNav';
 import { SouveraFooter } from '@/components/ui/SouveraFooter';
+import { MarketSignalBadge } from '@/components/intelligence/MarketSignalBadge';
 
 const FEATURES = [
   {
@@ -46,7 +48,43 @@ const TIERS = [
   { name: 'Business', access: 'Investment thesis, risk narratives, export intelligence' },
 ];
 
+const TERMINAL_TABS = ['Overview', 'Economy', 'Sectors', 'Trade', 'Signals'] as const;
+
+const PILOT_MARKETS = [
+  {
+    iso3: 'NGA',
+    name: 'Nigeria',
+    gdp: '$252B',
+    growth: '+3.2%',
+    population: '223M',
+    signal: 'emerging' as const,
+    sectors: ['Fintech', 'Energy', 'Agriculture', 'Logistics'],
+    blurb: 'Live macro data, 6 sector profiles, News Pulse, and PDF snapshot export.',
+  },
+  {
+    iso3: 'JAM',
+    name: 'Jamaica',
+    gdp: '$19B',
+    growth: '+2.1%',
+    population: '2.8M',
+    signal: 'stable' as const,
+    sectors: ['Tourism', 'Fintech', 'Mining', 'Logistics'],
+    blurb: 'Caribbean pilot with curated sectors, trade intelligence, and institutional reports.',
+  },
+];
+
 export function TerminalBridge() {
+  const [activePilot, setActivePilot] = useState(0);
+  const [activeTab, setActiveTab] = useState(0);
+  const pilot = PILOT_MARKETS[activePilot];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActivePilot((i) => (i + 1) % PILOT_MARKETS.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <main className="min-h-screen bg-[#0B0F14] text-white">
       <SouveraMegaNav />
@@ -88,29 +126,100 @@ export function TerminalBridge() {
               </div>
             </div>
 
-            <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-sm">
-              <div className="aspect-video bg-zinc-950 border border-zinc-800 rounded-sm flex flex-col items-center justify-center gap-4 p-8">
-                <div className="flex gap-2">
-                  {['Overview', 'Economy', 'Sectors', 'Trade', 'Risk'].map((tab) => (
-                    <span
-                      key={tab}
-                      className="px-2 py-1 text-[9px] uppercase tracking-wider bg-zinc-800 text-zinc-400 rounded-sm"
-                    >
-                      {tab}
-                    </span>
-                  ))}
-                </div>
-                <p className="text-2xl font-bold text-white">Nigeria · NGA</p>
-                <p className="text-xs text-zinc-500 text-center max-w-xs">
-                  Pilot terminal with live macro data, 6 sector profiles, News Pulse, and PDF
-                  snapshot export
-                </p>
-                <span className="text-[10px] uppercase tracking-widest text-emerald-500 bg-emerald-500/10 px-3 py-1 rounded-sm">
-                  Live & Curated
-                </span>
+            <div className="bg-zinc-900 border border-zinc-800 rounded-sm overflow-hidden">
+              {/* Tab row */}
+              <div className="flex items-center gap-1 px-4 pt-4 pb-2 border-b border-zinc-800/80 overflow-x-auto">
+                {TERMINAL_TABS.map((tab, i) => (
+                  <button
+                    key={tab}
+                    type="button"
+                    onClick={() => setActiveTab(i)}
+                    className={`shrink-0 px-2.5 py-1 text-[9px] uppercase tracking-wider rounded-sm transition-colors ${
+                      activeTab === i
+                        ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
+                        : 'bg-zinc-800/50 text-zinc-500 hover:text-zinc-300'
+                    }`}
+                  >
+                    {tab}
+                  </button>
+                ))}
               </div>
-              <p className="text-xs text-zinc-600 mt-4 text-center">
-                Jamaica (JAM) terminal also available · 74-country rollout in progress
+
+              <div className="p-6 space-y-5">
+                {/* Pilot selector */}
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-xl font-bold text-white">
+                      {pilot.name} · {pilot.iso3}
+                    </p>
+                    <p className="text-xs text-zinc-500 mt-1 max-w-sm">{pilot.blurb}</p>
+                  </div>
+                  <div className="flex gap-1.5 shrink-0">
+                    {PILOT_MARKETS.map((m, i) => (
+                      <button
+                        key={m.iso3}
+                        type="button"
+                        onClick={() => setActivePilot(i)}
+                        aria-label={`Show ${m.name} terminal preview`}
+                        className={`w-2 h-2 rounded-full transition-colors ${
+                          activePilot === i ? 'bg-blue-500' : 'bg-zinc-700 hover:bg-zinc-500'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Macro strip */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="bg-zinc-950 border border-zinc-800 rounded-sm p-3">
+                    <p className="text-[9px] uppercase tracking-wider text-zinc-600 mb-1">GDP</p>
+                    <p className="text-sm font-bold text-blue-400">{pilot.gdp}</p>
+                  </div>
+                  <div className="bg-zinc-950 border border-zinc-800 rounded-sm p-3">
+                    <p className="text-[9px] uppercase tracking-wider text-zinc-600 mb-1">Growth</p>
+                    <p className="text-sm font-bold text-emerald-400">{pilot.growth}</p>
+                  </div>
+                  <div className="bg-zinc-950 border border-zinc-800 rounded-sm p-3">
+                    <p className="text-[9px] uppercase tracking-wider text-zinc-600 mb-1">Population</p>
+                    <p className="text-sm font-bold text-purple-400">{pilot.population}</p>
+                  </div>
+                  <div className="bg-zinc-950 border border-zinc-800 rounded-sm p-3 flex flex-col justify-center">
+                    <p className="text-[9px] uppercase tracking-wider text-zinc-600 mb-1.5">Signal</p>
+                    <MarketSignalBadge profileSignal={pilot.signal} size="sm" />
+                  </div>
+                </div>
+
+                {/* Sector chips */}
+                <div>
+                  <p className="text-[9px] uppercase tracking-wider text-zinc-600 mb-2">Key Sectors</p>
+                  <div className="flex flex-wrap gap-2">
+                    {pilot.sectors.map((sector) => (
+                      <span
+                        key={sector}
+                        className="px-2.5 py-1 text-[10px] font-semibold bg-zinc-800 text-zinc-300 rounded-sm border border-zinc-700"
+                      >
+                        {sector}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-2 border-t border-zinc-800">
+                  <span className="text-[10px] uppercase tracking-widest text-emerald-500 bg-emerald-500/10 px-3 py-1 rounded-sm">
+                    Live & Curated
+                  </span>
+                  <Link
+                    href={`/country/${pilot.iso3}`}
+                    className="text-xs text-blue-400 hover:text-blue-300 font-semibold inline-flex items-center gap-1"
+                  >
+                    Open terminal
+                    <ArrowRight className="w-3 h-3" />
+                  </Link>
+                </div>
+              </div>
+
+              <p className="text-xs text-zinc-500 px-6 py-4 border-t border-zinc-800 bg-zinc-950/50 text-center">
+                Live pilot terminals: Nigeria (NGA) and Jamaica (JAM) · 74-market intelligence rollout in progress
               </p>
             </div>
           </div>
