@@ -66,7 +66,7 @@ export default function OpportunityTab({ data, userEntitlements }: IntelligenceT
           <p className="text-zinc-400 mb-6 max-w-2xl mx-auto">
             Unlock in-depth investment opportunity analysis, entry point strategies, and regional market access intelligence.
           </p>
-          <Link href="/pricing" className="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors">
+          <Link href="/access" className="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors">
             Upgrade to Business
           </Link>
         </div>

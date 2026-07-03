@@ -15,15 +15,14 @@ Souvera is a standalone intelligence platform providing structured country intel
 ## Architecture
 
 ```
-External Sources → Ingestion Services → Supabase → API Gateway → Terminal UI
+External Sources → Ingestion Services → Supabase → API Gateway → Intelligence UI
 ```
 
 ## Monorepo Structure
 
 ```
 /apps
-  /terminal-web       — Next.js terminal UI
-  /api-gateway        — Next.js API layer
+  /api-gateway        — Next.js app (API + intelligence UI)
   /admin-console      — Admin interface
 
 /packages

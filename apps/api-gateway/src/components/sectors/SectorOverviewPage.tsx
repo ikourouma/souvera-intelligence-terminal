@@ -3,6 +3,7 @@ import { ArrowRight } from 'lucide-react';
 import { SouveraMegaNav } from '@/components/ui/SouveraMegaNav';
 import { SouveraFooter } from '@/components/ui/SouveraFooter';
 import { SectorKeyMarkets } from '@/components/sectors/SectorKeyMarkets';
+import { SectorProfessionalServicesCta } from '@/components/sectors/SectorProfessionalServicesCta';
 import type { SectorOverviewTemplateProps } from './SectorOverviewTemplate';
 
 const ACCENT_STYLES: Record<
@@ -103,6 +104,14 @@ export function SectorOverviewPage({
         accentText={accent.text}
         accentBorder={accent.border}
         sectorSlug={content.slug}
+      />
+
+      <SectorProfessionalServicesCta
+        sectorSlug={content.slug}
+        icon={Icon}
+        accentText={accent.text}
+        accentBg={accent.bg}
+        accentBorder={accent.border}
       />
 
       <SouveraFooter />

@@ -22,6 +22,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: '/platform/signal-engine', priority: 0.7, changeFrequency: 'monthly' as const },
     { path: '/platform/data-foundation', priority: 0.7, changeFrequency: 'monthly' as const },
     { path: '/platform/api', priority: 0.7, changeFrequency: 'monthly' as const },
+    { path: '/professional-services', priority: 0.8, changeFrequency: 'monthly' as const },
 
     // Intelligence sub-pages
     { path: '/intelligence/africa', priority: 0.8, changeFrequency: 'monthly' as const },

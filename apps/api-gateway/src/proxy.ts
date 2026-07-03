@@ -1,39 +1,12 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
-const PUBLIC_ROUTES = [
-  '/',
-  '/about',
-  '/access',
-  '/contact',
-  '/status',
-  '/login',
-  '/register',
-  '/signup',
-  '/auth',
-  '/legal',
-  '/platform',
-  '/intelligence',
-  '/sectors',
-  '/insights',
-  '/resources',
-  '/sitemap',
-  '/api',
-];
-
 const PROTECTED_ROUTES = [
-  '/terminal',
   '/profile',
   '/settings',
   '/org',
   '/admin',
 ];
-
-function isPublicRoute(pathname: string): boolean {
-  return PUBLIC_ROUTES.some(
-    (route) => pathname === route || pathname.startsWith(`${route}/`)
-  );
-}
 
 function isProtectedRoute(pathname: string): boolean {
   return PROTECTED_ROUTES.some(
@@ -78,7 +51,6 @@ async function updateSession(request: NextRequest) {
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const referer = request.headers.get('referer') || '';
 
   // Skip static files and Next.js internals
   if (
@@ -86,19 +58,6 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith('/favicon') ||
     pathname.includes('.')
   ) {
-    // Handle Static Assets for Terminal/Regional pages (legacy proxy logic)
-    const isAssetForTerminal = pathname.startsWith('/_next') && (
-      referer.includes('/terminal') || 
-      referer.includes('/africa/map') || 
-      referer.includes('/caribbean/map')
-    );
-
-    if (isAssetForTerminal && process.env.TERMINAL_URL) {
-      const terminalUrl = process.env.TERMINAL_URL;
-      const targetUrl = new URL(pathname, terminalUrl);
-      return NextResponse.rewrite(targetUrl);
-    }
-
     return NextResponse.next();
   }
 
@@ -116,30 +75,6 @@ export async function proxy(request: NextRequest) {
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('redirect', pathname);
     return NextResponse.redirect(loginUrl);
-  }
-
-  // Handle Terminal and Regional Routes (legacy proxy logic for terminal app)
-  const isTerminalPath = pathname.startsWith('/terminal') || 
-                         pathname === '/africa/map' || 
-                         pathname === '/caribbean/map' ||
-                         pathname.startsWith('/data/');
-
-  if (isTerminalPath && process.env.TERMINAL_URL) {
-    // Redirect root /terminal to /terminal/africa
-    if (pathname === '/terminal' || pathname === '/terminal/') {
-      return NextResponse.redirect(new URL('/terminal/africa', request.url));
-    }
-
-    const terminalUrl = process.env.TERMINAL_URL;
-    
-    // Normalize path for the terminal app
-    let terminalPath = pathname;
-    if (pathname.startsWith('/terminal')) {
-      terminalPath = pathname.replace(/^\/terminal/, '') || '/';
-    }
-    
-    const targetUrl = new URL(terminalPath, terminalUrl);
-    return NextResponse.rewrite(targetUrl);
   }
 
   // Add security headers

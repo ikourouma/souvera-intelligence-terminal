@@ -262,7 +262,7 @@ export default function RiskTab({ data, userEntitlements }: IntelligenceTabProps
           <p className="text-zinc-400 mb-6 max-w-2xl mx-auto">
             Unlock comprehensive risk analysis, mitigation strategies, and risk-adjusted return frameworks for informed decision-making.
           </p>
-          <Link href="/pricing" className="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors">
+          <Link href="/access" className="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors">
             Upgrade to Business
           </Link>
         </div>

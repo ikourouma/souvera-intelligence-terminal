@@ -9,8 +9,7 @@
         "NEXT_PUBLIC_SUPABASE_ANON_KEY",
         "PROJECT_URL",
         "ANON_PUBLIC",
-        "SERVICE_ROLE",
-        "TERMINAL_URL"
+        "SERVICE_ROLE"
       ]
     },
     "dev": {

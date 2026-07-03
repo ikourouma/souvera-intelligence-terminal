@@ -23,6 +23,13 @@ const nextConfig: NextConfig = {
       { source: '/terminal/compare', destination: '/intelligence/compare', permanent: true },
       { source: '/terminal/map', destination: '/intelligence/map', permanent: true },
       { source: '/terminal/caribbean', destination: '/intelligence/caribbean', permanent: true },
+      // Legacy terminal-web root paths (pre–single-host migration)
+      { source: '/africa/map', destination: '/intelligence/map', permanent: true },
+      { source: '/caribbean/map', destination: '/intelligence/caribbean', permanent: true },
+      { source: '/africa/economies', destination: '/insights/rankings', permanent: true },
+      { source: '/caribbean/economies', destination: '/insights/rankings', permanent: true },
+      { source: '/africa', destination: '/intelligence/africa', permanent: true },
+      { source: '/caribbean', destination: '/intelligence/caribbean', permanent: true },
       { source: '/terminal/reports', destination: '/insights/briefings', permanent: true },
       { source: '/terminal/signals', destination: '/platform/signal-engine', permanent: true },
       

@@ -94,6 +94,15 @@ const TICKER_ITEMS = [
   { label: 'TTO', value: 'LNG+', color: '#F59E0B' },
 ];
 
+function normalizeLegacyHref(href: string): string {
+  if (href === '/terminal' || href === '/terminal/') return '/intelligence/africa';
+  if (href === '/terminal/map' || href === '/terminal/africa/map') return '/intelligence/map';
+  if (href.startsWith('/terminal/caribbean')) return '/intelligence/caribbean';
+  if (href.startsWith('/terminal/')) return '/intelligence/africa';
+  if (href === '/pricing' || href === '/subscriptions') return '/access';
+  return href;
+}
+
 function transformCMSSlide(cmsSlide: Record<string, unknown>): Slide {
   return {
     id: cmsSlide.id as number || Math.random(),
@@ -102,11 +111,11 @@ function transformCMSSlide(cmsSlide: Record<string, unknown>): Slide {
     subtitle: (cmsSlide.subtitle as string) || '',
     cta_primary: {
       label: (cmsSlide.cta_primary_label as string) || 'Explore',
-      href: (cmsSlide.cta_primary_url as string) || '/platform',
+      href: normalizeLegacyHref((cmsSlide.cta_primary_url as string) || '/platform'),
     },
     cta_secondary: {
       label: (cmsSlide.cta_secondary_label as string) || 'Learn More',
-      href: (cmsSlide.cta_secondary_url as string) || '/access/request-access',
+      href: normalizeLegacyHref((cmsSlide.cta_secondary_url as string) || '/access/request-access'),
     },
     stat_1: {
       value: (cmsSlide.stat_1_value as string) || '',
@@ -226,7 +235,7 @@ export function SouveraHero() {
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row items-start gap-4 pt-2">
               <Link
-                href={slide.cta_primary.href === '/terminal' ? '/terminal/africa' : slide.cta_primary.href}
+                href={normalizeLegacyHref(slide.cta_primary.href)}
                 className="flex items-center gap-2 px-7 py-4 font-bold text-[12px] tracking-widest uppercase transition-all group hover:gap-3"
                 style={{ background: '#2563EB', color: 'white' }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#1d4ed8'; }}
@@ -236,7 +245,7 @@ export function SouveraHero() {
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </Link>
               <Link
-                href={slide.cta_secondary.href}
+                href={normalizeLegacyHref(slide.cta_secondary.href)}
                 className="flex items-center gap-2 px-7 py-4 font-bold text-[12px] tracking-widest uppercase transition-all hover:text-white"
                 style={{ border: '1px solid #1F2A37', color: '#9CA3AF', background: 'transparent' }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = '#374151'; (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.03)'; }}

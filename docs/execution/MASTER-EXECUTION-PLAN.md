@@ -38,7 +38,7 @@
 - Trade Policy admin hub (+ `/events` sub-route)
 - Nav: AfCFTA + Supply-Demand under Trade & Policy
 
-### Tier 2.5 — Sovereign Trade Accuracy & Census Pipeline 🔄 Sign-off in progress
+### Tier 2.5 — Sovereign Trade Accuracy & Census Pipeline ✅ Certified (Reports tab deferred)
 
 **Certification doc:** [`docs/ux/phase-2.5-certification.md`](../ux/phase-2.5-certification.md)
 
@@ -52,6 +52,7 @@
 | AfCETA Corridor Flows UX (Task 14b) | ✅ | Corridor Lab, drawer, rule-based executive analysis, PNG export |
 | Explorer self-serve signup (Task 15) | ✅ | `/signup`, check-email, login CTA; invite-assisted for paid tiers |
 | Automated audit gates | ✅ | All green incl. `audit-afceta-corridor-consistency.ts` (416 rows) |
+| Pre-2.5 UX navigation gate | ✅ | Redirect audit, `/professional-services`, sector CTAs; `terminal-web` removed (2026-07-03) |
 | Manual smoke + stakeholder sign-off | 🔲 | AfCETA flows + Explorer signup E2E + GUY/JAM/COD/NGA/ERI/ZWE review |
 | Reports tab decision | 🔲 | Remains disabled until explicit post-2.5 approval |
 

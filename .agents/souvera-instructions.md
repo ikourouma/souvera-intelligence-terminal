@@ -25,7 +25,7 @@ Build Souvera independently with:
 7. Lite APIs ready for future AfDEC integration
 
 ## Non-Negotiable Architecture
-External Sources → Ingestion Services → Supabase → API Gateway → Terminal UI
+External Sources → Ingestion Services → Supabase → API Gateway → Intelligence UI
 
 All intelligence data must live in Souvera only.
 
@@ -65,7 +65,6 @@ Before coding, read and follow these documents in this order:
 Create this structure:
 
 /apps
-  /terminal-web
   /api-gateway
   /admin-console
 

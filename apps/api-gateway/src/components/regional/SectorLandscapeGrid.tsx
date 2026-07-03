@@ -72,7 +72,7 @@ const AFRICA_SECTORS: Sector[] = [
     keyCountries: ['South Africa', 'Kenya', 'Tanzania'],
     signal: 'stable',
     icon: Plane,
-    link: '/sectors/tourism',
+    link: '/sectors/tourism-hospitality',
   },
 ];
 

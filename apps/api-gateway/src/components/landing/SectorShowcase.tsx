@@ -57,7 +57,7 @@ const SECTORS = [
     color: '#06B6D4',
     countries: ['Dominican Republic', 'Jamaica', 'The Bahamas', 'Barbados'],
     highlights: ['Eco-Tourism', 'Luxury Resort Development', 'Cultural Tourism'],
-    href: '/sectors/tourism',
+    href: '/sectors/tourism-hospitality',
   },
   {
     id: 'logistics',

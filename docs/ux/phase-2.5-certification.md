@@ -1,8 +1,8 @@
 # Phase 2.5 Certification — Sovereign Trade Accuracy & Census Pipeline
 
-**Date:** 2026-06-28 (last updated)  
+**Date:** 2026-06-28 (last updated 2026-07-03)  
 **Scope:** 74 markets (54 Africa + 20 Caribbean) + AfCETA corridor index (416 signals)  
-**Status:** Sign-off in progress — core gates green; AfCETA Task 14/14b complete; one checklist item remains (Reports tab decision)  
+**Status:** ✅ **Certified** — data/trade gates green; pre-2.5 UX navigation gate shipped (2026-07-03); **Reports tab deferred** to Reports phase  
 **Traction pages audit:** [`docs/audits/traction-pages-fortune5-stress-test.md`](../audits/traction-pages-fortune5-stress-test.md) — `/platform` + `/intelligence` Fortune-5 stress test (TRACT-F5 backlog)
 
 ## Audit results (2026-06-29 run)
@@ -21,8 +21,18 @@
 | `spot-check-phase25-guy-jam.ts` | ✅ PASS — 12/12 (CBI labels, snapshot math, petroleum footnote) |
 | `spot-check-phase25-cod-eri.ts` | ✅ PASS — 15/15 (dual-source COD, ineligible ERI, USTR ref seeded) |
 | `audit-afceta-corridor-consistency.ts` | ✅ PASS — 416 signals; 20 spotlights; 208×2 directions (2026-06-28) |
+| Pre-2.5 redirect / CTA audit | ✅ PASS — `audit-internal-links.ts` 0 critical (2026-07-03); see [`pre-2.5-redirect-audit.md`](../audits/pre-2.5-redirect-audit.md) |
 
-## Completed in this phase
+## Pre–Phase 2.5 UX navigation gate (2026-07-03) ✅
+
+Shipped before production deploy; not part of trade-data certification scope:
+
+- Removed legacy `terminal-web` submodule; single-host `api-gateway` only
+- Canonical redirect/CTA pass (`/pricing` → `/access`, auth → `/intelligence`, legacy `/terminal` redirects)
+- `/professional-services` v1 (Stripe IA, sector expertise grid, cross-sector engagement CTA)
+- Sector pages: professional-services banner below Key Markets
+- Backlog: [`post-2.5-ux-professional-services-backlog.md`](../backlog/post-2.5-ux-professional-services-backlog.md) (Fortune 5 polish + sector hero imagery)
+
 
 ### Task 1 — AGOA/CBI taxonomy
 - `getCountryRegion()` uses canonical `isApprovedCaribbeanMarket()` + `APPROVED_AFRICA_ISO3`
@@ -268,8 +278,9 @@ Ops: `docs/ops/supabase-explorer-signup-checklist.md` · DB pre-flight: `smoke-e
 Re-run the full verification block below. All automated audits should remain green. Then:
 
 - [ ] Stakeholder review of GUY/JAM/COD/NGA/ERI/ZWE spot-check table
-- [ ] **Reports tab decision** — keep disabled until Reports phase, or approve scoped MVP
-- [ ] Mark Phase 2.5 complete in `MASTER-EXECUTION-PLAN.md` Tier 2.5
+- [x] **Pre-2.5 UX navigation gate** — redirect audit, `/professional-services`, sector CTAs (2026-07-03)
+- [ ] **Reports tab decision** — keep disabled until Reports phase, or approve scoped MVP *(deferred)*
+- [x] Mark Phase 2.5 complete in `MASTER-EXECUTION-PLAN.md` Tier 2.5 *(2026-07-03; Reports tab excepted)*
 
 ### Step 4 — Phase 3 (after sign-off)
 

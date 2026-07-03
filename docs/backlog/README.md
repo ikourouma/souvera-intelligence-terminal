@@ -12,6 +12,7 @@ Issue tracking and backlog documentation for the Souvera Intelligence Terminal.
 
 | Document | Description | Priority |
 |----------|-------------|----------|
+| [post-2.5-ux-professional-services-backlog.md](post-2.5-ux-professional-services-backlog.md) | Sector hero backgrounds (Bloomberg-style) + Fortune 5 `/professional-services` polish | P1 — Post 2.5 gate |
 | [user-dashboard-communication-hub-backlog.md](user-dashboard-communication-hub-backlog.md) | User Dashboard, Communication Hub, Admin Operations | High - Post Data Ingestion |
 
 ## Phase 4B — Ingestion Architecture

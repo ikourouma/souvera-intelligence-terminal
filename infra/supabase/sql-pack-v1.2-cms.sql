@@ -83,7 +83,7 @@ VALUES (
     'https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2000&auto=format&fit=crop',
     'Erasing Macro Lag Across the Transatlantic Corridor.',
     'A live data stream eliminating the 6-month reporting delay in African and Caribbean indicators. Institutional intelligence built for instant traction.',
-    'Access Terminal',
-    '/terminal',
+    'Access Intelligence',
+    '/intelligence/africa',
     1
 );

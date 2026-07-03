@@ -86,7 +86,7 @@ export function AccessCTABlock({
                 </Link>
               )}
               <Link
-                href="/pricing"
+                href="/access"
                 className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 text-white border border-white/20 rounded-sm font-semibold hover:bg-white/20 transition-all"
               >
                 View Plans

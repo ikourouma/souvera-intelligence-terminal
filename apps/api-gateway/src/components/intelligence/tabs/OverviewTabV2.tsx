@@ -533,7 +533,7 @@ export function OverviewTabV2({ data, userEntitlements, onNavigateToTab }: Overv
           <p className="text-xs text-zinc-500 mb-3">
             Access comprehensive country summaries, detailed sector analysis, and exportable intelligence cards with Professional or higher subscription.
           </p>
-          <Link href="/pricing" className="inline-block px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-sm transition-colors">
+          <Link href="/access" className="inline-block px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-sm transition-colors">
             Upgrade to Professional
           </Link>
         </div>

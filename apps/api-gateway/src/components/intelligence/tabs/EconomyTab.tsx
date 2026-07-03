@@ -52,7 +52,7 @@ export function EconomyTab({ data, userEntitlements }: IntelligenceTabProps) {
           <p className="text-sm text-zinc-500 mb-4">
             Access comprehensive economic analysis, time series charts, and historical data with a Professional or higher subscription.
           </p>
-          <Link href="/pricing" className="inline-block px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-sm transition-colors">
+          <Link href="/access" className="inline-block px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-sm transition-colors">
             Upgrade to Professional
           </Link>
         </div>

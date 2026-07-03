@@ -63,7 +63,7 @@ export default function ResetPasswordPage() {
 
     setStatus('success');
     setTimeout(() => {
-      router.push('/terminal');
+      router.push('/intelligence');
     }, 2000);
   };
 

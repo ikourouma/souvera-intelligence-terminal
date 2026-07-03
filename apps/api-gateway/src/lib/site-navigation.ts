@@ -42,6 +42,7 @@ export const SITE_MEGA_NAV: SiteNavItem[] = [
           { name: 'Platform Overview', href: '/platform' },
           { name: 'Intelligence Terminal', href: '/platform/terminal' },
           { name: 'Signal Engine', href: '/platform/signal-engine' },
+          { name: 'Professional Services', href: '/professional-services' },
         ],
       },
       {
@@ -225,6 +226,7 @@ export const FOOTER_LINK_GROUPS: {
     { name: 'Platform Overview', href: '/platform' },
     { name: 'Intelligence Terminal', href: '/platform/terminal' },
     { name: 'Signal Engine', href: '/platform/signal-engine' },
+    { name: 'Professional Services', href: '/professional-services' },
     { name: 'Data Foundation', href: '/platform/data-foundation' },
     { name: 'API Access', href: '/platform/api' },
   ],
