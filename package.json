@@ -13,6 +13,8 @@
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
+    "build:hostinger": "turbo build --filter=@souvera/api-gateway",
+    "start:hostinger": "npm run start --workspace=@souvera/api-gateway",
     "lint": "turbo lint",
     "clean": "turbo clean",
     "ingest": "npx tsx"

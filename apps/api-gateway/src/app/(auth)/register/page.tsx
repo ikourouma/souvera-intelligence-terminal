@@ -16,7 +16,7 @@ export default function RegisterPage() {
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/5 rounded-full blur-[120px] -mr-64 -mt-64 pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-emerald-500/5 rounded-full blur-[100px] -ml-32 -mb-32 pointer-events-none" />
 
-        <div className="w-full max-w-xl lg:max-w-2xl mx-auto pt-14 md:pt-6 pb-6 lg:py-10 relative z-10">
+        <div className="w-full max-w-md lg:max-w-lg mx-auto pt-14 md:pt-6 pb-6 lg:py-10 relative z-10">
           {/* Logo Section */}
           <div className="mb-10">
             <Link href="/" className="flex items-center gap-3 mb-8 group">
