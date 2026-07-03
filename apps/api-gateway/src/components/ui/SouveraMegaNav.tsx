@@ -166,7 +166,7 @@ export function SouveraMegaNav() {
     <>
       <header
         ref={containerRef}
-        className="sticky top-0 z-50 w-full"
+        className="sticky top-0 z-[100] w-full"
         style={{ background: 'rgba(11,15,20,0.92)', backdropFilter: 'blur(20px)', borderBottom: '1px solid #1F2A37' }}
         onMouseLeave={handleMouseLeave}
       >
@@ -245,7 +245,7 @@ export function SouveraMegaNav() {
         {/* Mega Menu Panel */}
         <div
           ref={panelRef}
-          className="absolute top-full left-0 w-full shadow-2xl overflow-hidden hidden"
+          className="absolute top-full left-0 w-full z-[100] shadow-2xl overflow-hidden hidden"
           style={{ opacity: 0, display: 'none', background: '#0B0F14', borderBottom: '1px solid #1F2A37' }}
         >
           <div className="max-w-[1600px] mx-auto px-6 lg:px-12 py-10">

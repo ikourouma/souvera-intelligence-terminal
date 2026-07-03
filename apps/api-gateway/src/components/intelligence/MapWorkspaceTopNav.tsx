@@ -46,7 +46,7 @@ export function MapWorkspaceTopNav({
     setIsOpen(false);
   };
   return (
-    <div className="bg-zinc-900/80 backdrop-blur-sm border-b border-zinc-800 sticky top-0 z-40">
+    <div className="bg-zinc-900/80 backdrop-blur-sm border-b border-zinc-800 sticky top-[var(--site-nav-height,72px)] z-30">
       <div className="max-w-[1800px] mx-auto px-4 lg:px-8">
         <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-3 py-3 sm:h-14 sm:py-0">
           {/* Left: Breadcrumb and workspace label */}

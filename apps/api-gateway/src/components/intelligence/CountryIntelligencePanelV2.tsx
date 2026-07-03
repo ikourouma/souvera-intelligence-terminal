@@ -166,7 +166,7 @@ export function CountryIntelligencePanelV2({
   
   // Determine header state based on scroll position and direction
   const shouldShowCompactHeader = scrollY > 100 && !isAtTop;
-  const shouldHideHeader = scrollY > 300 && scrollDirection === 'down';
+  const shouldHideHeader = scrollY > 400 && scrollDirection === 'down';
   
   // Get current tab label for compact header breadcrumb
   const getTabLabel = (tabId: string) => {
@@ -315,7 +315,7 @@ export function CountryIntelligencePanelV2({
 
       {/* Sticky Country Header (without tab bar) */}
       <div className={`
-        sticky top-0 z-50 bg-zinc-950 
+        sticky top-[var(--site-nav-height,72px)] z-30 bg-zinc-950 
         transition-transform duration-300 ease-in-out
         ${shouldHideHeader ? '-translate-y-full' : 'translate-y-0'}
       `}>
@@ -423,7 +423,7 @@ export function CountryIntelligencePanelV2({
       {/* 7-Tab System */}
       <div className={`${mode === 'drawer' ? 'flex-1 flex flex-col overflow-hidden' : ''}`}>
         {/* Tab Bar (Sticky, below Executive Snapshot) */}
-        <div className="sticky top-0 z-40 bg-zinc-950 border-b border-zinc-800">
+        <div className="sticky top-[var(--site-nav-height,72px)] z-20 bg-zinc-950 border-b border-zinc-800">
           <div className="flex overflow-x-auto scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent">
             {TAB_ENTITLEMENTS.map((tab) => {
               const Icon = TAB_ICONS[tab.id as keyof typeof TAB_ICONS];
